@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitX</title>
+<meta name="description" content="KitX for Minecraft Bedrock: build kits and presets in your browser.">
+<style>
+  :root{
+    --bg:#0f1115; --bar:#14171d; --card:#181b22; --line:#2a2f3a; --text:#e8eaf0; --mute:#9aa3b2;
+    --accent:#5b8cff; --accent2:#3a64d8; --bad:#ff6b6b; --good:#4ade80;
+  }
+  @media (prefers-color-scheme: light){
+    :root{--bg:#f4f5f8; --bar:#ffffff; --card:#fff; --line:#dcdfe6; --text:#1b1e26; --mute:#5d6676; --accent:#3a64d8; --accent2:#2a4fb5;}
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+
+  /* top bar */
+  .bar{position:sticky;top:0;z-index:20;background:var(--bar);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:6px 10px;height:52px}
+  .bar h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.01em}
+  .burger{appearance:none;background:transparent;border:0;color:var(--text);width:44px;height:44px;border-radius:10px;display:grid;place-items:center;cursor:pointer;padding:0}
+  .burger:hover{background:var(--bg)}
+  .burger span,.burger span::before,.burger span::after{display:block;width:22px;height:2px;background:currentColor;border-radius:2px;content:"";position:relative}
+  .burger span::before{position:absolute;top:-7px}
+  .burger span::after{position:absolute;top:7px}
+
+  /* drawer */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;bottom:0;left:0;width:min(280px,82vw);background:var(--bar);border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .22s;z-index:40;display:flex;flex-direction:column;padding:10px}
+  .drawer.on{transform:none}
+  .drawer .head{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 12px;font-weight:700}
+  .drawer a,.drawer .item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:600}
+  .drawer a:hover{background:var(--bg)}
+  .drawer a.active{background:var(--bg);box-shadow:inset 3px 0 0 var(--accent)}
+  .drawer .item.off{color:var(--mute);opacity:.55;cursor:not-allowed}
+  .drawer .tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  .drawer .sep{height:1px;background:var(--line);margin:8px 4px}
+  .x{appearance:none;background:transparent;border:0;color:var(--mute);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:8px}
+  .x:hover{background:var(--bg)}
+
+  /* pages */
+  .page{display:none}
+  .page.on{display:block}
+  h2.title{font-size:26px;margin:6px 0 2px}
+  .sub{color:var(--mute);margin:0 0 20px}
+  .hero{padding:26px 0 6px}
+  .hero h2{font-size:34px;line-height:1.15;margin:0 0 8px}
+  .hero p{color:var(--mute);font-size:17px;margin:0 0 18px}
+  .cta{display:flex;gap:10px;flex-wrap:wrap}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+  .card h3{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+  .card p{margin:0 0 8px}
+  .card ul{margin:0;padding-left:20px}
+  .card li{margin:4px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:520px){.grid2{grid-template-columns:1fr}}
+  .tile{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .tile:hover{border-color:var(--accent)}
+  .tile b{display:block;font-size:17px;margin-bottom:2px}
+  .tile span{color:var(--mute);font-size:14px}
+  .hl{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:13px}
+
+  label{display:block;font-size:14px;margin:10px 0 4px;color:var(--mute)}
+  label.chk{display:flex;gap:8px;align-items:center;color:var(--text);margin-top:12px}
+  input[type=text],textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+  input[type=text]:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+  select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+  select:focus{outline:2px solid var(--accent);border-color:transparent}
+  .ver{display:flex;gap:8px}
+  .ver input{text-align:center}
+  button.btn,a.btn{appearance:none;border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;text-decoration:none;display:inline-block}
+  button.btn:hover,a.btn:hover{background:var(--accent2)}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn[aria-disabled=true],.btn:disabled{opacity:.5;cursor:not-allowed}
+  button.danger{appearance:none;background:transparent;color:var(--bad);border:1px solid var(--line);padding:6px 10px;border-radius:10px;font:inherit;cursor:pointer}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--mute);cursor:pointer}
+  .drop.over{border-color:var(--accent);color:var(--text)}
+  .kit{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:10px;background:var(--bg)}
+  .kit .name{flex:1;min-width:0}
+  .kit .name input{padding:7px 10px}
+  .kit .meta{font-size:12px;color:var(--mute);margin-top:3px;word-break:break-all}
+  .warn{color:var(--bad);font-size:13px;margin-top:4px}
+  .ok{color:var(--good)}
+  .hint{font-size:13px;color:var(--mute);margin-top:8px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  code{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:13px}
+  #status{margin-top:12px;font-size:14px;min-height:20px}
+  .iconrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .iconprev{width:56px;height:56px;border-radius:8px;border:1px solid var(--line);object-fit:cover;image-rendering:pixelated;background:var(--bg)}
+  /* ---- Kit Builder panels ---- */
+  :root{
+    --t-slot:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAUElEQVR4Ae2TsQ3AMAgEP1GGYg9WgSnYkZotHNmWF8CWK64BfXHdPUTUsAkz4+uPqiKLu0NEpmgNGSJi3BeHKFGJSnRHNOrv5a+K05hZO8EPnvFZHaFPAD0AAAAASUVORK5CYII="); --t-sel:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAklEQVR4AewaftIAAAJXSURBVLXBwYocRRzA4V/9q6qrpkd2s30XUcRnUfCir+DBqwQlCL6FTxDQc24elEQ9CBISdUWEHL0IhmWH3Zme7uruqrIKHMjB28x+nwIyd8gUj+Z5/iClRAgBpRV/D3/xxtnbvHj5B1UIgaZpUEphrWWeZyqtNTFGxnHEe8+rnj19zkcffvzIUMQY+fqbhxxM00TT/MRBzpmzszOurq5wzrHZbOi6jnEccc4RQsA5R7VarRiGgcffPqEyFHOcqX54/CMpJUIIOOeYpglrLUopDrTWxBhRSjHPM8YYUkqICNV777+LMQalFJWh8I2nSinx8MuvFEe4/+CT/NsvlxwIxZ//XLJerzmFi4sLKucclfCfvu85he12S5VzphLuyDRNVELR9z13RSjW6zWn5L3nQCiUUnjvOQWtNeM4MgwDlVDknBnHkVNomoaq6zoqobDWUi3LwrGGYaC6vb2lEop5nhERpmniVKy1VELhnCOlRNd1nJpQhBComqbhFOZ5JoRAJRTOOZZlYbfbcQrWWrz3VEJxfX2NMYbtdsuxpmlCa421lkooVqsVu92Opmk4lveeGCPTNFEJhYjQti0iwrHevPcOKSX2+z2VoVBKISJ8+vl9HnzxWRYRKq01wzAgIhhjiDGiteb/WGt5/bW3yDkjIrRtS2Uocs5Ul7/+Ttu2bDYbvPfknKnGcaTrOvb7PcuyYIzhIMaI1poYI1r/TEoJpRQHhuLZ0+c8+e57KmstVd/3aK3RWlM551BKMY4jr8o5470nhMD5+Tk3NzcMw0DbtlQKyNyhfwFNkPmJmSxZDgAAAABJRU5ErkJggg==");
+    --t-head:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAA1SURBVDjLY2AYnkBSQek/Nky0ZnLkiFNASM3gMQA90JD5tHUBxbFAFQNwKSRaM67UOHjzDQCorytBHr4ANwAAAABJRU5ErkJggg=="); --t-chest:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAA3SURBVDjLY2AYdEBSQek/PkxQI7EWYAiS49JBZACphmBVS7EBxBpCMCqHuAGEFBAd0CTnA0oAADFJM124lUjJAAAAAElFTkSuQmCC"); --t-legs:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAA+SURBVDjLY2SgEDBS3QBJBaX/+DQ8f3CPEacBIM3oCrBZgKxmkBsACw90MaIMIIY9asCgNQBbusclTpXcCACaWqARL90+vAAAAABJRU5ErkJggg=="); --t-feet:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAA2SURBVDjLY2AYfkBSQek/DOMTw6mZFPaoAXg0E9KEYQg2UwnZiiJG0AZCapATCr5AIlbdEAMA/8A+LTlsgLEAAAAASUVORK5CYII="); --t-off:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAABtSURBVDjLrZNREkARCEXbhj9j/3vMj97UleTRTD/qHhchZqabDIulNh4ZA3QoETsg02wceA2lti9xA+NAbGZDNBMgC/EARy70xb4B6MXfAClkxNMzPgXsjrEDhBCsrQDmD8B4UwjA8UXhEnCTHXbKIdbBEGAIAAAAAElFTkSuQmCC");
+    --mc-panel:#c6c6c6; --mc-ink:#3f3f3f;
+  }
+  .kb{display:flex;flex-direction:column;gap:14px;max-width:480px;margin:0 auto}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .panel>h3{font-size:12px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+  /* item panel */
+  .ip{display:flex;gap:14px;align-items:flex-start}
+  .ip-icon{flex:none;width:72px;height:72px;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
+  .ip-body{min-width:0;flex:1}
+  .ip-name{font-weight:700;font-size:17px;line-height:1.2;margin:2px 0 2px}
+  .ip-where{color:var(--mute);font-size:13px;margin-bottom:8px}
+  .ip-props{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px;margin:0}
+  .ip-props dt{color:var(--mute)}
+  .ip-props dd{margin:0;min-width:0;overflow-wrap:anywhere}
+  /* inventory panel */
+  .invp{background:var(--mc-panel);border:2px solid #fff;border-right-color:#555;border-bottom-color:#555;border-radius:2px;padding:10px;box-shadow:0 0 0 2px #000}
+  .invp .cap{font-size:11px;font-weight:700;color:var(--mc-ink);margin:8px 0 3px;letter-spacing:.02em}
+  .invp .cap:first-child{margin-top:0}
+  .sgrid{display:grid;grid-template-columns:repeat(9,1fr)}
+  .slot{appearance:none;border:0;padding:0;margin:0;aspect-ratio:1;position:relative;cursor:pointer;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated;-webkit-tap-highlight-color:transparent;font:inherit;color:inherit}
+  .slot .ph{position:absolute;inset:6%;background:center/contain no-repeat;opacity:.45;image-rendering:pixelated;pointer-events:none}
+  .slot[data-ph=head] .ph{background-image:var(--t-head)}
+  .slot[data-ph=chest] .ph{background-image:var(--t-chest)}
+  .slot[data-ph=legs] .ph{background-image:var(--t-legs)}
+  .slot[data-ph=feet] .ph{background-image:var(--t-feet)}
+  .slot[data-ph=off] .ph{background-image:var(--t-off)}
+  .slot.sel{z-index:3}
+  .slot.sel::after{content:"";position:absolute;inset:-16.667%;background:var(--t-sel) center/100% 100% no-repeat;image-rendering:pixelated;pointer-events:none}
+  .slot:focus-visible{outline:2px solid var(--accent);outline-offset:1px;z-index:4}
+  .gap{height:10px}
+  /* control panel */
+  .cp{position:sticky;bottom:10px;z-index:10;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  .cp-msg{color:var(--mute);font-size:14px;margin:0 0 10px}
+  .cp-actions{display:flex;flex-wrap:wrap;gap:8px}
+  .cp-actions .btn{padding:10px 14px}
+  /* item icons */
+  .ico{display:block;width:100%;height:100%;background-repeat:no-repeat}
+  .ico.mono{display:grid;place-items:center;font:700 11px/1 system-ui,sans-serif;color:#fff;background:hsl(var(--h) 42% 36%);border-radius:3px;text-shadow:0 1px 0 rgba(0,0,0,.45);overflow:hidden}
+  .slot .ico{position:absolute;inset:9%;width:auto;height:auto;pointer-events:none}
+  .slot .cnt{position:absolute;right:3px;bottom:1px;font:700 12px/1 system-ui,sans-serif;color:#fff;text-shadow:1px 1px 0 #3f3f3f;pointer-events:none;z-index:1}
+  .ip-icon{position:relative}
+  .ip-icon .ico{position:absolute;inset:9%;width:auto;height:auto}
+  /* picker */
+  body.lock{overflow:hidden}
+  .sheet{position:fixed;inset:0;z-index:60;background:var(--bg);display:none;flex-direction:column}
+  .sheet.on{display:flex}
+  .sheet-head{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bar);border-bottom:1px solid var(--line)}
+  .sheet-head input{flex:1;min-width:0}
+  .sheet-title{font-weight:700;padding:10px 12px 4px;max-width:720px;width:100%;margin:0 auto}
+  .sheet-count{color:var(--mute);font-size:13px;padding:0 12px 6px;max-width:720px;width:100%;margin:0 auto}
+  .sheet-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 10px 30px}
+  .sheet-inner{max-width:720px;margin:0 auto}
+  .row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;appearance:none;background:var(--card);border:1px solid var(--line);color:inherit;font:inherit;border-radius:10px;padding:6px 10px;margin-bottom:6px;cursor:pointer}
+  .row:hover,.row:focus-visible{border-color:var(--accent);outline:none}
+  .row .ri{flex:none;width:40px;height:40px;position:relative}
+  .row .rn{min-width:0}
+  .row .rn b{display:block;font-weight:600;line-height:1.2}
+  .row .rn span{display:block;color:var(--mute);font-size:12px;overflow-wrap:anywhere}
+  .none{color:var(--mute);text-align:center;padding:30px 0}
+  footer{color:var(--mute);font-size:13px;text-align:center;padding:10px 16px 40px}
+  .soon{text-align:center;padding:50px 10px;color:var(--mute)}
+  .soon b{display:block;color:var(--text);font-size:20px;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span></button>
+  <h1 id="barTitle">KitX</h1>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="Main menu">
+  <div class="head"><span>KitX</span><button class="x" id="closeMenu" aria-label="Close menu">✕</button></div>
+  <a href="#home" data-route="home">Home</a>
+  <div class="sep"></div>
+  <a href="#kit-builder" data-route="kit-builder">1 · Kit Builder</a>
+  <a href="#preset-builder" data-route="preset-builder">2 · Preset Builder</a>
+  <div class="item off" aria-disabled="true">3 · More tools <span class="tag">Soon</span></div>
+</nav>
+
+<main class="wrap">
+
+  <!-- HOME -->
+  <section class="page" id="page-home" data-title="KitX">
+    <div class="hero">
+      <h2>KitX</h2>
+      <p>A kit management addon for Minecraft Bedrock. Save kits, equip them in one command, and control who can use them.</p>
+      <div class="cta">
+        <a class="btn" id="cfBtn" target="_blank" rel="noopener">Get KitX on CurseForge</a>
+        <a class="btn ghost" href="#preset-builder">Open the Preset Builder</a>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:22px">
+      <h3>What is KitX?</h3>
+      <p>KitX stores kits in your world, so they survive addon updates. Each kit can be Open, Locked or Limited to certain players, can have a cooldown, and can be hidden from the list. There's an in-game menu, per-player layouts, and backups that survive version changes.</p>
+      <p>This site has companion tools for it. You don't need them to use KitX, but they make big kit sets easier to prepare.</p>
+    </div>
+
+    <div class="grid2">
+      <a class="tile" href="#kit-builder"><b>Kit Builder</b><span>Lay out a kit slot by slot and export it as a .mcstructure file.</span></a>
+      <a class="tile" href="#preset-builder"><b>Preset Builder</b><span>Bundle kit files into a preset addon that you add next to KitX.</span></a>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>How the tools fit together</h3>
+      <ul>
+        <li>Make a kit in the Kit Builder and export it as a <span class="hl">.mcstructure</span> file.</li>
+        <li>Add one or more of those files to the Preset Builder, name your pack, and download the <span class="hl">.mcaddon</span>.</li>
+        <li>Import the file into Minecraft, enable it in the world next to the main KitX addon, and use the Presets screen in KitX's Backup menu.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Credits</h3>
+      <p>KitX and this site are made by <b>ionyne</b>.</p>
+      <p class="hint" style="margin:0">Minecraft is a trademark of Mojang AB and Microsoft. KitX is not affiliated with or endorsed by them.</p>
+    </div>
+  </section>
+
+  <!-- KIT BUILDER -->
+  <section class="page" id="page-kit-builder" data-title="Kit Builder">
+    <div class="kb">
+
+      <div class="panel" aria-label="Item Panel">
+        <h3>Item</h3>
+        <div class="ip">
+          <div class="ip-icon" aria-hidden="true"></div>
+          <div class="ip-body">
+            <div class="ip-name" id="ipName">No slot selected</div>
+            <div class="ip-where" id="ipWhere">Tap a slot below</div>
+            <dl class="ip-props">
+              <dt>Item</dt><dd id="ipId">—</dd>
+              <dt>Count</dt><dd id="ipCount">—</dd>
+              <dt>Durability</dt><dd id="ipDur">—</dd>
+              <dt>Enchants</dt><dd id="ipEnch">—</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Inventory Panel">
+        <h3>Inventory</h3>
+        <div class="invp" id="invp"></div>
+      </div>
+
+      <div class="panel cp" aria-label="Control Panel">
+        <h3>Controls</h3>
+        <p class="cp-msg" id="cpMsg">Select a slot to see what you can do with it.</p>
+        <div class="cp-actions" id="cpActions"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PRESET BUILDER -->
+  <section class="page" id="page-preset-builder" data-title="Preset Builder">
+    <h2 class="title">Preset Builder</h2>
+    <p class="sub">Add your kit structure files, name your pack, and download a preset addon to use alongside KitX. Everything runs in your browser; nothing is uploaded anywhere.</p>
+
+    <div class="card">
+      <h3>1 · Pack details</h3>
+      <label for="packName">Preset name</label>
+      <input id="packName" type="text" placeholder="Mark's PvP KitX Preset" autocomplete="off">
+      <label for="packAuthor">Author</label>
+      <input id="packAuthor" type="text" placeholder="Mark" autocomplete="off">
+      <label for="packDesc">Description</label>
+      <input id="packDesc" type="text" placeholder="KitX kit presets" autocomplete="off">
+      <label>Version</label>
+      <div class="ver">
+        <input id="v1" type="text" inputmode="numeric" value="1" aria-label="Major">
+        <input id="v2" type="text" inputmode="numeric" value="0" aria-label="Minor">
+        <input id="v3" type="text" inputmode="numeric" value="0" aria-label="Patch">
+      </div>
+      <label class="chk"><input id="verInName" type="checkbox" checked> Add the version to the pack name (e.g. “Mark's PvP KitX Preset v1.0.0”)</label>
+      <label for="indexSlot">Index slot</label>
+      <select id="indexSlot" aria-describedby="indexHint"></select>
+      <p class="hint" id="indexHint">KitX reads the pack's kit list from an index file. If you use several preset packs in the same world, give each pack its own slot (up to 12). A pack with more than 26 kits uses several consecutive slots and keep kit names unique across them.</p>
+      <label>Pack icon (optional PNG)</label>
+      <div class="iconrow">
+        <img id="iconPrev" class="iconprev" alt="" style="display:none">
+        <input id="iconFile" type="file" accept="image/png">
+        <button class="danger" id="iconClear" style="display:none">Remove</button>
+      </div>
+      <p class="hint" id="iconHint">No icon chosen. The pack is built without one until the KitX default icon is added to this site.</p>
+    </div>
+
+    <div class="card">
+      <h3>2 · Kit structures</h3>
+      <div id="drop" class="drop">Tap to choose <code>.mcstructure</code> files, or drop them here</div>
+      <input id="files" type="file" accept=".mcstructure" multiple hidden>
+      <div id="kits"></div>
+      <div class="hint" id="kitCount"></div>
+      <p class="hint">Each file becomes one kit preset. The kit name comes from the file name and you can rename it. Names are lowercased and limited to <code>a-z 0-9 _</code>. Kits are listed in the index in the order shown here. Each index file holds 26 kits, so bigger sets are split across consecutive index slots automatically.</p>
+    </div>
+
+    <div class="card">
+      <h3>3 · Build</h3>
+      <div class="actions">
+        <button class="btn" id="build" disabled>Build preset</button>
+        <button class="btn ghost" id="clear">Reset</button>
+      </div>
+      <div id="status" role="status"></div>
+      <p class="hint">Output is a <code>.mcaddon</code> with a fresh pack UUID and module UUID on every build, your kit files, and the index file KitX uses to list the pack under the title you chose. Import it on your device, enable it in the world next to the main KitX addon, then use the Presets screen in KitX's Backup menu.</p>
+    </div>
+  </section>
+
+</main>
+<div class="sheet" id="picker" role="dialog" aria-modal="true" aria-label="Add item">
+  <div class="sheet-head">
+    <button class="x" id="pickClose" aria-label="Close">✕</button>
+    <input id="pickQ" type="text" placeholder="Search items (e.g. diamond sword)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+  </div>
+  <div class="sheet-title" id="pickTitle">Add item</div>
+  <div class="sheet-count" id="pickCount"></div>
+  <div class="sheet-list" id="pickList"><div class="sheet-inner" id="pickInner"></div></div>
+</div>
+
+<footer>KitX · made by ionyne</footer>
+
+<script>
+(() => {
+  // ====== Site settings: edit these ======
+  const CURSEFORGE_URL = '';          // paste the KitX CurseForge page link here
+  const DEFAULT_ICON_B64 = '';        // optional: base64 of the KitX default pack icon (PNG)
+  // =======================================
+
+  const $ = id => document.getElementById(id);
+
+  // ---------- router + drawer ----------
+  const routes = ['home','kit-builder','preset-builder'];
+  const drawer=$('drawer'), scrim=$('scrim'), burger=$('burger');
+  function setMenu(open){
+    drawer.classList.toggle('on',open); scrim.classList.toggle('on',open);
+    burger.setAttribute('aria-expanded',String(open));
+  }
+  burger.addEventListener('click',()=>setMenu(!drawer.classList.contains('on')));
+  $('closeMenu').addEventListener('click',()=>setMenu(false));
+  scrim.addEventListener('click',()=>setMenu(false));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
+  function route(){
+    let r=(location.hash||'#home').slice(1);
+    if(!routes.includes(r)) r='home';
+    routes.forEach(n=>$('page-'+n).classList.toggle('on',n===r));
+    document.querySelectorAll('.drawer a[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===r));
+    const t=$('page-'+r).dataset.title;
+    $('barTitle').textContent=t; document.title=r==='home'?'KitX':t+' · KitX';
+    setMenu(false); window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',route);
+  route();
+
+  // CurseForge button
+  const cf=$('cfBtn');
+  if(CURSEFORGE_URL){cf.href=CURSEFORGE_URL}
+  else{cf.setAttribute('aria-disabled','true');cf.textContent='CurseForge link coming soon';cf.addEventListener('click',e=>e.preventDefault())}
+
+  // ---------- helpers ----------
+  const kits = [];            // {file, id, bytes, size, warn}
+  let iconBytes = null;
+  const clean = s => (s || '').toLowerCase().replace(/\.mcstructure$/,'').replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'');
+  const fmt = n => n < 1024 ? n+' B' : (n/1024).toFixed(1)+' KB';
+  const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16)}));
+  const enc = new TextEncoder();
+  const b64 = s => Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+  const defaultIcon = DEFAULT_ICON_B64 ? b64(DEFAULT_ICON_B64) : null;
+
+  // ---------- minimal ZIP writer (store, no compression) ----------
+  const crcTable = (()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+  const crc32 = b => {let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=crcTable[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+  function makeZip(files){
+    const parts=[], central=[]; let offset=0;
+    const now=new Date();
+    const dosTime=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);
+    const dosDate=((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+    for(const f of files){
+      const name=enc.encode(f.name), crc=crc32(f.data), size=f.data.length;
+      const lh=new DataView(new ArrayBuffer(30));
+      lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true);
+      lh.setUint16(8,0,true); lh.setUint16(10,dosTime,true); lh.setUint16(12,dosDate,true);
+      lh.setUint32(14,crc,true); lh.setUint32(18,size,true); lh.setUint32(22,size,true);
+      lh.setUint16(26,name.length,true); lh.setUint16(28,0,true);
+      parts.push(new Uint8Array(lh.buffer),name,f.data);
+      const ch=new DataView(new ArrayBuffer(46));
+      ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true); ch.setUint16(8,0x0800,true);
+      ch.setUint16(10,0,true); ch.setUint16(12,dosTime,true); ch.setUint16(14,dosDate,true);
+      ch.setUint32(16,crc,true); ch.setUint32(20,size,true); ch.setUint32(24,size,true);
+      ch.setUint16(28,name.length,true); ch.setUint32(42,offset,true);
+      central.push(new Uint8Array(ch.buffer),name);
+      offset+=30+name.length+size;
+    }
+    let cdSize=0; for(const c of central) cdSize+=c.length;
+    const end=new DataView(new ArrayBuffer(22));
+    end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true);
+    end.setUint32(12,cdSize,true); end.setUint32(16,offset,true);
+    return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/zip'});
+  }
+
+  // ---------- KitX preset index (.mcstructure, Bedrock little-endian NBT) ----------
+  // Layout copied from the v1.1.0 template's _index.mcstructure: a 1x1x1 structure holding one
+  // chest minecart. Slot 0 is a paper item named "=<pack title>", slots 1.. are paper items named after kit files.
+  const MAX_KITS = 26;                  // per index file: chest minecart = 27 slots, slot 0 is the title. More kits spill into the next index file.
+  const INDEX_SLOTS = 12;               // _index, _index2 ... _index12
+  const indexName = n => n<=1 ? '_index' : '_index'+n;
+  function nbtIndex(title, kitIds){
+    const o=[];
+    const u8=v=>o.push(v&255);
+    const i16=v=>{u8(v);u8(v>>8)};
+    const i32=v=>{u8(v);u8(v>>8);u8(v>>16);u8(v>>24)};
+    const i64=v=>{const b=new DataView(new ArrayBuffer(8));b.setBigInt64(0,BigInt(v),true);for(let i=0;i<8;i++)u8(b.getUint8(i))};
+    const f32=v=>{const b=new DataView(new ArrayBuffer(4));b.setFloat32(0,v,true);for(let i=0;i<4;i++)u8(b.getUint8(i))};
+    const f32raw=v=>{u8(v);u8(v>>>8);u8(v>>>16);u8(v>>>24)};
+    const str=s=>{const e=enc.encode(s);i16(e.length);e.forEach(u8)};
+    const head=(t,name)=>{u8(t);str(name)};
+    const END=0,BYTE=1,SHORT=2,INT=3,LONG=4,FLOAT=5,STRING=8,LIST=9,COMP=10,INTARR=11;
+    const tByte=(n,v)=>{head(BYTE,n);u8(v)};
+    const tShort=(n,v)=>{head(SHORT,n);i16(v)};
+    const tInt=(n,v)=>{head(INT,n);i32(v)};
+    const tLong=(n,v)=>{head(LONG,n);i64(v)};
+    const tFloat=(n,v)=>{head(FLOAT,n);f32(v)};
+    const tStr=(n,v)=>{head(STRING,n);str(v)};
+    const listOf=(n,type,count)=>{head(LIST,n);u8(type);i32(count)};
+    const comp=n=>head(COMP,n);
+
+    comp('');
+      tInt('compression',0);
+      tInt('format_version',2);
+      listOf('size',INT,3); i32(1);i32(1);i32(1);
+      comp('structure');
+        listOf('block_indices',INTARR,1); i32(1); i32(0);
+        listOf('entities',COMP,1);
+          listOf('ChestItems',COMP,kitIds.length+1);
+          ['='+title,...kitIds].forEach((name,slot)=>{
+            tByte('Count',1); tShort('Damage',0); tStr('Name','minecraft:paper');
+            tByte('Slot',slot); tByte('WasPickedUp',0);
+            comp('tag'); comp('display'); tStr('Name',name); u8(END); u8(END);
+            u8(END);
+          });
+          tFloat('FallDistance',0.04);
+          tStr('InventoryVersion','1.26.60');
+          listOf('Motion',FLOAT,3); f32raw(0xbd75c290); f32(-0.04); f32(0);   // -0.06 as the game wrote it (1 ulp off JS's -0.06)
+          tLong('OwnerNew',-1);
+          listOf('Pos',FLOAT,3); f32(2.3); f32(1.36); f32(2.5);
+          listOf('Rotation',FLOAT,2); f32(0); f32(0);
+          tByte('Sitting',0);
+          listOf('Tags',STRING,1); str('ionyne_preset_index');
+          tLong('UniqueID',-4294967287);
+          listOf('definitions',STRING,1); str('+minecraft:chest_minecart');
+          tStr('identifier','minecraft:chest_minecart');
+          comp('internalComponents'); u8(END);
+          u8(END);
+        comp('palette');
+          comp('default');
+            listOf('block_palette',COMP,1);
+              tStr('name','minecraft:air'); comp('states'); u8(END); tInt('version',18168865); u8(END);
+            comp('block_position_data'); u8(END);
+          u8(END);   // default
+        u8(END);     // palette
+      u8(END);       // structure
+      listOf('structure_world_origin',INT,3); i32(2);i32(1);i32(2);
+      u8(END);
+    return Uint8Array.from(o);
+  }
+
+  // ---------- Preset Builder UI ----------
+  function uniqueId(base, skip){
+    let id=base||'kit', n=2;
+    while(kits.some(k=>k!==skip && k.id===id)) id=(base||'kit')+'_'+n++;
+    return id;
+  }
+  const slotSel=$('indexSlot');
+  const startSlot=()=>Math.max(1,Math.min(INDEX_SLOTS,parseInt(slotSel.value,10)||1));
+  const partsNeeded=()=>Math.max(1,Math.ceil(kits.length/MAX_KITS));
+  function updateCount(){
+    const kc=$('kitCount'), parts=partsNeeded(), last=startSlot()+parts-1, over=last>INDEX_SLOTS;
+    kc.className=over?'warn':'hint';
+    kc.textContent=!kits.length?'':
+      over?`${kits.length} kits need ${parts} index files, which would run past slot ${INDEX_SLOTS}. Pick a lower starting slot or remove some kits.`:
+      parts>1?`${kits.length} kits: split across ${parts} index files (${indexName(startSlot())} to ${indexName(last)}), ${MAX_KITS} kits each. KitX will show them as ${parts} packs titled “Name”, “Name (2)” and so on.`:
+      `${kits.length} kit${kits.length===1?'':'s'}`;
+    $('build').disabled=kits.length===0||over;
+  }
+  slotSel.addEventListener('change',updateCount);
+  for(let n=1;n<=INDEX_SLOTS;n++){const o=document.createElement('option');o.value=n;o.textContent=n===1?'Slot 1 (_index): default':`Slot ${n} (${indexName(n)})`;slotSel.append(o)}
+  function renderKits(){
+    const box=$('kits'); box.innerHTML='';
+    kits.forEach((k,i)=>{
+      const el=document.createElement('div'); el.className='kit';
+      const name=document.createElement('div'); name.className='name';
+      const inp=document.createElement('input'); inp.type='text'; inp.value=k.id; inp.setAttribute('aria-label','Kit name');
+      const meta=document.createElement('div'); meta.className='meta'; meta.textContent=`${k.file} · ${fmt(k.size)}`;
+      name.append(inp,meta);
+      if(k.warn){const w=document.createElement('div');w.className='warn';w.textContent=k.warn;name.append(w)}
+      const rm=document.createElement('button'); rm.className='danger'; rm.textContent='✕'; rm.setAttribute('aria-label','Remove kit');
+      inp.addEventListener('change',()=>{k.id=uniqueId(clean(inp.value)||'kit',k);renderKits()});
+      rm.addEventListener('click',()=>{kits.splice(i,1);renderKits()});
+      el.append(name,rm); box.append(el);
+    });
+    updateCount();
+  }
+  async function addFiles(list){
+    // Copy first: the input's FileList is emptied (files.value='') while we await below
+    for(const f of Array.from(list)){
+      if(!/\.mcstructure$/i.test(f.name)) continue;
+      const bytes=new Uint8Array(await f.arrayBuffer());
+      const k={file:f.name,bytes,size:bytes.length,id:'',warn:''};
+      if(bytes[0]!==0x0A) k.warn='This does not look like a valid .mcstructure file.';
+      k.id=uniqueId(clean(f.name)||'kit',k);
+      kits.push(k);
+    }
+    renderKits();
+  }
+  const drop=$('drop'), files=$('files');
+  drop.addEventListener('click',()=>files.click());
+  files.addEventListener('change',()=>{addFiles(files.files);files.value=''});
+  ['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
+  ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
+  drop.addEventListener('drop',ev=>addFiles(ev.dataTransfer.files));
+
+  function iconUI(){
+    const has=!!iconBytes;
+    $('iconPrev').style.display=has?'block':'none';
+    $('iconClear').style.display=has?'inline-block':'none';
+    $('iconHint').textContent=has?'Using your icon.':(defaultIcon?'No icon chosen: the KitX icon will be used.':'No icon chosen. The pack is built without one until the KitX default icon is added to this site.');
+  }
+  $('iconFile').addEventListener('change',async e=>{
+    const f=e.target.files[0]; if(!f){return}
+    iconBytes=new Uint8Array(await f.arrayBuffer());
+    $('iconPrev').src=URL.createObjectURL(f); iconUI();
+  });
+  $('iconClear').addEventListener('click',()=>{iconBytes=null;$('iconFile').value='';iconUI()});
+  iconUI();
+
+  $('clear').addEventListener('click',()=>{
+    kits.length=0; iconBytes=null; $('iconFile').value=''; iconUI();
+    $('status').textContent=''; renderKits();
+  });
+
+  const verPart=id=>Math.max(0,Math.min(999,parseInt($(id).value,10)||0));
+  $('build').addEventListener('click',()=>{
+    const st=$('status'); st.className=''; st.style.color='';
+    try{
+      const base=($('packName').value.trim()||'KitX Preset');
+      const ver=[verPart('v1'),verPart('v2'),verPart('v3')];
+      const name=$('verInName').checked ? `${base} v${ver.join('.')}` : base;
+      const desc=$('packDesc').value.trim()||'KitX kit presets';
+      const author=$('packAuthor').value.trim();
+      const manifest={
+        format_version:2,
+        header:{name,description:desc,uuid:uuid(),version:ver,min_engine_version:[1,21,120]},
+        modules:[{type:'data',uuid:uuid(),version:ver}]
+      };
+      if(author) manifest.metadata={authors:[author]};
+      const R='KitX_Preset_BP/';
+      const out=[{name:R+'manifest.json',data:enc.encode(JSON.stringify(manifest,null,2))}];
+      const icon=iconBytes||defaultIcon;
+      if(icon) out.push({name:R+'pack_icon.png',data:icon});
+      const first=startSlot(), parts=partsNeeded();
+      if(first+parts-1>INDEX_SLOTS) throw new Error(`${kits.length} kits need ${parts} index files starting at slot ${first}, but there are only ${INDEX_SLOTS} slots.`);
+      const idxFiles=[];
+      for(let p=0;p<parts;p++){
+        const f=indexName(first+p)+'.mcstructure'; idxFiles.push(f);
+        const title=p===0?name:`${name} (${p+1})`;
+        out.push({name:`${R}structures/kitx_preset/${f}`,data:nbtIndex(title,kits.slice(p*MAX_KITS,(p+1)*MAX_KITS).map(k=>k.id))});
+      }
+      const idxFile=idxFiles.length>1?`${idxFiles[0]} to ${idxFiles[idxFiles.length-1]}`:idxFiles[0];
+      for(const k of kits) out.push({name:`${R}structures/kitx_preset/${k.id}.mcstructure`,data:k.bytes});
+      const blob=makeZip(out);
+      const fileName=(clean(name)||'kitx_preset')+'.mcaddon';
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      st.className='ok'; st.textContent=`Built “${name}” with ${kits.length} kit${kits.length===1?'':'s'} (index: ${idxFile}) → ${fileName}`;
+    }catch(err){ st.style.color='var(--bad)'; st.textContent='Build failed: '+err.message; }
+  });
+
+  renderKits();
+
+  // ---------- Kit Builder ----------
+  // Slot keys follow the kit layout: 0-8 hotbar, 9-35 inventory, plus armor and offhand.
+  const DATA = {"cols":25,"rows":25,"items":[["acacia_boat",0],["acacia_button",1],["acacia_chest_boat",2],["acacia_door",3],["acacia_fence",1],["acacia_fence_gate",1],["acacia_hanging_sign",4],["acacia_leaves",5],["acacia_log",6],["acacia_planks",7],["acacia_pressure_plate",1],["acacia_sapling",8],["acacia_shelf",9],["acacia_sign",10],["acacia_slab",11],["acacia_stairs",12],["acacia_trapdoor",13],["acacia_wood",14],["activator_rail",15],["agent_spawn_egg",16],["allay_spawn_egg",17],["allium",18],["amethyst_block",19],["amethyst_cluster",20],["amethyst_shard",21],["ancient_debris",22],["andesite",23],["andesite_slab",24],["andesite_stairs",25],["andesite_wall",26],["angler_pottery_sherd",27],["anvil",28],["apple",29],["archer_pottery_sherd",30],["armadillo_scute",31],["armadillo_spawn_egg",32],["armor_stand",33],["arms_up_pottery_sherd",34],["arrow",35],["axolotl_bucket",36],["axolotl_spawn_egg",37],["azalea",38],["azalea_leaves",39],["azure_bluet",40],["baked_potato",41],["bamboo",42],["bamboo_block",43],["bamboo_button",44],["bamboo_chest_raft",45],["bamboo_door",46],["bamboo_fence",47],["bamboo_fence_gate",48],["bamboo_hanging_sign",49],["bamboo_mosaic",50],["bamboo_mosaic_slab",51],["bamboo_mosaic_stairs",52],["bamboo_planks",53],["bamboo_pressure_plate",44],["bamboo_raft",54],["bamboo_shelf",55],["bamboo_sign",56],["bamboo_slab",57],["bamboo_stairs",58],["bamboo_trapdoor",59],["banner",60],["banner_pattern",61],["barrel",62],["barrier",63],["basalt",64],["bat_spawn_egg",65],["beacon",66],["bedrock",67],["bee_nest",68],["bee_spawn_egg",69],["beef",70],["beehive",71],["beetroot",72],["beetroot_seeds",73],["beetroot_soup",74],["bell",75],["big_dripleaf",76],["birch_boat",77],["birch_button",78],["birch_chest_boat",79],["birch_door",80],["birch_fence",78],["birch_fence_gate",78],["birch_hanging_sign",81],["birch_leaves",82],["birch_log",83],["birch_planks",84],["birch_pressure_plate",78],["birch_sapling",85],["birch_shelf",86],["birch_sign",87],["birch_slab",88],["birch_stairs",89],["birch_trapdoor",90],["birch_wood",91],["black_banner",92],["black_bed",93],["black_bundle",94],["black_candle",95],["black_carpet",96],["black_concrete",97],["black_concrete_powder",98],["black_cushion",99],["black_dye",100],["black_glazed_terracotta",101],["black_harness",102],["black_shulker_box",103],["black_stained_glass",104],["black_stained_glass_pane",105],["black_terracotta",106],["black_wool",107],["blackstone",108],["blackstone_slab",109],["blackstone_stairs",110],["blackstone_wall",111],["blade_pottery_sherd",112],["blast_furnace",113],["blaze_powder",114],["blaze_rod",115],["blaze_spawn_egg",116],["blue_banner",117],["blue_bed",118],["blue_bundle",119],["blue_candle",120],["blue_carpet",121],["blue_concrete",122],["blue_concrete_powder",123],["blue_cushion",124],["blue_dye",125],["blue_egg",126],["blue_glazed_terracotta",127],["blue_harness",128],["blue_ice",129],["blue_orchid",130],["blue_shulker_box",131],["blue_stained_glass",132],["blue_stained_glass_pane",133],["blue_terracotta",134],["blue_wool",135],["boat",136],["boat_dark_oak",137],["bogged_spawn_egg",138],["bolt_armor_trim_smithing_template",139],["bone",140],["bone_block",141],["bone_meal",142],["book",143],["book_portfolio",144],["bookshelf",145],["bordure_indented_banner_pattern",146],["bow",147],["bow_pulling_0",148],["bow_pulling_1",149],["bow_pulling_2",150],["bowl",151],["brain_coral",152],["brain_coral_block",153],["brain_coral_fan",154],["bread",155],["breeze_rod",156],["breeze_spawn_egg",157],["brewer_pottery_sherd",158],["brewing_stand",159],["brick",160],["brick_block",161],["brick_slab",162],["brick_stairs",163],["brick_wall",164],["broken_elytra",165],["brown_banner",166],["brown_bed",167],["brown_bundle",168],["brown_candle",169],["brown_carpet",170],["brown_concrete",171],["brown_concrete_powder",172],["brown_cushion",173],["brown_dye",174],["brown_egg",175],["brown_glazed_terracotta",176],["brown_harness",177],["brown_mushroom",178],["brown_mushroom_block",179],["brown_shulker_box",180],["brown_stained_glass",181],["brown_stained_glass_pane",182],["brown_terracotta",183],["brown_wool",184],["brush",185],["bubble_coral",186],["bubble_coral_block",187],["bubble_coral_fan",188],["bucket",189],["bucket_sulfur_cube",190],["budding_amethyst",191],["bundle",192],["bundle_black_open",193],["bundle_black_open_back",194],["bundle_black_open_front",195],["bundle_blue_open",196],["bundle_blue_open_back",197],["bundle_blue_open_front",198],["bundle_brown_open",199],["bundle_brown_open_back",200],["bundle_brown_open_front",201],["bundle_cyan_open",202],["bundle_cyan_open_back",203],["bundle_cyan_open_front",204],["bundle_gray_open",205],["bundle_gray_open_back",206],["bundle_gray_open_front",207],["bundle_green_open",208],["bundle_green_open_back",209],["bundle_green_open_front",210],["bundle_light_blue_open",211],["bundle_light_blue_open_back",212],["bundle_light_blue_open_front",213],["bundle_light_gray_open",214],["bundle_light_gray_open_back",215],["bundle_light_gray_open_front",216],["bundle_lime_open",217],["bundle_lime_open_back",218],["bundle_lime_open_front",219],["bundle_magenta_open",220],["bundle_magenta_open_back",221],["bundle_magenta_open_front",222],["bundle_open",223],["bundle_open_back",224],["bundle_open_front",225],["bundle_orange_open",226],["bundle_orange_open_back",227],["bundle_orange_open_front",228],["bundle_pink_open",229],["bundle_pink_open_back",230],["bundle_pink_open_front",231],["bundle_purple_open",232],["bundle_purple_open_back",233],["bundle_purple_open_front",234],["bundle_red_open",235],["bundle_red_open_back",236],["bundle_red_open_front",237],["bundle_white_open",238],["bundle_white_open_back",239],["bundle_white_open_front",240],["bundle_yellow_open",241],["bundle_yellow_open_back",242],["bundle_yellow_open_front",243],["burn_pottery_sherd",244],["bush",245],["cactus",246],["cake",247],["calcite",248],["calibrated_sculk_sensor",249],["camel_husk_spawn_egg",250],["camel_spawn_egg",251],["campfire",252],["candle",253],["carrot",254],["carrot_on_a_stick",255],["cartography_table",256],["carved_pumpkin",257],["cat_spawn_egg",258],["cauldron",259],["cave_spider_spawn_egg",260],["cave_vines",261],["chain",262],["chain_command_block",263],["chainmail_boots",264],["chainmail_chestplate",265],["chainmail_helmet",266],["chainmail_leggings",267],["chalkboard_large",268],["chalkboard_medium",269],["chalkboard_small",270],["charcoal",271],["cherry_boat",272],["cherry_button",273],["cherry_chest_boat",274],["cherry_door",275],["cherry_fence",273],["cherry_fence_gate",273],["cherry_hanging_sign",276],["cherry_leaves",277],["cherry_log",278],["cherry_planks",279],["cherry_pressure_plate",273],["cherry_sapling",280],["cherry_shelf",281],["cherry_sign",282],["cherry_slab",283],["cherry_stairs",284],["cherry_trapdoor",285],["cherry_wood",286],["chest",287],["chest_minecart",288],["chicken",289],["chicken_spawn_egg",290],["chipped_anvil",291],["chiseled_bookshelf",292],["chiseled_cinnabar",293],["chiseled_copper",294],["chiseled_deepslate",295],["chiseled_nether_bricks",296],["chiseled_polished_blackstone",297],["chiseled_quartz_block",298],["chiseled_red_sandstone",299],["chiseled_resin_bricks",300],["chiseled_sandstone",301],["chiseled_stone_bricks",302],["chiseled_sulfur",303],["chiseled_tuff",304],["chiseled_tuff_bricks",305],["chorus_flower",306],["chorus_fruit",307],["chorus_plant",308],["cinnabar",309],["cinnabar_bricks",310],["clay",311],["clay_ball",312],["clock",313],["closed_eyeblossom",314],["coal",315],["coal_block",316],["coal_ore",317],["coarse_dirt",318],["coast_armor_trim_smithing_template",319],["cobbled_deepslate",320],["cobbled_deepslate_slab",321],["cobbled_deepslate_stairs",322],["cobbled_deepslate_wall",323],["cobblestone",324],["cobblestone_slab",325],["cobblestone_stairs",326],["cobblestone_wall",327],["cocoa_beans",328],["cod",329],["cod_bucket",330],["cod_spawn_egg",331],["command_block",332],["command_block_minecart",333],["comparator",334],["compass",335],["compass_atlas",336],["composter",337],["conduit",338],["cooked_beef",339],["cooked_chicken",340],["cooked_cod",341],["cooked_mutton",342],["cooked_porkchop",343],["cooked_rabbit",344],["cooked_salmon",345],["cookie",346],["copper_axe",347],["copper_bars",348],["copper_block",349],["copper_boots",350],["copper_bulb",351],["copper_chain",352],["copper_chest",353],["copper_chestplate",354],["copper_door",355],["copper_golem_spawn_egg",356],["copper_grate",357],["copper_helmet",358],["copper_hoe",359],["copper_horse_armor",360],["copper_ingot",361],["copper_lantern",362],["copper_leggings",363],["copper_nautilus_armor",364],["copper_nugget",365],["copper_ore",366],["copper_pickaxe",367],["copper_shovel",368],["copper_spear",369],["copper_sword",370],["copper_torch",371],["copper_trapdoor",372],["cornflower",373],["cow_spawn_egg",374],["cracked_deepslate_bricks",375],["cracked_deepslate_tiles",376],["cracked_nether_bricks",377],["cracked_polished_blackstone_bricks",378],["cracked_stone_bricks",379],["crafter",380],["crafting_table",381],["creaking_heart",382],["creaking_spawn_egg",383],["creeper_banner_pattern",384],["creeper_head",385],["creeper_spawn_egg",386],["crimson_button",387],["crimson_door",388],["crimson_fence",387],["crimson_fence_gate",387],["crimson_fungus",389],["crimson_hanging_sign",390],["crimson_hyphae",391],["crimson_nylium",392],["crimson_planks",393],["crimson_pressure_plate",387],["crimson_roots",394],["crimson_shelf",395],["crimson_sign",396],["crimson_slab",397],["crimson_stairs",398],["crimson_stem",399],["crimson_trapdoor",400],["crossbow",401],["crossbow_arrow",402],["crossbow_firework",403],["crossbow_pulling_0",404],["crossbow_pulling_1",405],["crossbow_pulling_2",406],["crying_obsidian",407],["cut_copper",408],["cut_copper_slab",409],["cut_copper_stairs",410],["cut_red_sandstone",411],["cut_red_sandstone_slab",412],["cut_red_sandstone_stairs",413],["cut_sandstone",414],["cut_sandstone_slab",415],["cut_sandstone_stairs",416],["cyan_banner",417],["cyan_bed",418],["cyan_bundle",419],["cyan_candle",420],["cyan_carpet",421],["cyan_concrete",422],["cyan_concrete_powder",423],["cyan_cushion",424],["cyan_dye",425],["cyan_glazed_terracotta",426],["cyan_harness",427],["cyan_shulker_box",428],["cyan_stained_glass",429],["cyan_stained_glass_pane",430],["cyan_terracotta",431],["cyan_wool",432],["damaged_anvil",433],["dandelion",434],["danger_pottery_sherd",435],["dark_oak_boat",436],["dark_oak_button",437],["dark_oak_chest_boat",438],["dark_oak_door",439],["dark_oak_fence",437],["dark_oak_fence_gate",437],["dark_oak_hanging_sign",440],["dark_oak_leaves",441],["dark_oak_log",442],["dark_oak_planks",443],["dark_oak_pressure_plate",437],["dark_oak_sapling",444],["dark_oak_shelf",445],["dark_oak_sign",446],["dark_oak_slab",447],["dark_oak_stairs",448],["dark_oak_trapdoor",449],["dark_oak_wood",450],["dark_prismarine",451],["dark_prismarine_slab",452],["dark_prismarine_stairs",453],["daylight_detector",454],["dead_brain_coral",455],["dead_brain_coral_block",456],["dead_brain_coral_fan",457],["dead_bubble_coral",458],["dead_bubble_coral_block",459],["dead_bubble_coral_fan",460],["dead_fire_coral",461],["dead_fire_coral_block",462],["dead_fire_coral_fan",463],["dead_horn_coral",464],["dead_horn_coral_block",465],["dead_horn_coral_fan",466],["dead_tube_coral",467],["dead_tube_coral_block",468],["dead_tube_coral_fan",469],["deadbush",470],["decorated_pot",471],["deepslate",472],["deepslate_brick_slab",473],["deepslate_brick_stairs",474],["deepslate_brick_wall",475],["deepslate_bricks",476],["deepslate_coal_ore",477],["deepslate_copper_ore",478],["deepslate_diamond_ore",479],["deepslate_emerald_ore",480],["deepslate_gold_ore",481],["deepslate_iron_ore",482],["deepslate_lapis_ore",483],["deepslate_redstone_ore",484],["deepslate_tile_slab",485],["deepslate_tile_stairs",486],["deepslate_tile_wall",487],["deepslate_tiles",488],["detector_rail",489],["diamond",490],["diamond_axe",491],["diamond_block",492],["diamond_boots",493],["diamond_chestplate",494],["diamond_helmet",495],["diamond_hoe",496],["diamond_horse_armor",497],["diamond_leggings",498],["diamond_nautilus_armor",499],["diamond_ore",500],["diamond_pickaxe",501],["diamond_shovel",502],["diamond_spear",503],["diamond_sword",504],["diorite",505],["diorite_slab",506],["diorite_stairs",507],["diorite_wall",508],["dirt",509],["dirt_path",510],["disc_fragment_5",511],["dispenser",512],["dolphin_spawn_egg",513],["donkey_spawn_egg",514],["dragon_breath",515],["dragon_egg",516],["dragon_fireball",517],["dragon_head",518],["dried_kelp",519],["dried_kelp_block",520],["dripstone_block",521],["dropper",522],["drowned_spawn_egg",523],["dune_armor_trim_smithing_template",524],["echo_shard",525],["egg",526],["egg_agent",527],["egg_bat",528],["egg_bee",529],["egg_blaze",530],["egg_cat",531],["egg_cave_spider",532],["egg_chicken",533],["egg_clownfish",534],["egg_cod",535],["egg_cow",536],["egg_creeper",537],["egg_dolphin",538],["egg_donkey",539],["egg_drowned",540],["egg_elderguardian",541],["egg_enderman",542],["egg_endermite",543],["egg_evoker",544],["egg_fish",545],["egg_fox",546],["egg_ghast",547],["egg_glow_squid",548],["egg_guardian",549],["egg_horse",550],["egg_husk",551],["egg_lava_slime",552],["egg_llama",553],["egg_mask",554],["egg_mule",555],["egg_mushroomcow",556],["egg_null",557],["egg_ocelot",558],["egg_panda",559],["egg_parrot",560],["egg_phantom",561],["egg_pig",562],["egg_pigzombie",563],["egg_pillager",564],["egg_polarbear",565],["egg_pufferfish",566],["egg_rabbit",567],["egg_ravager",568],["egg_salmon",569],["egg_sheep",570],["egg_shulker",571],["egg_silverfish",572],["egg_skeleton",573],["egg_skeletonhorse",574],["egg_slime",575],["egg_spider",576],["egg_squid",577],["egg_stray",578],["egg_turtle",579],["egg_vex",580],["egg_villager",581],["egg_vindicator",582],["egg_wanderingtrader",583],["egg_witch",584],["egg_wither",585],["egg_wolf",586],["egg_zombie",587],["egg_zombiehorse",588],["egg_zombievillager",589],["elder_guardian_spawn_egg",590],["elytra",591],["emerald",592],["emerald_block",593],["emerald_ore",594],["empty_armor_slot_boots",595],["empty_armor_slot_chestplate",596],["empty_armor_slot_helmet",597],["empty_armor_slot_leggings",598],["empty_armor_slot_shield",599],["empty_map",600],["enchanted_book",601],["enchanted_golden_apple",602],["enchanting_table",603],["end_brick_stairs",604],["end_bricks",605],["end_crystal",606],["end_portal_frame",607],["end_rod",608],["end_stone",609],["end_stone_brick_slab",610],["end_stone_brick_stairs",611],["end_stone_brick_wall",612],["ender_chest",613],["ender_dragon_spawn_egg",614],["ender_eye",615],["ender_pearl",616],["enderman_spawn_egg",617],["endermite_spawn_egg",618],["evoker_spawn_egg",619],["experience_bottle",620],["explorer_pottery_sherd",621],["exposed_chiseled_copper",622],["exposed_copper",623],["exposed_copper_bars",624],["exposed_copper_block",625],["exposed_copper_bulb",626],["exposed_copper_chain",627],["exposed_copper_chest",628],["exposed_copper_door",629],["exposed_copper_grate",630],["exposed_copper_lantern",631],["exposed_copper_trapdoor",632],["exposed_cut_copper",633],["exposed_cut_copper_slab",634],["exposed_cut_copper_stairs",635],["exposed_lightning_rod",636],["eye_armor_trim_smithing_template",637],["farmland",638],["feather",639],["fence",640],["fence_gate",640],["fermented_spider_eye",641],["fern",642],["field_masoned_banner_pattern",643],["filled_map",644],["fire_charge",645],["fire_coral",646],["fire_coral_block",647],["fire_coral_fan",648],["firefly_bush",649],["firework_rocket",650],["firework_star",651],["fishing_rod",652],["fishing_rod_cast",653],["fletching_table",654],["flint",655],["flint_and_steel",656],["flow_armor_trim_smithing_template",657],["flow_banner_pattern",658],["flow_pottery_sherd",659],["flower_banner_pattern",660],["flower_pot",661],["flowering_azalea",662],["fox_spawn_egg",663],["friend_pottery_sherd",664],["frog_spawn_egg",665],["frogspawn",666],["frosted_ice",667],["furnace",668],["furnace_minecart",669],["ghast_spawn_egg",670],["ghast_tear",671],["gilded_blackstone",672],["glass",673],["glass_bottle",674],["glass_pane",675],["glistering_melon_slice",676],["globe_banner_pattern",677],["glow_berries",678],["glow_ink_sac",679],["glow_item_frame",680],["glow_lichen",681],["glow_squid_spawn_egg",682],["glowing_obsidian",683],["glowstone",684],["glowstone_dust",685],["goat_horn",686],["goat_spawn_egg",687],["gold_block",688],["gold_ingot",689],["gold_nugget",690],["gold_ore",691],["golden_apple",602],["golden_axe",692],["golden_boots",693],["golden_carrot",694],["golden_chestplate",695],["golden_dandelion",696],["golden_helmet",697],["golden_hoe",698],["golden_horse_armor",699],["golden_leggings",700],["golden_nautilus_armor",701],["golden_pickaxe",702],["golden_rail",703],["golden_shovel",704],["golden_spear",705],["golden_sword",706],["granite",707],["granite_slab",708],["granite_stairs",709],["granite_wall",710],["grass_block",711],["grass_path",712],["gravel",713],["gray_banner",714],["gray_bed",715],["gray_bundle",716],["gray_candle",717],["gray_carpet",718],["gray_concrete",719],["gray_concrete_powder",720],["gray_cushion",721],["gray_dye",722],["gray_glazed_terracotta",723],["gray_harness",724],["gray_shulker_box",725],["gray_stained_glass",726],["gray_stained_glass_pane",727],["gray_terracotta",728],["gray_wool",729],["green_banner",730],["green_bed",731],["green_bundle",732],["green_candle",733],["green_carpet",734],["green_concrete",735],["green_concrete_powder",736],["green_cushion",737],["green_dye",738],["green_glazed_terracotta",739],["green_harness",740],["green_shulker_box",741],["green_stained_glass",742],["green_stained_glass_pane",743],["green_terracotta",744],["green_wool",745],["grindstone",746],["guardian_spawn_egg",747],["gunpowder",748],["guster_banner_pattern",749],["guster_pottery_sherd",750],["hanging_roots",751],["happy_ghast_spawn_egg",752],["hardened_clay",753],["hay_block",754],["heart_of_the_sea",755],["heart_pottery_sherd",756],["heartbreak_pottery_sherd",757],["heavy_core",758],["heavy_weighted_pressure_plate",759],["hoglin_meat_cooked",760],["hoglin_meat_raw",761],["hoglin_spawn_egg",762],["honey_block",763],["honey_bottle",764],["honeycomb",765],["honeycomb_block",766],["hopper",767],["hopper_minecart",768],["horn_coral",769],["horn_coral_block",770],["horn_coral_fan",771],["horse_spawn_egg",772],["host_armor_trim_smithing_template",773],["howl_pottery_sherd",774],["husk_spawn_egg",775],["ice",776],["ink_sac",777],["iron_axe",778],["iron_bars",779],["iron_block",780],["iron_boots",781],["iron_chestplate",782],["iron_door",783],["iron_golem_spawn_egg",784],["iron_helmet",785],["iron_hoe",786],["iron_horse_armor",787],["iron_ingot",788],["iron_leggings",789],["iron_nautilus_armor",790],["iron_nugget",791],["iron_ore",792],["iron_pickaxe",793],["iron_shovel",794],["iron_spear",795],["iron_sword",796],["iron_trapdoor",797],["item_frame",798],["jigsaw",799],["jukebox",800],["jungle_boat",801],["jungle_button",802],["jungle_chest_boat",803],["jungle_door",804],["jungle_fence",802],["jungle_fence_gate",802],["jungle_hanging_sign",805],["jungle_leaves",806],["jungle_log",807],["jungle_planks",808],["jungle_pressure_plate",802],["jungle_sapling",809],["jungle_shelf",810],["jungle_sign",811],["jungle_slab",812],["jungle_stairs",813],["jungle_trapdoor",814],["jungle_wood",815],["kelp",816],["ladder",817],["lantern",818],["lapis_block",819],["lapis_lazuli",820],["lapis_ore",821],["large_amethyst_bud",822],["large_fern",823],["lava_bucket",824],["lead",825],["leaf_litter",826],["leather",827],["leather_boots",828],["leather_chestplate",829],["leather_helmet",830],["leather_horse_armor",831],["leather_leggings",832],["lectern",833],["lever",834],["light_block_0",835],["light_block_1",836],["light_block_10",837],["light_block_11",838],["light_block_12",839],["light_block_13",840],["light_block_14",841],["light_block_15",842],["light_block_2",843],["light_block_3",844],["light_block_4",845],["light_block_5",846],["light_block_6",847],["light_block_7",848],["light_block_8",849],["light_block_9",850],["light_blue_banner",851],["light_blue_bed",852],["light_blue_bundle",853],["light_blue_candle",854],["light_blue_carpet",855],["light_blue_concrete",856],["light_blue_concrete_powder",857],["light_blue_cushion",858],["light_blue_dye",859],["light_blue_glazed_terracotta",860],["light_blue_harness",861],["light_blue_shulker_box",862],["light_blue_stained_glass",863],["light_blue_stained_glass_pane",864],["light_blue_terracotta",865],["light_blue_wool",866],["light_gray_banner",867],["light_gray_bed",868],["light_gray_bundle",869],["light_gray_candle",870],["light_gray_carpet",871],["light_gray_concrete",872],["light_gray_concrete_powder",873],["light_gray_cushion",874],["light_gray_dye",875],["light_gray_glazed_terracotta",876],["light_gray_harness",877],["light_gray_shulker_box",878],["light_gray_stained_glass",879],["light_gray_stained_glass_pane",880],["light_gray_terracotta",881],["light_gray_wool",882],["light_weighted_pressure_plate",883],["lightning_rod",884],["lilac",885],["lily_of_the_valley",886],["lime_banner",887],["lime_bed",888],["lime_bundle",889],["lime_candle",890],["lime_carpet",891],["lime_concrete",892],["lime_concrete_powder",893],["lime_cushion",894],["lime_dye",895],["lime_glazed_terracotta",896],["lime_harness",897],["lime_shulker_box",898],["lime_stained_glass",899],["lime_stained_glass_pane",900],["lime_terracotta",901],["lime_wool",902],["lingering_potion",903],["lit_pumpkin",904],["llama_spawn_egg",905],["lodestone",906],["lodestone_compass",907],["lodestonecompass_atlas",908],["loom",909],["mace",910],["magenta_banner",911],["magenta_bed",912],["magenta_bundle",913],["magenta_candle",914],["magenta_carpet",915],["magenta_concrete",916],["magenta_concrete_powder",917],["magenta_cushion",918],["magenta_dye",919],["magenta_glazed_terracotta",920],["magenta_harness",921],["magenta_shulker_box",922],["magenta_stained_glass",923],["magenta_stained_glass_pane",924],["magenta_terracotta",925],["magenta_wool",926],["magma",927],["magma_cream",928],["magma_cube_spawn_egg",929],["mangrove_boat",930],["mangrove_button",931],["mangrove_chest_boat",932],["mangrove_door",933],["mangrove_fence",931],["mangrove_fence_gate",931],["mangrove_hanging_sign",934],["mangrove_leaves",935],["mangrove_log",936],["mangrove_planks",937],["mangrove_pressure_plate",931],["mangrove_propagule",938],["mangrove_shelf",939],["mangrove_sign",940],["mangrove_slab",941],["mangrove_stairs",942],["mangrove_trapdoor",943],["mangrove_wood",944],["map",600],["map_abandoned_campsite",945],["map_ancient_city",946],["map_desert_pyramid",947],["map_desert_village",948],["map_jungle_temple",949],["map_locked",950],["map_mansion",951],["map_mineshaft",952],["map_monument",953],["map_nautilus",954],["map_plains_village",955],["map_savanna_village",956],["map_snowy_village",957],["map_swamp_hut",958],["map_taiga_village",959],["map_trial_chambers",960],["map_warm_ocean_ruins",961],["medium_amethyst_bud",962],["melon_block",963],["melon_seeds",964],["melon_slice",965],["milk_bucket",966],["minecart",967],["miner_pottery_sherd",968],["mob_spawner",969],["mojang_banner_pattern",970],["mooshroom_spawn_egg",971],["moss_block",972],["moss_carpet",973],["mossy_cobblestone",974],["mossy_cobblestone_slab",975],["mossy_cobblestone_stairs",976],["mossy_cobblestone_wall",977],["mossy_stone_brick_slab",978],["mossy_stone_brick_stairs",979],["mossy_stone_brick_wall",980],["mossy_stone_bricks",981],["mourner_pottery_sherd",982],["mud",983],["mud_brick_slab",984],["mud_brick_stairs",985],["mud_brick_wall",986],["mud_bricks",987],["mule_spawn_egg",988],["mushroom_stem",989],["mushroom_stew",990],["music_disc_11",991],["music_disc_13",992],["music_disc_5",993],["music_disc_blocks",994],["music_disc_bounce",995],["music_disc_cat",996],["music_disc_chirp",997],["music_disc_creator",998],["music_disc_creator_music_box",999],["music_disc_far",1000],["music_disc_lava_chicken",1001],["music_disc_mall",1002],["music_disc_mellohi",1003],["music_disc_otherside",1004],["music_disc_pigstep",1005],["music_disc_precipice",1006],["music_disc_relic",1007],["music_disc_stal",1008],["music_disc_strad",1009],["music_disc_tears",1010],["music_disc_wait",1011],["music_disc_ward",1012],["mutton",1013],["mycelium",1014],["name_tag",1015],["nautilus_shell",1016],["nautilus_spawn_egg",1017],["nether_brick",1018],["nether_brick_fence",1019],["nether_brick_slab",1020],["nether_brick_stairs",1021],["nether_brick_wall",1019],["nether_gold_ore",1022],["nether_sprouts",1023],["nether_star",1024],["nether_wart",1025],["nether_wart_block",1026],["netherbrick",1027],["netherite_axe",1028],["netherite_block",1029],["netherite_boots",1030],["netherite_chestplate",1031],["netherite_helmet",1032],["netherite_hoe",1033],["netherite_horse_armor",1034],["netherite_ingot",1035],["netherite_leggings",1036],["netherite_nautilus_armor",1037],["netherite_pickaxe",1038],["netherite_scrap",1039],["netherite_shovel",1040],["netherite_spear",1041],["netherite_sword",1042],["netherite_upgrade_smithing_template",1043],["netherrack",1044],["normal_stone_slab",1045],["normal_stone_stairs",1046],["noteblock",1047],["npc_spawn_egg",1048],["oak_boat",1049],["oak_button",640],["oak_chest_boat",1050],["oak_fence",640],["oak_fence_gate",640],["oak_hanging_sign",1051],["oak_leaves",1052],["oak_log",1053],["oak_planks",1054],["oak_pressure_plate",640],["oak_sapling",1055],["oak_shelf",1056],["oak_sign",1057],["oak_slab",1058],["oak_stairs",1059],["oak_wood",1060],["observer",1061],["obsidian",1062],["ocelot_spawn_egg",1063],["ochre_froglight",1064],["ominous_bottle",1065],["ominous_trial_key",1066],["open_eyeblossom",1067],["orange_banner",1068],["orange_bed",1069],["orange_bundle",1070],["orange_candle",1071],["orange_carpet",1072],["orange_concrete",1073],["orange_concrete_powder",1074],["orange_cushion",1075],["orange_dye",1076],["orange_glazed_terracotta",1077],["orange_harness",1078],["orange_shulker_box",1079],["orange_stained_glass",1080],["orange_stained_glass_pane",1081],["orange_terracotta",1082],["orange_tulip",1083],["orange_wool",1084],["oxeye_daisy",1085],["oxidized_chiseled_copper",1086],["oxidized_copper",1087],["oxidized_copper_bars",1088],["oxidized_copper_block",1089],["oxidized_copper_bulb",1090],["oxidized_copper_chain",1091],["oxidized_copper_chest",1092],["oxidized_copper_door",1093],["oxidized_copper_grate",1094],["oxidized_copper_lantern",1095],["oxidized_copper_trapdoor",1096],["oxidized_cut_copper",1097],["oxidized_cut_copper_slab",1098],["oxidized_cut_copper_stairs",1099],["oxidized_lightning_rod",1100],["packed_ice",1101],["packed_mud",1102],["painting",1103],["pale_moss_block",1104],["pale_moss_carpet",1105],["pale_oak_boat",1106],["pale_oak_chest_boat",1107],["pale_oak_door",1108],["pale_oak_fence",1109],["pale_oak_fence_gate",1109],["pale_oak_hanging_sign",1110],["pale_oak_log",1111],["pale_oak_planks",1112],["pale_oak_sapling",1113],["pale_oak_shelf",1114],["pale_oak_sign",1115],["pale_oak_slab",1116],["pale_oak_stairs",1117],["pale_oak_trapdoor",1118],["pale_oak_wood",1119],["panda_spawn_egg",1120],["paper",1121],["parched_spawn_egg",1122],["parrot_spawn_egg",1123],["pearlescent_froglight",1124],["peony",1125],["phantom_membrane",1126],["phantom_spawn_egg",1127],["pig_spawn_egg",1128],["piglin_banner_pattern",1129],["piglin_brute_spawn_egg",1130],["piglin_head",1131],["piglin_spawn_egg",1132],["pillager_spawn_egg",1133],["pink_banner",1134],["pink_bed",1135],["pink_bundle",1136],["pink_candle",1137],["pink_carpet",1138],["pink_concrete",1139],["pink_concrete_powder",1140],["pink_cushion",1141],["pink_dye",1142],["pink_glazed_terracotta",1143],["pink_harness",1144],["pink_petals",1145],["pink_shulker_box",1146],["pink_stained_glass",1147],["pink_stained_glass_pane",1148],["pink_terracotta",1149],["pink_tulip",1150],["pink_wool",1151],["piston",1152],["pitcher_pod",1153],["player_head",1154],["plenty_pottery_sherd",1155],["podzol",1156],["pointed_dripstone",1157],["poisonous_potato",1158],["polar_bear_spawn_egg",1159],["polished_andesite",1160],["polished_andesite_slab",1161],["polished_andesite_stairs",1162],["polished_basalt",1163],["polished_blackstone",1164],["polished_blackstone_brick_slab",1165],["polished_blackstone_brick_stairs",1166],["polished_blackstone_brick_wall",1167],["polished_blackstone_bricks",1168],["polished_blackstone_button",1169],["polished_blackstone_pressure_plate",1169],["polished_blackstone_slab",1170],["polished_blackstone_stairs",1171],["polished_blackstone_wall",1169],["polished_cinnabar",1172],["polished_deepslate",1173],["polished_deepslate_slab",1174],["polished_deepslate_stairs",1175],["polished_deepslate_wall",1176],["polished_diorite",1177],["polished_diorite_slab",1178],["polished_diorite_stairs",1179],["polished_granite",1180],["polished_granite_slab",1181],["polished_granite_stairs",1182],["polished_sulfur",1183],["polished_tuff",1184],["polished_tuff_slab",1185],["polished_tuff_stairs",1186],["polished_tuff_wall",1187],["poplar_boat",1188],["poplar_chest_boat",1189],["poplar_door",1190],["poplar_hanging_sign",1191],["poplar_sign",1192],["popped_chorus_fruit",1193],["poppy",1194],["porkchop",1195],["potato",1196],["potent_sulfur",1197],["potion",1198],["potion_overlay",1199],["powder_snow",1200],["powder_snow_bucket",1201],["prismarine",1202],["prismarine_brick_slab",1203],["prismarine_brick_stairs",1204],["prismarine_bricks",1205],["prismarine_crystals",1206],["prismarine_shard",1207],["prismarine_slab",1208],["prismarine_stairs",1209],["prismarine_wall",1210],["prize_pottery_sherd",1211],["pufferfish",1212],["pufferfish_bucket",1213],["pufferfish_spawn_egg",1214],["pumpkin",1215],["pumpkin_pie",1216],["pumpkin_seeds",1217],["purple_banner",1218],["purple_bed",1219],["purple_bundle",1220],["purple_candle",1221],["purple_carpet",1222],["purple_concrete",1223],["purple_concrete_powder",1224],["purple_cushion",1225],["purple_dye",1226],["purple_glazed_terracotta",1227],["purple_harness",1228],["purple_shulker_box",1229],["purple_stained_glass",1230],["purple_stained_glass_pane",1231],["purple_terracotta",1232],["purple_wool",1233],["purpur_block",1234],["purpur_pillar",1235],["purpur_slab",1236],["purpur_stairs",1237],["quartz",1238],["quartz_block",1239],["quartz_bricks",1240],["quartz_ore",1241],["quartz_pillar",1242],["quartz_slab",1243],["quartz_stairs",1244],["quiver",1245],["rabbit",1246],["rabbit_foot",1247],["rabbit_hide",1248],["rabbit_spawn_egg",1249],["rabbit_stew",1250],["rail",1251],["raiser_armor_trim_smithing_template",1252],["ravager_spawn_egg",1253],["raw_copper",1254],["raw_copper_block",1255],["raw_gold",1256],["raw_gold_block",1257],["raw_iron",1258],["raw_iron_block",1259],["recovery_compass",1260],["recovery_compass_atlas",1261],["red_banner",1262],["red_bed",1263],["red_bundle",1264],["red_candle",1265],["red_carpet",1266],["red_concrete",1267],["red_concrete_powder",1268],["red_cushion",1269],["red_dye",1270],["red_glazed_terracotta",1271],["red_harness",1272],["red_mushroom",1273],["red_mushroom_block",1274],["red_nether_brick",1275],["red_nether_brick_slab",1276],["red_nether_brick_stairs",1277],["red_nether_brick_wall",1278],["red_sand",1279],["red_sandstone",1280],["red_sandstone_slab",1281],["red_sandstone_stairs",1282],["red_sandstone_wall",1283],["red_shulker_box",1284],["red_stained_glass",1285],["red_stained_glass_pane",1286],["red_terracotta",1287],["red_tulip",1288],["red_wool",1289],["redstone",1290],["redstone_block",1291],["redstone_lamp",1292],["redstone_ore",1293],["redstone_torch",1294],["redstone_wire",1295],["reinforced_deepslate",1296],["repeater",1297],["repeating_command_block",1298],["resin_block",1299],["resin_brick",1300],["resin_brick_slab",1301],["resin_brick_stairs",1302],["resin_brick_wall",1303],["resin_bricks",1304],["resin_clump",1305],["respawn_anchor",1306],["rib_armor_trim_smithing_template",1307],["rooted_dirt",1308],["rose_bush",1309],["rotten_flesh",1310],["ruby",1311],["saddle",1312],["salmon",1313],["salmon_bucket",1314],["salmon_spawn_egg",1315],["sand",1316],["sandstone",1317],["sandstone_slab",1318],["sandstone_stairs",1319],["sandstone_wall",1320],["scaffolding",1321],["scrape_pottery_sherd",1322],["sculk",1323],["sculk_catalyst",1324],["sculk_sensor",1325],["sculk_shrieker",1326],["sculk_vein",1327],["scute",1328],["sea_lantern",1329],["sea_pickle",1330],["seagrass",1331],["sentry_armor_trim_smithing_template",1332],["shaper_armor_trim_smithing_template",1333],["sheaf_pottery_sherd",1334],["shears",1335],["sheep_spawn_egg",1336],["shelter_pottery_sherd",1337],["shield",1338],["short_dry_grass",1339],["short_grass",1340],["shroomlight",1341],["shulker_shell",1342],["shulker_spawn_egg",1343],["silence_armor_trim_smithing_template",1344],["silverfish_spawn_egg",1345],["skeleton_horse_spawn_egg",1346],["skeleton_skull",1347],["skeleton_spawn_egg",1348],["skull_banner_pattern",1349],["skull_pottery_sherd",1350],["slime",1351],["slime_ball",1352],["slime_spawn_egg",1353],["small_amethyst_bud",1354],["smithing_table",1355],["smoker",1356],["smooth_basalt",1357],["smooth_quartz",1358],["smooth_quartz_slab",1359],["smooth_quartz_stairs",1360],["smooth_red_sandstone",1361],["smooth_red_sandstone_slab",1362],["smooth_red_sandstone_stairs",1363],["smooth_sandstone",1364],["smooth_sandstone_slab",1365],["smooth_sandstone_stairs",1366],["smooth_stone",1367],["smooth_stone_slab",1368],["sniffer_egg",1369],["sniffer_spawn_egg",1370],["snort_pottery_sherd",1371],["snout_armor_trim_smithing_template",1372],["snow",1373],["snow_golem_spawn_egg",1374],["snow_layer",1375],["snowball",1376],["soul_campfire",1377],["soul_lantern",1378],["soul_sand",1379],["soul_soil",1380],["soul_torch",1381],["spawn_egg_sulfur_cube",1382],["spider_eye",1383],["spider_spawn_egg",1384],["spire_armor_trim_smithing_template",1385],["splash_potion",1386],["sponge",1387],["spore_blossom",1388],["spruce_boat",1389],["spruce_button",1390],["spruce_chest_boat",1391],["spruce_door",1392],["spruce_fence",1390],["spruce_fence_gate",1390],["spruce_hanging_sign",1393],["spruce_leaves",1394],["spruce_log",1395],["spruce_planks",1396],["spruce_pressure_plate",1390],["spruce_sapling",1397],["spruce_shelf",1398],["spruce_sign",1399],["spruce_slab",1400],["spruce_stairs",1401],["spruce_trapdoor",1402],["spruce_wood",1403],["spyglass",1404],["squid_spawn_egg",1405],["stick",1406],["sticky_piston",1407],["stone",1408],["stone_axe",1409],["stone_brick_slab",1410],["stone_brick_stairs",1411],["stone_brick_wall",1412],["stone_bricks",1413],["stone_button",1414],["stone_hoe",1415],["stone_pickaxe",1416],["stone_pressure_plate",1414],["stone_shovel",1417],["stone_slab",1418],["stone_spear",1419],["stone_stairs",1420],["stone_sword",1421],["stonecutter",1422],["stonecutter_block",1423],["straw_bed",1424],["stray_spawn_egg",1425],["strider_spawn_egg",1426],["string",1427],["stripped_acacia_log",1428],["stripped_acacia_wood",1429],["stripped_bamboo_block",1430],["stripped_birch_log",1431],["stripped_birch_wood",1432],["stripped_cherry_log",1433],["stripped_cherry_wood",1434],["stripped_crimson_hyphae",1435],["stripped_crimson_stem",1436],["stripped_dark_oak_log",1437],["stripped_dark_oak_wood",1438],["stripped_jungle_log",1439],["stripped_jungle_wood",1440],["stripped_mangrove_log",1441],["stripped_mangrove_wood",1442],["stripped_oak_log",1443],["stripped_oak_wood",1444],["stripped_pale_oak_log",1445],["stripped_pale_oak_wood",1446],["stripped_spruce_log",1447],["stripped_spruce_wood",1448],["stripped_warped_hyphae",1449],["stripped_warped_stem",1450],["structure_block",1451],["sugar",1452],["sugar_cane",1453],["sulfur",1454],["sulfur_bricks",1455],["sulfur_cube_spawn_egg",1456],["sunflower",1457],["suspicious_gravel",1458],["suspicious_sand",1459],["suspicious_stew",1460],["sweet_berries",1461],["tadpole_bucket",1462],["tadpole_spawn_egg",1463],["tall_dry_grass",1464],["tall_grass",1465],["tallgrass",1340],["target",1466],["tide_armor_trim_smithing_template",1467],["tinted_glass",1468],["tipped_arrow",1469],["tnt",1470],["tnt_minecart",1471],["torch",1472],["torchflower",1473],["torchflower_seeds",1474],["totem_of_undying",1475],["trader_llama_spawn_egg",1476],["trapdoor",1477],["trapped_chest",1478],["trial_key",1479],["trial_spawner",1480],["trident",1481],["tripwire_hook",1482],["tropical_fish",1483],["tropical_fish_bucket",1484],["tropical_fish_spawn_egg",1485],["tropicalfish_spawn_egg",1485],["tube_coral",1486],["tube_coral_block",1487],["tube_coral_fan",1488],["tuff",1489],["tuff_brick_slab",1490],["tuff_brick_stairs",1491],["tuff_brick_wall",1492],["tuff_bricks",1493],["tuff_slab",1494],["tuff_stairs",1495],["tuff_wall",1496],["turtle_egg",1497],["turtle_helmet",1498],["turtle_scute",1328],["turtle_spawn_egg",1499],["twisting_vines",1500],["undyed_shulker_box",1501],["vault",1502],["verdant_froglight",1503],["vex_armor_trim_smithing_template",1504],["vex_spawn_egg",1505],["villagebell",1506],["villager_spawn_egg",1507],["vindicator_spawn_egg",1508],["vine",1509],["wandering_trader_spawn_egg",1510],["ward_armor_trim_smithing_template",1511],["warden_spawn_egg",1512],["warped_button",1513],["warped_door",1514],["warped_fence",1513],["warped_fence_gate",1513],["warped_fungus",1515],["warped_fungus_on_a_stick",1516],["warped_hanging_sign",1517],["warped_hyphae",1518],["warped_nylium",1519],["warped_planks",1520],["warped_pressure_plate",1513],["warped_roots",1521],["warped_shelf",1522],["warped_sign",1523],["warped_slab",1524],["warped_stairs",1525],["warped_stem",1526],["warped_trapdoor",1527],["warped_wart_block",1528],["watch_atlas",1529],["water_bucket",1530],["waterlily",1531],["waxed_chiseled_copper",1532],["waxed_copper",1533],["waxed_copper_block",1534],["waxed_copper_bulb",1535],["waxed_copper_chest",1536],["waxed_copper_grate",1537],["waxed_cut_copper",1538],["waxed_cut_copper_slab",1539],["waxed_cut_copper_stairs",1540],["waxed_exposed_chiseled_copper",1541],["waxed_exposed_copper",1542],["waxed_exposed_copper_block",1543],["waxed_exposed_copper_bulb",1544],["waxed_exposed_copper_chest",1545],["waxed_exposed_copper_grate",1546],["waxed_exposed_cut_copper",1547],["waxed_exposed_cut_copper_slab",1548],["waxed_exposed_cut_copper_stairs",1549],["waxed_oxidized_chiseled_copper",1550],["waxed_oxidized_copper",1551],["waxed_oxidized_copper_block",1552],["waxed_oxidized_copper_bulb",1553],["waxed_oxidized_copper_chest",1554],["waxed_oxidized_copper_grate",1555],["waxed_oxidized_cut_copper",1556],["waxed_oxidized_cut_copper_slab",1557],["waxed_oxidized_cut_copper_stairs",1558],["waxed_weathered_chiseled_copper",1559],["waxed_weathered_copper",1560],["waxed_weathered_copper_block",1561],["waxed_weathered_copper_bulb",1562],["waxed_weathered_copper_chest",1563],["waxed_weathered_copper_grate",1564],["waxed_weathered_cut_copper",1565],["waxed_weathered_cut_copper_slab",1566],["waxed_weathered_cut_copper_stairs",1567],["wayfinder_armor_trim_smithing_template",1568],["weathered_chiseled_copper",1569],["weathered_copper",1570],["weathered_copper_bars",1571],["weathered_copper_block",1572],["weathered_copper_bulb",1573],["weathered_copper_chain",1574],["weathered_copper_chest",1575],["weathered_copper_door",1576],["weathered_copper_grate",1577],["weathered_copper_lantern",1578],["weathered_copper_trapdoor",1579],["weathered_cut_copper",1580],["weathered_cut_copper_slab",1581],["weathered_cut_copper_stairs",1582],["weathered_lightning_rod",1583],["web",1584],["weeping_vines",1585],["wet_sponge",1586],["wheat",1587],["wheat_seeds",1588],["white_banner",1589],["white_bed",1590],["white_bundle",1591],["white_candle",1592],["white_carpet",1593],["white_concrete",1594],["white_concrete_powder",1595],["white_cushion",1596],["white_dye",1597],["white_glazed_terracotta",1598],["white_harness",1599],["white_shulker_box",1600],["white_stained_glass",1601],["white_stained_glass_pane",1602],["white_terracotta",1603],["white_tulip",1604],["white_wool",1605],["wild_armor_trim_smithing_template",1606],["wildflowers",1607],["wind_charge",1608],["witch_spawn_egg",1609],["wither_rose",1610],["wither_skeleton_skull",1611],["wither_skeleton_spawn_egg",1612],["wither_spawn_egg",1613],["wolf_armor",1614],["wolf_armor_dyed",1615],["wolf_spawn_egg",1616],["wooden_axe",1617],["wooden_button",640],["wooden_door",1618],["wooden_hoe",1619],["wooden_pickaxe",1620],["wooden_pressure_plate",640],["wooden_shovel",1621],["wooden_slab",1622],["wooden_spear",1623],["wooden_sword",1624],["writable_book",1625],["written_book",1626],["yellow_banner",1627],["yellow_bed",1628],["yellow_bundle",1629],["yellow_candle",1630],["yellow_carpet",1631],["yellow_concrete",1632],["yellow_concrete_powder",1633],["yellow_cushion",1634],["yellow_dye",1635],["yellow_glazed_terracotta",1636],["yellow_harness",1637],["yellow_shulker_box",1638],["yellow_stained_glass",1639],["yellow_stained_glass_pane",1640],["yellow_terracotta",1641],["yellow_wool",1642],["zoglin_spawn_egg",1643],["zombie_head",1644],["zombie_horse_spawn_egg",1645],["zombie_nautilus_spawn_egg",1646],["zombie_pigman_spawn_egg",1647],["zombie_spawn_egg",1648],["zombie_villager_spawn_egg",1649],["zombified_piglin_spawn_egg",1647]],"pos":{"5":[0,0],"6":[1,0],"7":[2,0],"11":[3,0],"12":[4,0],"14":[5,0],"19":[6,0],"22":[7,0],"23":[8,0],"24":[9,0],"25":[10,0],"28":[11,0],"39":[12,0],"43":[13,0],"50":[14,0],"51":[15,0],"52":[16,0],"53":[17,0],"57":[18,0],"58":[19,0],"60":[20,0],"62":[21,0],"64":[22,0],"67":[23,0],"68":[24,0],"71":[0,1],"75":[1,1],"82":[2,1],"83":[3,1],"84":[4,1],"88":[5,1],"89":[6,1],"91":[7,1],"92":[8,1],"97":[9,1],"98":[10,1],"101":[11,1],"103":[12,1],"104":[13,1],"106":[14,1],"107":[15,1],"108":[16,1],"109":[17,1],"110":[18,1],"113":[19,1],"117":[20,1],"122":[21,1],"123":[22,1],"127":[23,1],"129":[24,1],"131":[0,2],"132":[1,2],"134":[2,2],"135":[3,2],"141":[4,2],"145":[5,2],"153":[6,2],"161":[7,2],"162":[8,2],"163":[9,2],"166":[10,2],"171":[11,2],"172":[12,2],"176":[13,2],"179":[14,2],"180":[15,2],"181":[16,2],"183":[17,2],"184":[18,2],"187":[19,2],"191":[20,2],"246":[21,2],"248":[22,2],"256":[23,2],"257":[24,2],"263":[0,3],"277":[1,3],"278":[2,3],"279":[3,3],"283":[4,3],"284":[5,3],"286":[6,3],"287":[7,3],"291":[8,3],"292":[9,3],"293":[10,3],"294":[11,3],"295":[12,3],"296":[13,3],"297":[14,3],"298":[15,3],"299":[16,3],"300":[17,3],"301":[18,3],"302":[19,3],"303":[20,3],"304":[21,3],"305":[22,3],"309":[23,3],"310":[24,3],"311":[0,4],"316":[1,4],"317":[2,4],"318":[3,4],"320":[4,4],"321":[5,4],"322":[6,4],"324":[7,4],"325":[8,4],"326":[9,4],"332":[10,4],"337":[11,4],"349":[12,4],"351":[13,4],"353":[14,4],"357":[15,4],"366":[16,4],"375":[17,4],"376":[18,4],"377":[19,4],"378":[20,4],"379":[21,4],"380":[22,4],"381":[23,4],"382":[24,4],"385":[0,5],"391":[1,5],"392":[2,5],"393":[3,5],"397":[4,5],"398":[5,5],"399":[6,5],"407":[7,5],"408":[8,5],"409":[9,5],"410":[10,5],"411":[11,5],"412":[12,5],"413":[13,5],"414":[14,5],"415":[15,5],"416":[16,5],"417":[17,5],"422":[18,5],"423":[19,5],"426":[20,5],"428":[21,5],"429":[22,5],"431":[23,5],"432":[24,5],"433":[0,6],"441":[1,6],"442":[2,6],"443":[3,6],"447":[4,6],"448":[5,6],"450":[6,6],"451":[7,6],"452":[8,6],"453":[9,6],"454":[10,6],"456":[11,6],"459":[12,6],"462":[13,6],"465":[14,6],"468":[15,6],"471":[16,6],"472":[17,6],"473":[18,6],"474":[19,6],"476":[20,6],"477":[21,6],"478":[22,6],"479":[23,6],"480":[24,6],"481":[0,7],"482":[1,7],"483":[2,7],"484":[3,7],"485":[4,7],"486":[5,7],"488":[6,7],"492":[7,7],"500":[8,7],"505":[9,7],"506":[10,7],"507":[11,7],"509":[12,7],"510":[13,7],"512":[14,7],"518":[15,7],"520":[16,7],"521":[17,7],"522":[18,7],"593":[19,7],"594":[20,7],"603":[21,7],"604":[22,7],"605":[23,7],"607":[24,7],"609":[0,8],"610":[1,8],"611":[2,8],"613":[3,8],"622":[4,8],"623":[5,8],"625":[6,8],"626":[7,8],"628":[8,8],"630":[9,8],"633":[10,8],"634":[11,8],"635":[12,8],"638":[13,8],"647":[14,8],"654":[15,8],"667":[16,8],"668":[17,8],"672":[18,8],"673":[19,8],"675":[20,8],"683":[21,8],"684":[22,8],"688":[23,8],"691":[24,8],"707":[0,9],"708":[1,9],"709":[2,9],"711":[3,9],"712":[4,9],"713":[5,9],"714":[6,9],"719":[7,9],"720":[8,9],"723":[9,9],"725":[10,9],"726":[11,9],"728":[12,9],"729":[13,9],"730":[14,9],"735":[15,9],"736":[16,9],"739":[17,9],"741":[18,9],"742":[19,9],"744":[20,9],"745":[21,9],"753":[22,9],"754":[23,9],"758":[24,9],"763":[0,10],"766":[1,10],"770":[2,10],"776":[3,10],"780":[4,10],"792":[5,10],"799":[6,10],"800":[7,10],"806":[8,10],"807":[9,10],"808":[10,10],"812":[11,10],"813":[12,10],"815":[13,10],"819":[14,10],"821":[15,10],"851":[16,10],"856":[17,10],"857":[18,10],"860":[19,10],"862":[20,10],"863":[21,10],"865":[22,10],"866":[23,10],"867":[24,10],"872":[0,11],"873":[1,11],"876":[2,11],"878":[3,11],"879":[4,11],"881":[5,11],"882":[6,11],"887":[7,11],"892":[8,11],"893":[9,11],"896":[10,11],"898":[11,11],"899":[12,11],"901":[13,11],"902":[14,11],"904":[15,11],"906":[16,11],"909":[17,11],"911":[18,11],"916":[19,11],"917":[20,11],"920":[21,11],"922":[22,11],"923":[23,11],"925":[24,11],"926":[0,12],"927":[1,12],"935":[2,12],"936":[3,12],"937":[4,12],"941":[5,12],"942":[6,12],"944":[7,12],"963":[8,12],"972":[9,12],"974":[10,12],"975":[11,12],"976":[12,12],"978":[13,12],"979":[14,12],"981":[15,12],"983":[16,12],"984":[17,12],"985":[18,12],"987":[19,12],"989":[20,12],"1014":[21,12],"1018":[22,12],"1020":[23,12],"1021":[24,12],"1022":[0,13],"1026":[1,13],"1029":[2,13],"1044":[3,13],"1045":[4,13],"1046":[5,13],"1047":[6,13],"1052":[7,13],"1053":[8,13],"1054":[9,13],"1058":[10,13],"1059":[11,13],"1060":[12,13],"1061":[13,13],"1062":[14,13],"1064":[15,13],"1068":[16,13],"1073":[17,13],"1074":[18,13],"1077":[19,13],"1079":[20,13],"1080":[21,13],"1082":[22,13],"1084":[23,13],"1086":[24,13],"1087":[0,14],"1089":[1,14],"1090":[2,14],"1092":[3,14],"1094":[4,14],"1097":[5,14],"1098":[6,14],"1099":[7,14],"1101":[8,14],"1102":[9,14],"1104":[10,14],"1111":[11,14],"1112":[12,14],"1116":[13,14],"1117":[14,14],"1119":[15,14],"1124":[16,14],"1131":[17,14],"1134":[18,14],"1139":[19,14],"1140":[20,14],"1143":[21,14],"1146":[22,14],"1147":[23,14],"1149":[24,14],"1151":[0,15],"1152":[1,15],"1154":[2,15],"1156":[3,15],"1160":[4,15],"1161":[5,15],"1162":[6,15],"1163":[7,15],"1164":[8,15],"1165":[9,15],"1166":[10,15],"1168":[11,15],"1170":[12,15],"1171":[13,15],"1172":[14,15],"1173":[15,15],"1174":[16,15],"1175":[17,15],"1177":[18,15],"1178":[19,15],"1179":[20,15],"1180":[21,15],"1181":[22,15],"1182":[23,15],"1183":[24,15],"1184":[0,16],"1185":[1,16],"1186":[2,16],"1197":[3,16],"1202":[4,16],"1203":[5,16],"1204":[6,16],"1205":[7,16],"1208":[8,16],"1209":[9,16],"1215":[10,16],"1218":[11,16],"1223":[12,16],"1224":[13,16],"1227":[14,16],"1229":[15,16],"1230":[16,16],"1232":[17,16],"1233":[18,16],"1234":[19,16],"1235":[20,16],"1236":[21,16],"1237":[22,16],"1239":[23,16],"1240":[24,16],"1241":[0,17],"1242":[1,17],"1243":[2,17],"1244":[3,17],"1255":[4,17],"1257":[5,17],"1259":[6,17],"1262":[7,17],"1267":[8,17],"1268":[9,17],"1271":[10,17],"1274":[11,17],"1275":[12,17],"1276":[13,17],"1277":[14,17],"1279":[15,17],"1280":[16,17],"1281":[17,17],"1282":[18,17],"1284":[19,17],"1285":[20,17],"1287":[21,17],"1289":[22,17],"1291":[23,17],"1292":[24,17],"1293":[0,18],"1296":[1,18],"1298":[2,18],"1299":[3,18],"1301":[4,18],"1302":[5,18],"1304":[6,18],"1306":[7,18],"1308":[8,18],"1316":[9,18],"1317":[10,18],"1318":[11,18],"1319":[12,18],"1321":[13,18],"1323":[14,18],"1324":[15,18],"1329":[16,18],"1338":[17,18],"1341":[18,18],"1347":[19,18],"1351":[20,18],"1355":[21,18],"1356":[22,18],"1357":[23,18],"1358":[24,18],"1359":[0,19],"1360":[1,19],"1361":[2,19],"1362":[3,19],"1363":[4,19],"1364":[5,19],"1365":[6,19],"1366":[7,19],"1367":[8,19],"1368":[9,19],"1373":[10,19],"1375":[11,19],"1379":[12,19],"1380":[13,19],"1387":[14,19],"1394":[15,19],"1395":[16,19],"1396":[17,19],"1400":[18,19],"1401":[19,19],"1403":[20,19],"1407":[21,19],"1408":[22,19],"1410":[23,19],"1411":[24,19],"1413":[0,20],"1418":[1,20],"1420":[2,20],"1422":[3,20],"1423":[4,20],"1428":[5,20],"1429":[6,20],"1430":[7,20],"1431":[8,20],"1432":[9,20],"1433":[10,20],"1434":[11,20],"1435":[12,20],"1436":[13,20],"1437":[14,20],"1438":[15,20],"1439":[16,20],"1440":[17,20],"1441":[18,20],"1442":[19,20],"1443":[20,20],"1444":[21,20],"1445":[22,20],"1446":[23,20],"1447":[24,20],"1448":[0,21],"1449":[1,21],"1450":[2,21],"1451":[3,21],"1454":[4,21],"1455":[5,21],"1458":[6,21],"1459":[7,21],"1466":[8,21],"1468":[9,21],"1470":[10,21],"1478":[11,21],"1480":[12,21],"1487":[13,21],"1489":[14,21],"1490":[15,21],"1491":[16,21],"1493":[17,21],"1494":[18,21],"1495":[19,21],"1501":[20,21],"1502":[21,21],"1503":[22,21],"1518":[23,21],"1519":[24,21],"1520":[0,22],"1524":[1,22],"1525":[2,22],"1526":[3,22],"1528":[4,22],"1532":[5,22],"1533":[6,22],"1534":[7,22],"1535":[8,22],"1536":[9,22],"1537":[10,22],"1538":[11,22],"1539":[12,22],"1540":[13,22],"1541":[14,22],"1542":[15,22],"1543":[16,22],"1544":[17,22],"1545":[18,22],"1546":[19,22],"1547":[20,22],"1548":[21,22],"1549":[22,22],"1550":[23,22],"1551":[24,22],"1552":[0,23],"1553":[1,23],"1554":[2,23],"1555":[3,23],"1556":[4,23],"1557":[5,23],"1558":[6,23],"1559":[7,23],"1560":[8,23],"1561":[9,23],"1562":[10,23],"1563":[11,23],"1564":[12,23],"1565":[13,23],"1566":[14,23],"1567":[15,23],"1569":[16,23],"1570":[17,23],"1572":[18,23],"1573":[19,23],"1575":[20,23],"1577":[21,23],"1580":[22,23],"1581":[23,23],"1582":[24,23],"1586":[0,24],"1589":[1,24],"1594":[2,24],"1595":[3,24],"1598":[4,24],"1600":[5,24],"1601":[6,24],"1603":[7,24],"1605":[8,24],"1611":[9,24],"1622":[10,24],"1627":[11,24],"1632":[12,24],"1633":[13,24],"1636":[14,24],"1638":[15,24],"1639":[16,24],"1641":[17,24],"1642":[18,24],"1644":[19,24]}};           // item list + icon positions, generated from KitX's icon map
+  const ATLAS_URL = 'cubes.png';
+  const ARMOR=[['head','Helmet'],['chest','Chestplate'],['legs','Leggings'],['feet','Boots']];
+  const kb={sel:null, items:{}};            // items: slotKey -> {id, count}
+  const slotEls={};
+  const ITEM_PATH={}; DATA.items.forEach(([id,pi])=>{ITEM_PATH[id]=pi});
+  const prettyId=id=>id.replace(/^minecraft:/,'').split('_').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
+  const hue=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%360;return h};
+  const mono=id=>{const w=id.split('_');return (w.length>1?w.map(x=>x[0]).join(''):id.slice(0,3)).slice(0,3).toUpperCase()};
+  function mkIcon(id){
+    const d=document.createElement('span'); d.className='ico';
+    const pos=DATA.pos[ITEM_PATH[id]];
+    if(pos){
+      d.style.backgroundImage=`url(${ATLAS_URL})`;
+      d.style.backgroundSize=`${DATA.cols*100}% ${DATA.rows*100}%`;
+      d.style.backgroundPosition=`${pos[0]/(DATA.cols-1)*100}% ${pos[1]/(DATA.rows-1)*100}%`;
+    }else{ d.classList.add('mono'); d.textContent=mono(id); d.style.setProperty('--h',hue(id)); }
+    return d;
+  }
+  function slotInfo(key){
+    if(key==='offhand') return {label:'Offhand',kind:'off'};
+    const a=ARMOR.find(x=>x[0]===key); if(a) return {label:a[1],kind:a[0]};
+    const n=+key;
+    return n<9 ? {label:'Hotbar '+(n+1)} : {label:'Inventory '+(n-8)};
+  }
+  function mkSlot(key,ph){
+    const b=document.createElement('button'); b.type='button'; b.className='slot'; b.dataset.key=key;
+    if(ph){b.dataset.ph=ph; const i=document.createElement('i'); i.className='ph'; b.append(i)}
+    b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',()=>selectSlot(kb.sel===key?null:key));
+    slotEls[key]=b; paintSlot(key); return b;
+  }
+  function paintSlot(key){
+    const b=slotEls[key]; if(!b) return;
+    b.querySelectorAll('.ico,.cnt').forEach(n=>n.remove());
+    const it=kb.items[key], ph=b.querySelector('.ph');
+    if(ph) ph.style.display=it?'none':'';
+    if(it){
+      b.append(mkIcon(it.id));
+      if(it.count>1){const c=document.createElement('span');c.className='cnt';c.textContent=it.count;b.append(c)}
+    }
+    b.setAttribute('aria-label',slotInfo(key).label+' ('+(it?prettyId(it.id):'empty')+')');
+  }
+  function cap(t){const d=document.createElement('div');d.className='cap';d.textContent=t;return d}
+  function buildInv(){
+    const root=$('invp'); root.innerHTML='';
+    root.append(cap('Armor and offhand'));
+    const top=document.createElement('div'); top.className='sgrid';
+    ARMOR.forEach(([k])=>top.append(mkSlot(k,k)));
+    for(let i=0;i<4;i++){const sp=document.createElement('div');top.append(sp)}
+    top.append(mkSlot('offhand','off'));
+    root.append(top);
+    root.append(cap('Inventory'));
+    const inv=document.createElement('div'); inv.className='sgrid';
+    for(let i=9;i<36;i++) inv.append(mkSlot(String(i)));
+    root.append(inv);
+    const g=document.createElement('div'); g.className='gap'; root.append(g);
+    root.append(cap('Hotbar'));
+    const hb=document.createElement('div'); hb.className='sgrid';
+    for(let i=0;i<9;i++) hb.append(mkSlot(String(i)));
+    root.append(hb);
+  }
+  function selectSlot(key){
+    kb.sel=key;
+    for(const k in slotEls){const on=k===key; slotEls[k].classList.toggle('sel',on); slotEls[k].setAttribute('aria-pressed',String(on))}
+    renderItemPanel(); renderControls();
+  }
+  function renderItemPanel(){
+    const key=kb.sel, it=key&&kb.items[key], ic=document.querySelector('.ip-icon');
+    ic.innerHTML=''; if(it) ic.append(mkIcon(it.id));
+    if(!key){ $('ipName').textContent='No slot selected'; $('ipWhere').textContent='Tap a slot below'; }
+    else{ $('ipName').textContent=it?prettyId(it.id):'Empty slot'; $('ipWhere').textContent=slotInfo(key).label; }
+    $('ipId').textContent=it?'minecraft:'+it.id:'—';
+    $('ipCount').textContent=it?String(it.count):'—';
+    $('ipDur').textContent='—'; $('ipEnch').textContent='—';
+  }
+  function actBtn(label,fn){const b=document.createElement('button');b.className='btn';b.textContent=label;if(fn)b.addEventListener('click',fn);else b.disabled=true;return b}
+  function renderControls(){
+    const key=kb.sel, box=$('cpActions'); box.innerHTML='';
+    if(!key){ $('cpMsg').textContent='Select a slot to see what you can do with it.'; return }
+    const it=kb.items[key];
+    if(!it){
+      $('cpMsg').textContent=slotInfo(key).label+' is empty.';
+      box.append(actBtn('Add item',openPicker));
+    }else{
+      $('cpMsg').textContent=slotInfo(key).label+': '+prettyId(it.id)+'. More actions are coming in the next parts.';
+      const rm=actBtn('Remove item',()=>{delete kb.items[key];paintSlot(key);renderItemPanel();renderControls()});
+      rm.classList.add('ghost'); box.append(rm);
+      ['Move','Rename','Enchant','Durability','Duplicate'].forEach(t=>box.append(actBtn(t)));
+    }
+  }
+
+  // ----- item picker -----
+  const ALL=DATA.items.map(([id])=>({id,name:prettyId(id).toLowerCase()}));
+  const PAGE=60; let results=[], shown=0, pickTimer=0;
+  function runSearch(q){
+    const terms=q.toLowerCase().trim().split(/[\s_]+/).filter(Boolean);
+    if(!terms.length) return ALL;
+    const scored=[];
+    for(const it of ALL){
+      if(!terms.every(t=>it.name.includes(t))) continue;
+      const first=terms[0];
+      const sc = it.name===terms.join(' ') ? 0 : it.name.startsWith(first) ? 1 : (' '+it.name).includes(' '+first) ? 2 : 3;
+      scored.push([sc,it]);
+    }
+    return scored.sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  }
+  function renderResults(append){
+    const inner=$('pickInner');
+    if(!append) inner.innerHTML='';
+    const old=inner.querySelector('.more'); if(old) old.remove();
+    const from=append?shown:0, to=Math.min(results.length, from+PAGE);
+    for(const it of results.slice(from,to)){
+      const r=document.createElement('button'); r.type='button'; r.className='row';
+      const ri=document.createElement('span'); ri.className='ri'; ri.append(mkIcon(it.id));
+      const rn=document.createElement('span'); rn.className='rn';
+      const b=document.createElement('b'); b.textContent=prettyId(it.id);
+      const sp=document.createElement('span'); sp.textContent='minecraft:'+it.id;
+      rn.append(b,sp); r.append(ri,rn);
+      r.addEventListener('click',()=>chooseItem(it.id));
+      inner.append(r);
+    }
+    shown=to;
+    if(!results.length){const n=document.createElement('div');n.className='none';n.textContent='No items match.';inner.append(n)}
+    if(shown<results.length){
+      const m=document.createElement('button'); m.type='button'; m.className='btn ghost more'; m.style.cssText='width:100%;margin:6px 0 10px';
+      m.textContent='Show more ('+(results.length-shown)+' left)'; m.addEventListener('click',()=>renderResults(true)); inner.append(m);
+    }
+    $('pickCount').textContent=results.length+(results.length===1?' item':' items');
+  }
+  function doSearch(){ results=runSearch($('pickQ').value); shown=0; renderResults(false); $('pickList').scrollTop=0 }
+  function openPicker(){
+    if(!kb.sel) return;
+    $('pickTitle').textContent='Add item to: '+slotInfo(kb.sel).label;
+    $('pickQ').value=''; doSearch();
+    $('picker').classList.add('on'); document.body.classList.add('lock');
+    if(matchMedia('(pointer:fine)').matches) $('pickQ').focus();
+  }
+  function closePicker(){ $('picker').classList.remove('on'); document.body.classList.remove('lock') }
+  function chooseItem(id){
+    const key=kb.sel; if(!key) return;
+    kb.items[key]={id,count:1};
+    paintSlot(key); closePicker(); renderItemPanel(); renderControls();
+  }
+  $('pickClose').addEventListener('click',closePicker);
+  $('pickQ').addEventListener('input',()=>{clearTimeout(pickTimer);pickTimer=setTimeout(doSearch,120)});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('picker').classList.contains('on'))closePicker()});
+
+  buildInv(); renderItemPanel(); renderControls();
+})();
+</script>
+</body>
+</html>
