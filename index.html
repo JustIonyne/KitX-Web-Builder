@@ -6,6 +6,7 @@
 <title>KitX</title>
 <meta name="description" content="KitX for Minecraft Bedrock: build kits and presets in your browser.">
 <style>
+  /*FONT-START*/@font-face{font-family:'KitX Pixel';font-weight:400;font-style:normal;font-display:block;src:url(data:font/woff;base64,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) format('woff')}@font-face{font-family:'KitX Pixel';font-weight:700;font-style:normal;font-display:block;src:url(data:font/woff;base64,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) format('woff')}/*FONT-END*/
   :root{
     --bg:#0f1115; --bar:#14171d; --card:#181b22; --line:#2a2f3a; --text:#e8eaf0; --mute:#9aa3b2;
     --accent:#5b8cff; --accent2:#3a64d8; --bad:#ff6b6b; --good:#4ade80;
@@ -15,12 +16,12 @@
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--text);font:10px/1.5 'KitX Pixel',system-ui,sans-serif;font-synthesis:none}
   .wrap{max-width:720px;margin:0 auto;padding:20px 16px 60px}
 
   /* top bar */
   .bar{position:sticky;top:0;z-index:20;background:var(--bar);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:6px 10px;height:52px}
-  .bar h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.01em}
+  .bar h1{font-size:12px;margin:0;font-weight:700;}
   .burger{appearance:none;background:transparent;border:0;color:var(--text);width:44px;height:44px;border-radius:10px;display:grid;place-items:center;cursor:pointer;padding:0}
   .burger:hover{background:var(--bg)}
   .burger span,.burger span::before,.burger span::after{display:block;width:22px;height:2px;background:currentColor;border-radius:2px;content:"";position:relative}
@@ -37,22 +38,22 @@
   .drawer a:hover{background:var(--bg)}
   .drawer a.active{background:var(--bg);box-shadow:inset 3px 0 0 var(--accent)}
   .drawer .item.off{color:var(--mute);opacity:.55;cursor:not-allowed}
-  .drawer .tag{margin-left:auto;font-size:11px;font-weight:600;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  .drawer .tag{margin-left:auto;font-size:10px;font-weight:600;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
   .drawer .sep{height:1px;background:var(--line);margin:8px 4px}
-  .x{appearance:none;background:transparent;border:0;color:var(--mute);font-size:20px;cursor:pointer;width:36px;height:36px;border-radius:8px}
+  .x{appearance:none;background:transparent;border:0;color:var(--mute);font-size:12px;cursor:pointer;width:36px;height:36px;border-radius:8px}
   .x:hover{background:var(--bg)}
 
   /* pages */
   .page{display:none}
   .page.on{display:block}
-  h2.title{font-size:26px;margin:6px 0 2px}
+  h2.title{font-size:12px;margin:6px 0 2px}
   .sub{color:var(--mute);margin:0 0 20px}
   .hero{padding:26px 0 6px}
-  .hero h2{font-size:34px;line-height:1.15;margin:0 0 8px}
-  .hero p{color:var(--mute);font-size:17px;margin:0 0 18px}
+  .hero h2{font-size:16px;line-height:1.15;margin:0 0 8px}
+  .hero p{color:var(--mute);font-size:10px;margin:0 0 18px}
   .cta{display:flex;gap:10px;flex-wrap:wrap}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
-  .card h3{font-size:15px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+  .card h3{font-size:10px;margin:0 0 10px;text-transform:uppercase;color:var(--mute)}
   .card p{margin:0 0 8px}
   .card ul{margin:0;padding-left:20px}
   .card li{margin:4px 0}
@@ -60,11 +61,11 @@
   @media (max-width:520px){.grid2{grid-template-columns:1fr}}
   .tile{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
   .tile:hover{border-color:var(--accent)}
-  .tile b{display:block;font-size:17px;margin-bottom:2px}
-  .tile span{color:var(--mute);font-size:14px}
-  .hl{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:13px}
+  .tile b{display:block;font-size:10px;margin-bottom:2px}
+  .tile span{color:var(--mute);font-size:10px}
+  .hl{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:10px}
 
-  label{display:block;font-size:14px;margin:10px 0 4px;color:var(--mute)}
+  label{display:block;font-size:10px;margin:10px 0 4px;color:var(--mute)}
   label.chk{display:flex;gap:8px;align-items:center;color:var(--text);margin-top:12px}
   input[type=text],textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
   input[type=text]:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
@@ -83,13 +84,13 @@
   .kit{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:10px;background:var(--bg)}
   .kit .name{flex:1;min-width:0}
   .kit .name input{padding:7px 10px}
-  .kit .meta{font-size:12px;color:var(--mute);margin-top:3px;word-break:break-all}
-  .warn{color:var(--bad);font-size:13px;margin-top:4px}
+  .kit .meta{font-size:10px;color:var(--mute);margin-top:3px;word-break:break-all}
+  .warn{color:var(--bad);font-size:10px;margin-top:4px}
   .ok{color:var(--good)}
-  .hint{font-size:13px;color:var(--mute);margin-top:8px}
+  .hint{font-size:10px;color:var(--mute);margin-top:8px}
   .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-  code{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:13px}
-  #status{margin-top:12px;font-size:14px;min-height:20px}
+  code{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:10px}
+  #status{margin-top:12px;font-size:10px;min-height:20px}
   .iconrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
   .iconprev{width:56px;height:56px;border-radius:8px;border:1px solid var(--line);object-fit:cover;image-rendering:pixelated;background:var(--bg)}
   /* ---- Kit Builder panels ---- */
@@ -100,22 +101,22 @@
   }
   .kb{display:flex;flex-direction:column;gap:14px;max-width:480px;margin:0 auto}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-  .panel>h3{font-size:12px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute)}
+  .panel>h3{font-size:10px;margin:0 0 10px;text-transform:uppercase;color:var(--mute)}
   /* item panel */
   .ip{display:flex;gap:14px;align-items:flex-start}
   .ip-icon{flex:none;width:72px;height:72px;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
   .ip-body{min-width:0;flex:1}
-  .ip-name{font-weight:700;font-size:17px;line-height:1.2;margin:2px 0 2px}
-  .ip-where{color:var(--mute);font-size:13px;margin-bottom:8px}
-  .ip-props{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px;margin:0}
+  .ip-name{font-weight:700;font-size:12px;line-height:1.2;margin:2px 0 2px}
+  .ip-where{color:var(--mute);font-size:10px;margin-bottom:8px}
+  .ip-props{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:10px;margin:0}
   .ip-props dt{color:var(--mute)}
   .ip-props dd{margin:0;min-width:0;overflow-wrap:anywhere}
   /* inventory panel */
   .invp{background:var(--mc-panel);border:2px solid #fff;border-right-color:#555;border-bottom-color:#555;border-radius:2px;padding:10px;box-shadow:0 0 0 2px #000}
-  .invp .cap{font-size:11px;font-weight:700;color:var(--mc-ink);margin:8px 0 3px;letter-spacing:.02em}
+  .invp .cap{font-size:10px;font-weight:700;color:var(--mc-ink);margin:8px 0 3px;}
   .invp .cap:first-child{margin-top:0}
   .sgrid{display:grid;grid-template-columns:repeat(9,1fr)}
-  .slot{appearance:none;border:0;padding:0;margin:0;aspect-ratio:1;position:relative;cursor:pointer;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated;-webkit-tap-highlight-color:transparent;font:inherit;color:inherit}
+  .slot{appearance:none;border:0;padding:0;margin:0;aspect-ratio:1;position:relative;cursor:pointer;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated;-webkit-tap-highlight-color:transparent;font:inherit;color:inherit;container-type:inline-size}
   .slot .ph{position:absolute;inset:6%;background:center/contain no-repeat;opacity:.45;image-rendering:pixelated;pointer-events:none}
   .slot[data-ph=head] .ph{background-image:var(--t-head)}
   .slot[data-ph=chest] .ph{background-image:var(--t-chest)}
@@ -123,19 +124,50 @@
   .slot[data-ph=feet] .ph{background-image:var(--t-feet)}
   .slot[data-ph=off] .ph{background-image:var(--t-off)}
   .slot.sel{z-index:3}
+  .slot.bad{filter:brightness(.5)}
   .slot.sel::after{content:"";position:absolute;inset:-16.667%;background:var(--t-sel) center/100% 100% no-repeat;image-rendering:pixelated;pointer-events:none}
   .slot:focus-visible{outline:2px solid var(--accent);outline-offset:1px;z-index:4}
   .gap{height:10px}
   /* control panel */
   .cp{position:sticky;bottom:10px;z-index:10;box-shadow:0 6px 24px rgba(0,0,0,.35)}
-  .cp-msg{color:var(--mute);font-size:14px;margin:0 0 10px}
+  .cp-msg{color:var(--mute);font-size:10px;margin:0 0 10px}
   .cp-actions{display:flex;flex-wrap:wrap;gap:8px}
   .cp-actions .btn{padding:10px 14px}
+  /* set amount dialog */
+  .dlg{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55)}
+  .dlg.on{display:flex}
+  .dlg-card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+  .dlg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .dlg-head b{font-size:12px}
+  .dlg-item{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .dlg-item .ri{flex:none;width:44px;height:44px;position:relative}
+  .dlg-item span.n{min-width:0;font-weight:600;overflow-wrap:anywhere}
+  .amt-row{display:flex;align-items:center;gap:12px}
+  .amt-row input[type=range]{flex:1;min-width:0;height:32px;accent-color:var(--accent);cursor:pointer}
+  .amt-row input[type=text]{width:76px;flex:none;text-align:center;font-weight:700}
+  .amt-scale{display:flex;justify-content:space-between;color:var(--mute);font-size:10px;margin:2px 88px 0 2px}
+  .amt-err{color:var(--bad);font-size:10px;min-height:19px;margin:8px 0 0}
+  .dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+  #amtDlg{z-index:80}
+  .ench-card{max-width:440px;display:flex;flex-direction:column;max-height:92vh}
+  .ench-list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+  .er{display:flex;align-items:center;gap:8px;padding:4px 6px 4px 4px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--bg)}
+  .er.on{border-color:var(--accent)}
+  .er.off{opacity:.45}
+  .er .pick{flex:1;min-width:0;display:flex;align-items:center;gap:10px;appearance:none;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:8px 6px;cursor:pointer}
+  .er.off .pick{cursor:not-allowed}
+  .er .box{flex:none;width:18px;height:18px;border:2px solid var(--mute);border-radius:3px;display:grid;place-items:center}
+  .er.on .box{background:var(--accent);border-color:var(--accent)}
+  .er.on .box::after{content:"";width:8px;height:8px;background:#fff}
+  .er .en{min-width:0}
+  .er .en b{display:block;font-weight:600}
+  .er .en span{display:block;color:var(--mute);font-size:10px}
+  .er .lv{flex:none;padding:8px 10px}
   /* item icons */
   .ico{display:block;width:100%;height:100%;background-repeat:no-repeat}
-  .ico.mono{display:grid;place-items:center;font:700 11px/1 system-ui,sans-serif;color:#fff;background:hsl(var(--h) 42% 36%);border-radius:3px;text-shadow:0 1px 0 rgba(0,0,0,.45);overflow:hidden}
+  .ico.mono{display:grid;place-items:center;font:700 10px/1 'KitX Pixel',system-ui,sans-serif;color:#fff;background:hsl(var(--h) 42% 36%);border-radius:3px;text-shadow:0 1px 0 rgba(0,0,0,.45);overflow:hidden}
   .slot .ico{position:absolute;inset:9%;width:auto;height:auto;pointer-events:none}
-  .slot .cnt{position:absolute;right:3px;bottom:1px;font:700 12px/1 system-ui,sans-serif;color:#fff;text-shadow:1px 1px 0 #3f3f3f;pointer-events:none;z-index:1}
+  .slot .cnt{position:absolute;right:2px;bottom:1px;font:400 10px/1 'KitX Pixel',system-ui,sans-serif;color:#fff;text-shadow:1px 1px 0 #3f3f3f;pointer-events:none;z-index:1}
   .ip-icon{position:relative}
   .ip-icon .ico{position:absolute;inset:9%;width:auto;height:auto}
   /* picker */
@@ -145,7 +177,7 @@
   .sheet-head{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bar);border-bottom:1px solid var(--line)}
   .sheet-head input{flex:1;min-width:0}
   .sheet-title{font-weight:700;padding:10px 12px 4px;max-width:720px;width:100%;margin:0 auto}
-  .sheet-count{color:var(--mute);font-size:13px;padding:0 12px 6px;max-width:720px;width:100%;margin:0 auto}
+  .sheet-count{color:var(--mute);font-size:10px;padding:0 12px 6px;max-width:720px;width:100%;margin:0 auto}
   .sheet-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 10px 30px}
   .sheet-inner{max-width:720px;margin:0 auto}
   .row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;appearance:none;background:var(--card);border:1px solid var(--line);color:inherit;font:inherit;border-radius:10px;padding:6px 10px;margin-bottom:6px;cursor:pointer}
@@ -153,11 +185,15 @@
   .row .ri{flex:none;width:40px;height:40px;position:relative}
   .row .rn{min-width:0}
   .row .rn b{display:block;font-weight:600;line-height:1.2}
-  .row .rn span{display:block;color:var(--mute);font-size:12px;overflow-wrap:anywhere}
+  .row .rn span{display:block;color:var(--mute);font-size:10px;overflow-wrap:anywhere}
   .none{color:var(--mute);text-align:center;padding:30px 0}
-  footer{color:var(--mute);font-size:13px;text-align:center;padding:10px 16px 40px}
+  footer{color:var(--mute);font-size:10px;text-align:center;padding:10px 16px 40px}
   .soon{text-align:center;padding:50px 10px;color:var(--mute)}
-  .soon b{display:block;color:var(--text);font-size:20px;margin-bottom:6px}
+  .soon b{display:block;color:var(--text);font-size:12px;margin-bottom:6px}
+
+  button,input,select,option,optgroup,textarea{font-family:'KitX Pixel',system-ui,sans-serif;font-size:10px}
+  select,option{font-weight:400}
+  input[type=text]::placeholder,textarea::placeholder{font-family:inherit}
 </style>
 </head>
 <body>
@@ -169,7 +205,7 @@
 
 <div class="scrim" id="scrim"></div>
 <nav class="drawer" id="drawer" aria-label="Main menu">
-  <div class="head"><span>KitX</span><button class="x" id="closeMenu" aria-label="Close menu">✕</button></div>
+  <div class="head"><span>KitX</span><button class="x" id="closeMenu" aria-label="Close menu">×</button></div>
   <a href="#home" data-route="home">Home</a>
   <div class="sep"></div>
   <a href="#kit-builder" data-route="kit-builder">1 · Kit Builder</a>
@@ -307,12 +343,57 @@
 </main>
 <div class="sheet" id="picker" role="dialog" aria-modal="true" aria-label="Add item">
   <div class="sheet-head">
-    <button class="x" id="pickClose" aria-label="Close">✕</button>
+    <button class="x" id="pickClose" aria-label="Close">×</button>
     <input id="pickQ" type="text" placeholder="Search items (e.g. diamond sword)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
   </div>
   <div class="sheet-title" id="pickTitle">Add item</div>
   <div class="sheet-count" id="pickCount"></div>
   <div class="sheet-list" id="pickList"><div class="sheet-inner" id="pickInner"></div></div>
+</div>
+
+<div class="dlg" id="nameDlg" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+  <div class="dlg-card">
+    <div class="dlg-head"><b id="nameTitle">Rename</b><button class="x" id="nameClose" type="button" aria-label="Close">×</button></div>
+    <div class="dlg-item"><span class="ri" id="nameIcon"></span><span class="n" id="nameItem"></span></div>
+    <input id="nameInput" type="text" maxlength="50" placeholder="Custom name" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Custom name">
+    <p class="hint" id="nameHint">Up to 50 characters. Leave it empty or press Reset to use the normal name.</p>
+    <div class="dlg-actions">
+      <button class="btn ghost" id="nameReset" type="button" style="margin-right:auto">Reset</button>
+      <button class="btn ghost" id="nameCancel" type="button">Cancel</button>
+      <button class="btn" id="nameOk" type="button">Set</button>
+    </div>
+  </div>
+</div>
+
+<div class="dlg" id="enchDlg" role="dialog" aria-modal="true" aria-labelledby="enchTitle">
+  <div class="dlg-card ench-card">
+    <div class="dlg-head"><b id="enchTitle">Enchant</b><button class="x" id="enchClose" type="button" aria-label="Close">×</button></div>
+    <div class="dlg-item"><span class="ri" id="enchIcon"></span><span class="n" id="enchName"></span></div>
+    <p class="hint" id="enchHint" style="margin:0 0 8px"></p>
+    <div class="ench-list" id="enchList"></div>
+    <div class="dlg-actions">
+      <button class="btn ghost" id="enchClear" type="button" style="margin-right:auto">Clear</button>
+      <button class="btn ghost" id="enchCancel" type="button">Cancel</button>
+      <button class="btn" id="enchOk" type="button">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="dlg" id="amtDlg" role="dialog" aria-modal="true" aria-labelledby="amtTitle">
+  <div class="dlg-card">
+    <div class="dlg-head"><b id="amtTitle">Set amount</b><button class="x" id="amtClose" type="button" aria-label="Close">×</button></div>
+    <div class="dlg-item"><span class="ri" id="amtIcon"></span><span class="n" id="amtName"></span></div>
+    <div class="amt-row">
+      <input id="amtRange" type="range" min="1" max="64" step="1" value="1" aria-label="Amount slider">
+      <input id="amtNum" type="text" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Amount">
+    </div>
+    <div class="amt-scale"><span id="amtMin">1</span><span id="amtMax">64</span></div>
+    <p class="amt-err" id="amtErr" role="alert"></p>
+    <div class="dlg-actions">
+      <button class="btn ghost" id="amtCancel" type="button">Cancel</button>
+      <button class="btn" id="amtOk" type="button">Set</button>
+    </div>
+  </div>
 </div>
 
 <footer>KitX · made by ionyne</footer>
@@ -491,7 +572,7 @@
       const meta=document.createElement('div'); meta.className='meta'; meta.textContent=`${k.file} · ${fmt(k.size)}`;
       name.append(inp,meta);
       if(k.warn){const w=document.createElement('div');w.className='warn';w.textContent=k.warn;name.append(w)}
-      const rm=document.createElement('button'); rm.className='danger'; rm.textContent='✕'; rm.setAttribute('aria-label','Remove kit');
+      const rm=document.createElement('button'); rm.className='danger'; rm.textContent='×'; rm.setAttribute('aria-label','Remove kit');
       inp.addEventListener('change',()=>{k.id=uniqueId(clean(inp.value)||'kit',k);renderKits()});
       rm.addEventListener('click',()=>{kits.splice(i,1);renderKits()});
       el.append(name,rm); box.append(el);
@@ -580,7 +661,7 @@
   const DATA = {"cols":41,"rows":37,"cell":64,"items":[["acacia_boat",0],["acacia_button",1],["acacia_chest_boat",2],["acacia_door",3],["acacia_fence",1],["acacia_fence_gate",1],["acacia_hanging_sign",4],["acacia_leaves",5],["acacia_log",6],["acacia_planks",7],["acacia_pressure_plate",1],["acacia_sapling",8],["acacia_shelf",9],["acacia_sign",10],["acacia_slab",11],["acacia_stairs",12],["acacia_trapdoor",13],["acacia_wood",14],["activator_rail",15],["agent_spawn_egg",null],["allay_spawn_egg",16],["allium",17],["amethyst_block",18],["amethyst_cluster",19],["amethyst_shard",20],["ancient_debris",21],["andesite",22],["andesite_slab",23],["andesite_stairs",24],["andesite_wall",25],["angler_pottery_sherd",26],["anvil",27],["apple",28],["archer_pottery_sherd",29],["armadillo_scute",30],["armadillo_spawn_egg",31],["armor_stand",32],["arms_up_pottery_sherd",33],["arrow",34],["axolotl_bucket",35],["axolotl_spawn_egg",36],["azalea",37],["azalea_leaves",38],["azure_bluet",39],["baked_potato",40],["bamboo",41],["bamboo_block",42],["bamboo_button",43],["bamboo_chest_raft",44],["bamboo_door",45],["bamboo_fence",46],["bamboo_fence_gate",47],["bamboo_hanging_sign",48],["bamboo_mosaic",49],["bamboo_mosaic_slab",50],["bamboo_mosaic_stairs",51],["bamboo_planks",52],["bamboo_pressure_plate",43],["bamboo_raft",53],["bamboo_shelf",54],["bamboo_sign",55],["bamboo_slab",56],["bamboo_stairs",57],["bamboo_trapdoor",58],["banner",59],["banner_pattern",60],["barrel",61],["barrier",62],["basalt",63],["bat_spawn_egg",64],["beacon",65],["bedrock",66],["bee_nest",67],["bee_spawn_egg",68],["beef",69],["beehive",70],["beetroot",71],["beetroot_seeds",72],["beetroot_soup",73],["bell",74],["big_dripleaf",75],["birch_boat",76],["birch_button",77],["birch_chest_boat",78],["birch_door",79],["birch_fence",77],["birch_fence_gate",77],["birch_hanging_sign",80],["birch_leaves",81],["birch_log",82],["birch_planks",83],["birch_pressure_plate",77],["birch_sapling",84],["birch_shelf",85],["birch_sign",86],["birch_slab",87],["birch_stairs",88],["birch_trapdoor",89],["birch_wood",90],["black_banner",91],["black_bed",92],["black_bundle",93],["black_candle",94],["black_carpet",95],["black_concrete",96],["black_concrete_powder",97],["black_cushion",98],["black_dye",99],["black_glazed_terracotta",100],["black_harness",101],["black_shulker_box",102],["black_stained_glass",103],["black_stained_glass_pane",104],["black_terracotta",105],["black_wool",106],["blackstone",107],["blackstone_slab",108],["blackstone_stairs",109],["blackstone_wall",110],["blade_pottery_sherd",111],["blast_furnace",112],["blaze_powder",113],["blaze_rod",114],["blaze_spawn_egg",115],["blue_banner",116],["blue_bed",117],["blue_bundle",118],["blue_candle",119],["blue_carpet",120],["blue_concrete",121],["blue_concrete_powder",122],["blue_cushion",123],["blue_dye",124],["blue_egg",125],["blue_glazed_terracotta",126],["blue_harness",127],["blue_ice",128],["blue_orchid",129],["blue_shulker_box",130],["blue_stained_glass",131],["blue_stained_glass_pane",132],["blue_terracotta",133],["blue_wool",134],["boat",135],["boat_dark_oak",136],["bogged_spawn_egg",137],["bolt_armor_trim_smithing_template",138],["bone",139],["bone_block",140],["bone_meal",141],["book",142],["book_portfolio",null],["bookshelf",143],["bordure_indented_banner_pattern",144],["bow",145],["bow_pulling_0",146],["bow_pulling_1",147],["bow_pulling_2",148],["bowl",149],["brain_coral",150],["brain_coral_block",151],["brain_coral_fan",152],["bread",153],["breeze_rod",154],["breeze_spawn_egg",155],["brewer_pottery_sherd",156],["brewing_stand",157],["brick",158],["brick_block",159],["brick_slab",160],["brick_stairs",161],["brick_wall",162],["broken_elytra",163],["brown_banner",164],["brown_bed",165],["brown_bundle",166],["brown_candle",167],["brown_carpet",168],["brown_concrete",169],["brown_concrete_powder",170],["brown_cushion",171],["brown_dye",172],["brown_egg",173],["brown_glazed_terracotta",174],["brown_harness",175],["brown_mushroom",176],["brown_mushroom_block",177],["brown_shulker_box",178],["brown_stained_glass",179],["brown_stained_glass_pane",180],["brown_terracotta",181],["brown_wool",182],["brush",183],["bubble_coral",184],["bubble_coral_block",185],["bubble_coral_fan",186],["bucket",187],["bucket_sulfur_cube",188],["budding_amethyst",189],["bundle",190],["bundle_black_open",93],["bundle_black_open_back",191],["bundle_black_open_front",192],["bundle_blue_open",118],["bundle_blue_open_back",193],["bundle_blue_open_front",194],["bundle_brown_open",166],["bundle_brown_open_back",195],["bundle_brown_open_front",196],["bundle_cyan_open",197],["bundle_cyan_open_back",198],["bundle_cyan_open_front",199],["bundle_gray_open",200],["bundle_gray_open_back",201],["bundle_gray_open_front",202],["bundle_green_open",203],["bundle_green_open_back",204],["bundle_green_open_front",205],["bundle_light_blue_open",206],["bundle_light_blue_open_back",207],["bundle_light_blue_open_front",208],["bundle_light_gray_open",209],["bundle_light_gray_open_back",210],["bundle_light_gray_open_front",211],["bundle_lime_open",212],["bundle_lime_open_back",213],["bundle_lime_open_front",214],["bundle_magenta_open",215],["bundle_magenta_open_back",216],["bundle_magenta_open_front",217],["bundle_open",190],["bundle_open_back",218],["bundle_open_front",219],["bundle_orange_open",220],["bundle_orange_open_back",221],["bundle_orange_open_front",222],["bundle_pink_open",223],["bundle_pink_open_back",224],["bundle_pink_open_front",225],["bundle_purple_open",226],["bundle_purple_open_back",227],["bundle_purple_open_front",228],["bundle_red_open",229],["bundle_red_open_back",230],["bundle_red_open_front",231],["bundle_white_open",232],["bundle_white_open_back",233],["bundle_white_open_front",234],["bundle_yellow_open",235],["bundle_yellow_open_back",236],["bundle_yellow_open_front",237],["burn_pottery_sherd",238],["bush",239],["cactus",240],["cake",241],["calcite",242],["calibrated_sculk_sensor",243],["camel_husk_spawn_egg",244],["camel_spawn_egg",245],["campfire",246],["candle",247],["carrot",248],["carrot_on_a_stick",249],["cartography_table",250],["carved_pumpkin",251],["cat_spawn_egg",252],["cauldron",253],["cave_spider_spawn_egg",254],["cave_vines",255],["chain",256],["chain_command_block",257],["chainmail_boots",258],["chainmail_chestplate",259],["chainmail_helmet",260],["chainmail_leggings",261],["chalkboard_large",null],["chalkboard_medium",null],["chalkboard_small",null],["charcoal",262],["cherry_boat",263],["cherry_button",264],["cherry_chest_boat",265],["cherry_door",266],["cherry_fence",264],["cherry_fence_gate",264],["cherry_hanging_sign",267],["cherry_leaves",268],["cherry_log",269],["cherry_planks",270],["cherry_pressure_plate",264],["cherry_sapling",271],["cherry_shelf",272],["cherry_sign",273],["cherry_slab",274],["cherry_stairs",275],["cherry_trapdoor",276],["cherry_wood",277],["chest",278],["chest_minecart",279],["chicken",280],["chicken_spawn_egg",281],["chipped_anvil",282],["chiseled_bookshelf",283],["chiseled_cinnabar",284],["chiseled_copper",285],["chiseled_deepslate",286],["chiseled_nether_bricks",287],["chiseled_polished_blackstone",288],["chiseled_quartz_block",289],["chiseled_red_sandstone",290],["chiseled_resin_bricks",291],["chiseled_sandstone",292],["chiseled_stone_bricks",293],["chiseled_sulfur",294],["chiseled_tuff",295],["chiseled_tuff_bricks",296],["chorus_flower",297],["chorus_fruit",298],["chorus_plant",297],["cinnabar",299],["cinnabar_bricks",300],["clay",301],["clay_ball",302],["clock",303],["closed_eyeblossom",304],["coal",305],["coal_block",306],["coal_ore",307],["coarse_dirt",308],["coast_armor_trim_smithing_template",309],["cobbled_deepslate",310],["cobbled_deepslate_slab",311],["cobbled_deepslate_stairs",312],["cobbled_deepslate_wall",313],["cobblestone",314],["cobblestone_slab",315],["cobblestone_stairs",316],["cobblestone_wall",317],["cocoa_beans",318],["cod",319],["cod_bucket",320],["cod_spawn_egg",321],["command_block",322],["command_block_minecart",323],["comparator",324],["compass",325],["compass_atlas",325],["composter",326],["conduit",null],["cooked_beef",327],["cooked_chicken",328],["cooked_cod",329],["cooked_mutton",330],["cooked_porkchop",331],["cooked_rabbit",332],["cooked_salmon",333],["cookie",334],["copper_axe",335],["copper_bars",336],["copper_block",337],["copper_boots",338],["copper_bulb",339],["copper_chain",340],["copper_chest",341],["copper_chestplate",342],["copper_door",343],["copper_golem_spawn_egg",344],["copper_grate",345],["copper_helmet",346],["copper_hoe",347],["copper_horse_armor",348],["copper_ingot",349],["copper_lantern",350],["copper_leggings",351],["copper_nautilus_armor",352],["copper_nugget",353],["copper_ore",354],["copper_pickaxe",355],["copper_shovel",356],["copper_spear",357],["copper_sword",358],["copper_torch",359],["copper_trapdoor",360],["cornflower",361],["cow_spawn_egg",362],["cracked_deepslate_bricks",363],["cracked_deepslate_tiles",364],["cracked_nether_bricks",365],["cracked_polished_blackstone_bricks",366],["cracked_stone_bricks",367],["crafter",368],["crafting_table",369],["creaking_heart",370],["creaking_spawn_egg",371],["creeper_banner_pattern",60],["creeper_head",372],["creeper_spawn_egg",373],["crimson_button",374],["crimson_door",375],["crimson_fence",374],["crimson_fence_gate",374],["crimson_fungus",376],["crimson_hanging_sign",377],["crimson_hyphae",378],["crimson_nylium",379],["crimson_planks",380],["crimson_pressure_plate",374],["crimson_roots",381],["crimson_shelf",382],["crimson_sign",383],["crimson_slab",384],["crimson_stairs",385],["crimson_stem",386],["crimson_trapdoor",387],["crossbow",388],["crossbow_arrow",389],["crossbow_firework",390],["crossbow_pulling_0",391],["crossbow_pulling_1",392],["crossbow_pulling_2",393],["crying_obsidian",394],["cut_copper",395],["cut_copper_slab",396],["cut_copper_stairs",397],["cut_red_sandstone",398],["cut_red_sandstone_slab",399],["cut_red_sandstone_stairs",400],["cut_sandstone",401],["cut_sandstone_slab",402],["cut_sandstone_stairs",403],["cyan_banner",404],["cyan_bed",405],["cyan_bundle",197],["cyan_candle",406],["cyan_carpet",407],["cyan_concrete",408],["cyan_concrete_powder",409],["cyan_cushion",410],["cyan_dye",411],["cyan_glazed_terracotta",412],["cyan_harness",413],["cyan_shulker_box",414],["cyan_stained_glass",415],["cyan_stained_glass_pane",416],["cyan_terracotta",417],["cyan_wool",418],["damaged_anvil",419],["dandelion",420],["danger_pottery_sherd",421],["dark_oak_boat",136],["dark_oak_button",422],["dark_oak_chest_boat",423],["dark_oak_door",424],["dark_oak_fence",422],["dark_oak_fence_gate",422],["dark_oak_hanging_sign",425],["dark_oak_leaves",426],["dark_oak_log",427],["dark_oak_planks",428],["dark_oak_pressure_plate",422],["dark_oak_sapling",429],["dark_oak_shelf",430],["dark_oak_sign",431],["dark_oak_slab",432],["dark_oak_stairs",433],["dark_oak_trapdoor",434],["dark_oak_wood",435],["dark_prismarine",436],["dark_prismarine_slab",437],["dark_prismarine_stairs",438],["daylight_detector",439],["dead_brain_coral",440],["dead_brain_coral_block",441],["dead_brain_coral_fan",442],["dead_bubble_coral",443],["dead_bubble_coral_block",444],["dead_bubble_coral_fan",445],["dead_fire_coral",446],["dead_fire_coral_block",447],["dead_fire_coral_fan",448],["dead_horn_coral",449],["dead_horn_coral_block",450],["dead_horn_coral_fan",451],["dead_tube_coral",452],["dead_tube_coral_block",453],["dead_tube_coral_fan",454],["deadbush",455],["decorated_pot",456],["deepslate",457],["deepslate_brick_slab",458],["deepslate_brick_stairs",459],["deepslate_brick_wall",460],["deepslate_bricks",461],["deepslate_coal_ore",462],["deepslate_copper_ore",463],["deepslate_diamond_ore",464],["deepslate_emerald_ore",465],["deepslate_gold_ore",466],["deepslate_iron_ore",467],["deepslate_lapis_ore",468],["deepslate_redstone_ore",469],["deepslate_tile_slab",470],["deepslate_tile_stairs",471],["deepslate_tile_wall",472],["deepslate_tiles",473],["detector_rail",474],["diamond",475],["diamond_axe",476],["diamond_block",477],["diamond_boots",478],["diamond_chestplate",479],["diamond_helmet",480],["diamond_hoe",481],["diamond_horse_armor",482],["diamond_leggings",483],["diamond_nautilus_armor",484],["diamond_ore",485],["diamond_pickaxe",486],["diamond_shovel",487],["diamond_spear",488],["diamond_sword",489],["diorite",490],["diorite_slab",491],["diorite_stairs",492],["diorite_wall",493],["dirt",494],["dirt_path",495],["disc_fragment_5",496],["dispenser",497],["dolphin_spawn_egg",498],["donkey_spawn_egg",499],["dragon_breath",500],["dragon_egg",501],["dragon_fireball",null],["dragon_head",502],["dried_kelp",503],["dried_kelp_block",504],["dripstone_block",505],["dropper",506],["drowned_spawn_egg",507],["dune_armor_trim_smithing_template",508],["echo_shard",509],["egg",510],["egg_agent",null],["egg_bat",64],["egg_bee",68],["egg_blaze",115],["egg_cat",252],["egg_cave_spider",254],["egg_chicken",281],["egg_clownfish",511],["egg_cod",321],["egg_cow",362],["egg_creeper",373],["egg_dolphin",498],["egg_donkey",499],["egg_drowned",507],["egg_elderguardian",512],["egg_enderman",513],["egg_endermite",514],["egg_evoker",515],["egg_fish",null],["egg_fox",516],["egg_ghast",517],["egg_glow_squid",518],["egg_guardian",519],["egg_horse",520],["egg_husk",521],["egg_lava_slime",522],["egg_llama",523],["egg_mask",null],["egg_mule",524],["egg_mushroomcow",525],["egg_null",null],["egg_ocelot",526],["egg_panda",527],["egg_parrot",528],["egg_phantom",529],["egg_pig",530],["egg_pigzombie",531],["egg_pillager",532],["egg_polarbear",533],["egg_pufferfish",534],["egg_rabbit",535],["egg_ravager",536],["egg_salmon",537],["egg_sheep",538],["egg_shulker",539],["egg_silverfish",540],["egg_skeleton",541],["egg_skeletonhorse",542],["egg_slime",543],["egg_spider",544],["egg_squid",545],["egg_stray",546],["egg_turtle",547],["egg_vex",548],["egg_villager",549],["egg_vindicator",550],["egg_wanderingtrader",551],["egg_witch",552],["egg_wither",553],["egg_wolf",554],["egg_zombie",555],["egg_zombiehorse",556],["egg_zombievillager",557],["elder_guardian_spawn_egg",512],["elytra",558],["emerald",559],["emerald_block",560],["emerald_ore",561],["empty_armor_slot_boots",null],["empty_armor_slot_chestplate",null],["empty_armor_slot_helmet",null],["empty_armor_slot_leggings",null],["empty_armor_slot_shield",null],["empty_map",562],["enchanted_book",563],["enchanted_golden_apple",564],["enchanting_table",565],["end_brick_stairs",566],["end_bricks",567],["end_crystal",568],["end_portal_frame",569],["end_rod",570],["end_stone",571],["end_stone_brick_slab",572],["end_stone_brick_stairs",566],["end_stone_brick_wall",573],["ender_chest",574],["ender_dragon_spawn_egg",575],["ender_eye",576],["ender_pearl",577],["enderman_spawn_egg",513],["endermite_spawn_egg",514],["evoker_spawn_egg",515],["experience_bottle",578],["explorer_pottery_sherd",579],["exposed_chiseled_copper",580],["exposed_copper",581],["exposed_copper_bars",582],["exposed_copper_block",581],["exposed_copper_bulb",583],["exposed_copper_chain",584],["exposed_copper_chest",585],["exposed_copper_door",586],["exposed_copper_grate",587],["exposed_copper_lantern",588],["exposed_copper_trapdoor",589],["exposed_cut_copper",590],["exposed_cut_copper_slab",591],["exposed_cut_copper_stairs",592],["exposed_lightning_rod",593],["eye_armor_trim_smithing_template",594],["farmland",595],["feather",596],["fence",597],["fence_gate",597],["fermented_spider_eye",598],["fern",599],["field_masoned_banner_pattern",600],["filled_map",601],["fire_charge",602],["fire_coral",603],["fire_coral_block",604],["fire_coral_fan",605],["firefly_bush",606],["firework_rocket",607],["firework_star",608],["fishing_rod",609],["fishing_rod_cast",610],["fletching_table",611],["flint",612],["flint_and_steel",613],["flow_armor_trim_smithing_template",614],["flow_banner_pattern",615],["flow_pottery_sherd",616],["flower_banner_pattern",617],["flower_pot",618],["flowering_azalea",619],["fox_spawn_egg",516],["friend_pottery_sherd",620],["frog_spawn_egg",621],["frogspawn",622],["frosted_ice",623],["furnace",624],["furnace_minecart",625],["ghast_spawn_egg",517],["ghast_tear",626],["gilded_blackstone",627],["glass",628],["glass_bottle",629],["glass_pane",65],["glistering_melon_slice",630],["globe_banner_pattern",631],["glow_berries",255],["glow_ink_sac",632],["glow_item_frame",633],["glow_lichen",634],["glow_squid_spawn_egg",518],["glowing_obsidian",635],["glowstone",636],["glowstone_dust",637],["goat_horn",638],["goat_spawn_egg",639],["gold_block",640],["gold_ingot",641],["gold_nugget",642],["gold_ore",643],["golden_apple",564],["golden_axe",644],["golden_boots",645],["golden_carrot",646],["golden_chestplate",647],["golden_dandelion",648],["golden_helmet",649],["golden_hoe",650],["golden_horse_armor",651],["golden_leggings",652],["golden_nautilus_armor",653],["golden_pickaxe",654],["golden_rail",655],["golden_shovel",656],["golden_spear",657],["golden_sword",658],["granite",659],["granite_slab",660],["granite_stairs",661],["granite_wall",662],["grass_block",663],["grass_path",495],["gravel",664],["gray_banner",665],["gray_bed",666],["gray_bundle",200],["gray_candle",667],["gray_carpet",668],["gray_concrete",669],["gray_concrete_powder",670],["gray_cushion",671],["gray_dye",672],["gray_glazed_terracotta",673],["gray_harness",674],["gray_shulker_box",675],["gray_stained_glass",676],["gray_stained_glass_pane",677],["gray_terracotta",678],["gray_wool",679],["green_banner",680],["green_bed",681],["green_bundle",203],["green_candle",682],["green_carpet",683],["green_concrete",684],["green_concrete_powder",685],["green_cushion",686],["green_dye",687],["green_glazed_terracotta",688],["green_harness",689],["green_shulker_box",690],["green_stained_glass",691],["green_stained_glass_pane",692],["green_terracotta",693],["green_wool",694],["grindstone",695],["guardian_spawn_egg",519],["gunpowder",696],["guster_banner_pattern",697],["guster_pottery_sherd",698],["hanging_roots",699],["happy_ghast_spawn_egg",700],["hardened_clay",701],["hay_block",702],["heart_of_the_sea",703],["heart_pottery_sherd",704],["heartbreak_pottery_sherd",705],["heavy_core",706],["heavy_weighted_pressure_plate",707],["hoglin_meat_cooked",331],["hoglin_meat_raw",708],["hoglin_spawn_egg",709],["honey_block",710],["honey_bottle",711],["honeycomb",712],["honeycomb_block",713],["hopper",714],["hopper_minecart",715],["horn_coral",716],["horn_coral_block",717],["horn_coral_fan",718],["horse_spawn_egg",520],["host_armor_trim_smithing_template",719],["howl_pottery_sherd",720],["husk_spawn_egg",521],["ice",721],["ink_sac",722],["iron_axe",723],["iron_bars",724],["iron_block",725],["iron_boots",726],["iron_chestplate",727],["iron_door",728],["iron_golem_spawn_egg",729],["iron_helmet",730],["iron_hoe",731],["iron_horse_armor",732],["iron_ingot",733],["iron_leggings",734],["iron_nautilus_armor",735],["iron_nugget",736],["iron_ore",737],["iron_pickaxe",738],["iron_shovel",739],["iron_spear",740],["iron_sword",741],["iron_trapdoor",742],["item_frame",743],["jigsaw",744],["jukebox",745],["jungle_boat",746],["jungle_button",747],["jungle_chest_boat",748],["jungle_door",749],["jungle_fence",747],["jungle_fence_gate",747],["jungle_hanging_sign",750],["jungle_leaves",751],["jungle_log",752],["jungle_planks",753],["jungle_pressure_plate",747],["jungle_sapling",754],["jungle_shelf",755],["jungle_sign",756],["jungle_slab",757],["jungle_stairs",758],["jungle_trapdoor",759],["jungle_wood",760],["kelp",761],["ladder",762],["lantern",763],["lapis_block",764],["lapis_lazuli",765],["lapis_ore",766],["large_amethyst_bud",767],["large_fern",768],["lava_bucket",769],["lead",770],["leaf_litter",771],["leather",772],["leather_boots",773],["leather_chestplate",774],["leather_helmet",775],["leather_horse_armor",776],["leather_leggings",777],["lectern",778],["lever",779],["light_block_0",780],["light_block_1",781],["light_block_10",782],["light_block_11",783],["light_block_12",784],["light_block_13",785],["light_block_14",786],["light_block_15",780],["light_block_2",787],["light_block_3",788],["light_block_4",789],["light_block_5",790],["light_block_6",791],["light_block_7",792],["light_block_8",793],["light_block_9",794],["light_blue_banner",795],["light_blue_bed",796],["light_blue_bundle",206],["light_blue_candle",797],["light_blue_carpet",798],["light_blue_concrete",799],["light_blue_concrete_powder",800],["light_blue_cushion",801],["light_blue_dye",802],["light_blue_glazed_terracotta",803],["light_blue_harness",804],["light_blue_shulker_box",805],["light_blue_stained_glass",806],["light_blue_stained_glass_pane",807],["light_blue_terracotta",808],["light_blue_wool",809],["light_gray_banner",810],["light_gray_bed",811],["light_gray_bundle",209],["light_gray_candle",812],["light_gray_carpet",813],["light_gray_concrete",814],["light_gray_concrete_powder",815],["light_gray_cushion",816],["light_gray_dye",817],["light_gray_glazed_terracotta",818],["light_gray_harness",819],["light_gray_shulker_box",820],["light_gray_stained_glass",821],["light_gray_stained_glass_pane",822],["light_gray_terracotta",823],["light_gray_wool",824],["light_weighted_pressure_plate",825],["lightning_rod",826],["lilac",827],["lily_of_the_valley",828],["lime_banner",829],["lime_bed",830],["lime_bundle",212],["lime_candle",831],["lime_carpet",832],["lime_concrete",833],["lime_concrete_powder",834],["lime_cushion",835],["lime_dye",836],["lime_glazed_terracotta",837],["lime_harness",838],["lime_shulker_box",839],["lime_stained_glass",840],["lime_stained_glass_pane",841],["lime_terracotta",842],["lime_wool",843],["lingering_potion",844],["lit_pumpkin",845],["llama_spawn_egg",523],["lodestone",846],["lodestone_compass",325],["lodestonecompass_atlas",325],["loom",847],["mace",848],["magenta_banner",849],["magenta_bed",850],["magenta_bundle",215],["magenta_candle",851],["magenta_carpet",852],["magenta_concrete",853],["magenta_concrete_powder",854],["magenta_cushion",855],["magenta_dye",856],["magenta_glazed_terracotta",857],["magenta_harness",858],["magenta_shulker_box",859],["magenta_stained_glass",860],["magenta_stained_glass_pane",861],["magenta_terracotta",862],["magenta_wool",863],["magma",864],["magma_cream",865],["magma_cube_spawn_egg",522],["mangrove_boat",866],["mangrove_button",867],["mangrove_chest_boat",868],["mangrove_door",869],["mangrove_fence",867],["mangrove_fence_gate",867],["mangrove_hanging_sign",870],["mangrove_leaves",871],["mangrove_log",872],["mangrove_planks",873],["mangrove_pressure_plate",867],["mangrove_propagule",874],["mangrove_shelf",875],["mangrove_sign",876],["mangrove_slab",877],["mangrove_stairs",878],["mangrove_trapdoor",879],["mangrove_wood",880],["map",562],["map_abandoned_campsite",881],["map_ancient_city",882],["map_desert_pyramid",883],["map_desert_village",884],["map_jungle_temple",885],["map_locked",601],["map_mansion",886],["map_mineshaft",887],["map_monument",888],["map_nautilus",null],["map_plains_village",889],["map_savanna_village",890],["map_snowy_village",891],["map_swamp_hut",892],["map_taiga_village",893],["map_trial_chambers",894],["map_warm_ocean_ruins",895],["medium_amethyst_bud",896],["melon_block",897],["melon_seeds",898],["melon_slice",899],["milk_bucket",900],["minecart",901],["miner_pottery_sherd",902],["mob_spawner",903],["mojang_banner_pattern",904],["mooshroom_spawn_egg",525],["moss_block",905],["moss_carpet",906],["mossy_cobblestone",907],["mossy_cobblestone_slab",908],["mossy_cobblestone_stairs",909],["mossy_cobblestone_wall",910],["mossy_stone_brick_slab",911],["mossy_stone_brick_stairs",912],["mossy_stone_brick_wall",913],["mossy_stone_bricks",914],["mourner_pottery_sherd",915],["mud",916],["mud_brick_slab",917],["mud_brick_stairs",918],["mud_brick_wall",919],["mud_bricks",920],["mule_spawn_egg",524],["mushroom_stem",921],["mushroom_stew",922],["music_disc_11",923],["music_disc_13",924],["music_disc_5",925],["music_disc_blocks",926],["music_disc_bounce",927],["music_disc_cat",928],["music_disc_chirp",929],["music_disc_creator",930],["music_disc_creator_music_box",931],["music_disc_far",932],["music_disc_lava_chicken",933],["music_disc_mall",934],["music_disc_mellohi",935],["music_disc_otherside",936],["music_disc_pigstep",937],["music_disc_precipice",938],["music_disc_relic",939],["music_disc_stal",940],["music_disc_strad",941],["music_disc_tears",942],["music_disc_wait",943],["music_disc_ward",944],["mutton",945],["mycelium",946],["name_tag",947],["nautilus_shell",948],["nautilus_spawn_egg",949],["nether_brick",950],["nether_brick_fence",951],["nether_brick_slab",952],["nether_brick_stairs",953],["nether_brick_wall",951],["nether_gold_ore",954],["nether_sprouts",955],["nether_star",956],["nether_wart",957],["nether_wart_block",958],["netherbrick",959],["netherite_axe",960],["netherite_block",961],["netherite_boots",962],["netherite_chestplate",963],["netherite_helmet",964],["netherite_hoe",965],["netherite_horse_armor",966],["netherite_ingot",967],["netherite_leggings",968],["netherite_nautilus_armor",969],["netherite_pickaxe",970],["netherite_scrap",971],["netherite_shovel",972],["netherite_spear",973],["netherite_sword",974],["netherite_upgrade_smithing_template",975],["netherrack",976],["normal_stone_slab",977],["normal_stone_stairs",978],["noteblock",979],["npc_spawn_egg",null],["oak_boat",135],["oak_button",597],["oak_chest_boat",980],["oak_fence",597],["oak_fence_gate",597],["oak_hanging_sign",981],["oak_leaves",982],["oak_log",983],["oak_planks",984],["oak_pressure_plate",597],["oak_sapling",985],["oak_shelf",986],["oak_sign",987],["oak_slab",988],["oak_stairs",989],["oak_wood",990],["observer",991],["obsidian",992],["ocelot_spawn_egg",526],["ochre_froglight",993],["ominous_bottle",994],["ominous_trial_key",995],["open_eyeblossom",996],["orange_banner",997],["orange_bed",998],["orange_bundle",220],["orange_candle",999],["orange_carpet",1000],["orange_concrete",1001],["orange_concrete_powder",1002],["orange_cushion",1003],["orange_dye",1004],["orange_glazed_terracotta",1005],["orange_harness",1006],["orange_shulker_box",1007],["orange_stained_glass",1008],["orange_stained_glass_pane",1009],["orange_terracotta",1010],["orange_tulip",1011],["orange_wool",1012],["oxeye_daisy",1013],["oxidized_chiseled_copper",1014],["oxidized_copper",1015],["oxidized_copper_bars",1016],["oxidized_copper_block",1015],["oxidized_copper_bulb",1017],["oxidized_copper_chain",1018],["oxidized_copper_chest",1019],["oxidized_copper_door",1020],["oxidized_copper_grate",1021],["oxidized_copper_lantern",1022],["oxidized_copper_trapdoor",1023],["oxidized_cut_copper",1024],["oxidized_cut_copper_slab",1025],["oxidized_cut_copper_stairs",1026],["oxidized_lightning_rod",1027],["packed_ice",1028],["packed_mud",1029],["painting",1030],["pale_moss_block",1031],["pale_moss_carpet",1032],["pale_oak_boat",1033],["pale_oak_chest_boat",1034],["pale_oak_door",1035],["pale_oak_fence",1036],["pale_oak_fence_gate",1036],["pale_oak_hanging_sign",1037],["pale_oak_log",1038],["pale_oak_planks",1039],["pale_oak_sapling",1040],["pale_oak_shelf",1041],["pale_oak_sign",1042],["pale_oak_slab",1043],["pale_oak_stairs",1044],["pale_oak_trapdoor",1045],["pale_oak_wood",1046],["panda_spawn_egg",527],["paper",1047],["parched_spawn_egg",1048],["parrot_spawn_egg",528],["pearlescent_froglight",1049],["peony",1050],["phantom_membrane",1051],["phantom_spawn_egg",529],["pig_spawn_egg",530],["piglin_banner_pattern",1052],["piglin_brute_spawn_egg",1053],["piglin_head",1054],["piglin_spawn_egg",1055],["pillager_spawn_egg",532],["pink_banner",1056],["pink_bed",1057],["pink_bundle",223],["pink_candle",1058],["pink_carpet",1059],["pink_concrete",1060],["pink_concrete_powder",1061],["pink_cushion",1062],["pink_dye",1063],["pink_glazed_terracotta",1064],["pink_harness",1065],["pink_petals",1066],["pink_shulker_box",1067],["pink_stained_glass",1068],["pink_stained_glass_pane",1069],["pink_terracotta",1070],["pink_tulip",1071],["pink_wool",1072],["piston",1073],["pitcher_pod",1074],["player_head",1075],["plenty_pottery_sherd",1076],["podzol",1077],["pointed_dripstone",1078],["poisonous_potato",1079],["polar_bear_spawn_egg",533],["polished_andesite",1080],["polished_andesite_slab",1081],["polished_andesite_stairs",1082],["polished_basalt",1083],["polished_blackstone",1084],["polished_blackstone_brick_slab",1085],["polished_blackstone_brick_stairs",1086],["polished_blackstone_brick_wall",1087],["polished_blackstone_bricks",1088],["polished_blackstone_button",1089],["polished_blackstone_pressure_plate",1089],["polished_blackstone_slab",1090],["polished_blackstone_stairs",1091],["polished_blackstone_wall",1089],["polished_cinnabar",1092],["polished_deepslate",1093],["polished_deepslate_slab",1094],["polished_deepslate_stairs",1095],["polished_deepslate_wall",1096],["polished_diorite",1097],["polished_diorite_slab",1098],["polished_diorite_stairs",1099],["polished_granite",1100],["polished_granite_slab",1101],["polished_granite_stairs",1102],["polished_sulfur",1103],["polished_tuff",1104],["polished_tuff_slab",1105],["polished_tuff_stairs",1106],["polished_tuff_wall",1107],["poplar_boat",1108],["poplar_chest_boat",1109],["poplar_door",1110],["poplar_hanging_sign",1111],["poplar_sign",1112],["popped_chorus_fruit",1113],["poppy",1114],["porkchop",708],["potato",1115],["potent_sulfur",1116],["potion",1117],["potion_overlay",null],["powder_snow",1118],["powder_snow_bucket",1118],["prismarine",1119],["prismarine_brick_slab",1120],["prismarine_brick_stairs",1121],["prismarine_bricks",1122],["prismarine_crystals",1123],["prismarine_shard",1124],["prismarine_slab",1125],["prismarine_stairs",1126],["prismarine_wall",1127],["prize_pottery_sherd",1128],["pufferfish",1129],["pufferfish_bucket",1130],["pufferfish_spawn_egg",534],["pumpkin",1131],["pumpkin_pie",1132],["pumpkin_seeds",1133],["purple_banner",1134],["purple_bed",1135],["purple_bundle",226],["purple_candle",1136],["purple_carpet",1137],["purple_concrete",1138],["purple_concrete_powder",1139],["purple_cushion",1140],["purple_dye",1141],["purple_glazed_terracotta",1142],["purple_harness",1143],["purple_shulker_box",1144],["purple_stained_glass",1145],["purple_stained_glass_pane",1146],["purple_terracotta",1147],["purple_wool",1148],["purpur_block",1149],["purpur_pillar",1150],["purpur_slab",1151],["purpur_stairs",1152],["quartz",1153],["quartz_block",1154],["quartz_bricks",1155],["quartz_ore",1156],["quartz_pillar",1157],["quartz_slab",1158],["quartz_stairs",1159],["quiver",null],["rabbit",1160],["rabbit_foot",1161],["rabbit_hide",1162],["rabbit_spawn_egg",535],["rabbit_stew",1163],["rail",1164],["raiser_armor_trim_smithing_template",1165],["ravager_spawn_egg",536],["raw_copper",1166],["raw_copper_block",1167],["raw_gold",1168],["raw_gold_block",1169],["raw_iron",1170],["raw_iron_block",1171],["recovery_compass",1172],["recovery_compass_atlas",1172],["red_banner",1173],["red_bed",1174],["red_bundle",229],["red_candle",1175],["red_carpet",1176],["red_concrete",1177],["red_concrete_powder",1178],["red_cushion",1179],["red_dye",1180],["red_glazed_terracotta",1181],["red_harness",1182],["red_mushroom",1183],["red_mushroom_block",1184],["red_nether_brick",1185],["red_nether_brick_slab",1186],["red_nether_brick_stairs",1187],["red_nether_brick_wall",1188],["red_sand",1189],["red_sandstone",1190],["red_sandstone_slab",1191],["red_sandstone_stairs",1192],["red_sandstone_wall",1193],["red_shulker_box",1194],["red_stained_glass",1195],["red_stained_glass_pane",1196],["red_terracotta",1197],["red_tulip",1198],["red_wool",1199],["redstone",1200],["redstone_block",1201],["redstone_lamp",1202],["redstone_ore",1203],["redstone_torch",1204],["redstone_wire",1200],["reinforced_deepslate",1205],["repeater",1206],["repeating_command_block",1207],["resin_block",1208],["resin_brick",1209],["resin_brick_slab",1210],["resin_brick_stairs",1211],["resin_brick_wall",1212],["resin_bricks",1213],["resin_clump",1214],["respawn_anchor",1215],["rib_armor_trim_smithing_template",1216],["rooted_dirt",1217],["rose_bush",1218],["rotten_flesh",1219],["ruby",null],["saddle",1220],["salmon",1221],["salmon_bucket",1222],["salmon_spawn_egg",537],["sand",1223],["sandstone",1224],["sandstone_slab",1225],["sandstone_stairs",1226],["sandstone_wall",1227],["scaffolding",1228],["scrape_pottery_sherd",1229],["sculk",1230],["sculk_catalyst",1231],["sculk_sensor",243],["sculk_shrieker",1232],["sculk_vein",1233],["scute",1234],["sea_lantern",1235],["sea_pickle",1236],["seagrass",1237],["sentry_armor_trim_smithing_template",1238],["shaper_armor_trim_smithing_template",1239],["sheaf_pottery_sherd",1240],["shears",1241],["sheep_spawn_egg",538],["shelter_pottery_sherd",1242],["shield",1243],["short_dry_grass",1244],["short_grass",1245],["shroomlight",1246],["shulker_shell",1247],["shulker_spawn_egg",539],["silence_armor_trim_smithing_template",1248],["silverfish_spawn_egg",540],["skeleton_horse_spawn_egg",542],["skeleton_skull",1249],["skeleton_spawn_egg",541],["skull_banner_pattern",1250],["skull_pottery_sherd",1251],["slime",1252],["slime_ball",1253],["slime_spawn_egg",543],["small_amethyst_bud",1254],["smithing_table",1255],["smoker",1256],["smooth_basalt",1257],["smooth_quartz",1258],["smooth_quartz_slab",1259],["smooth_quartz_stairs",1260],["smooth_red_sandstone",1261],["smooth_red_sandstone_slab",1262],["smooth_red_sandstone_stairs",1263],["smooth_sandstone",1264],["smooth_sandstone_slab",1265],["smooth_sandstone_stairs",1266],["smooth_stone",1267],["smooth_stone_slab",1268],["sniffer_egg",1269],["sniffer_spawn_egg",1270],["snort_pottery_sherd",1271],["snout_armor_trim_smithing_template",1272],["snow",1273],["snow_golem_spawn_egg",1274],["snow_layer",1275],["snowball",1276],["soul_campfire",1277],["soul_lantern",1278],["soul_sand",1279],["soul_soil",1280],["soul_torch",1281],["spawn_egg_sulfur_cube",1282],["spider_eye",1283],["spider_spawn_egg",544],["spire_armor_trim_smithing_template",1284],["splash_potion",1285],["sponge",1286],["spore_blossom",1287],["spruce_boat",1288],["spruce_button",1289],["spruce_chest_boat",1290],["spruce_door",1291],["spruce_fence",1289],["spruce_fence_gate",1289],["spruce_hanging_sign",1292],["spruce_leaves",1293],["spruce_log",1294],["spruce_planks",1295],["spruce_pressure_plate",1289],["spruce_sapling",1296],["spruce_shelf",1297],["spruce_sign",1298],["spruce_slab",1299],["spruce_stairs",1300],["spruce_trapdoor",1301],["spruce_wood",1302],["spyglass",1303],["squid_spawn_egg",545],["stick",1304],["sticky_piston",1305],["stone",1306],["stone_axe",1307],["stone_brick_slab",1308],["stone_brick_stairs",1309],["stone_brick_wall",1310],["stone_bricks",1311],["stone_button",1312],["stone_hoe",1313],["stone_pickaxe",1314],["stone_pressure_plate",1312],["stone_shovel",1315],["stone_slab",1268],["stone_spear",1316],["stone_stairs",316],["stone_sword",1317],["stonecutter",1318],["stonecutter_block",1318],["straw_bed",1319],["stray_spawn_egg",546],["strider_spawn_egg",1320],["string",1321],["stripped_acacia_log",1322],["stripped_acacia_wood",1323],["stripped_bamboo_block",1324],["stripped_birch_log",1325],["stripped_birch_wood",1326],["stripped_cherry_log",1327],["stripped_cherry_wood",1328],["stripped_crimson_hyphae",1329],["stripped_crimson_stem",1330],["stripped_dark_oak_log",1331],["stripped_dark_oak_wood",1332],["stripped_jungle_log",1333],["stripped_jungle_wood",1334],["stripped_mangrove_log",1335],["stripped_mangrove_wood",1336],["stripped_oak_log",1337],["stripped_oak_wood",1338],["stripped_pale_oak_log",1339],["stripped_pale_oak_wood",1340],["stripped_spruce_log",1341],["stripped_spruce_wood",1342],["stripped_warped_hyphae",1343],["stripped_warped_stem",1344],["structure_block",1345],["sugar",1346],["sugar_cane",1347],["sulfur",1348],["sulfur_bricks",1349],["sulfur_cube_spawn_egg",1282],["sunflower",1350],["suspicious_gravel",1351],["suspicious_sand",1352],["suspicious_stew",1353],["sweet_berries",1354],["tadpole_bucket",1355],["tadpole_spawn_egg",1356],["tall_dry_grass",1357],["tall_grass",1358],["tallgrass",1245],["target",1359],["tide_armor_trim_smithing_template",1360],["tinted_glass",1361],["tipped_arrow",1362],["tnt",1363],["tnt_minecart",1364],["torch",1365],["torchflower",1366],["torchflower_seeds",1367],["totem_of_undying",1368],["trader_llama_spawn_egg",1369],["trapdoor",1370],["trapped_chest",1371],["trial_key",1372],["trial_spawner",1373],["trident",1374],["tripwire_hook",1375],["tropical_fish",1376],["tropical_fish_bucket",1377],["tropical_fish_spawn_egg",511],["tropicalfish_spawn_egg",511],["tube_coral",1378],["tube_coral_block",1379],["tube_coral_fan",1380],["tuff",1381],["tuff_brick_slab",1382],["tuff_brick_stairs",1383],["tuff_brick_wall",1384],["tuff_bricks",1385],["tuff_slab",1386],["tuff_stairs",1387],["tuff_wall",1388],["turtle_egg",1389],["turtle_helmet",1390],["turtle_scute",1234],["turtle_spawn_egg",547],["twisting_vines",1391],["undyed_shulker_box",1392],["vault",1393],["verdant_froglight",1394],["vex_armor_trim_smithing_template",1395],["vex_spawn_egg",548],["villagebell",74],["villager_spawn_egg",549],["vindicator_spawn_egg",550],["vine",1396],["wandering_trader_spawn_egg",551],["ward_armor_trim_smithing_template",1397],["warden_spawn_egg",1398],["warped_button",1399],["warped_door",1400],["warped_fence",1399],["warped_fence_gate",1399],["warped_fungus",1401],["warped_fungus_on_a_stick",1402],["warped_hanging_sign",1403],["warped_hyphae",1404],["warped_nylium",1405],["warped_planks",1406],["warped_pressure_plate",1399],["warped_roots",1407],["warped_shelf",1408],["warped_sign",1409],["warped_slab",1410],["warped_stairs",1411],["warped_stem",1412],["warped_trapdoor",1413],["warped_wart_block",1414],["watch_atlas",303],["water_bucket",1415],["waterlily",1416],["waxed_chiseled_copper",285],["waxed_copper",337],["waxed_copper_block",337],["waxed_copper_bulb",339],["waxed_copper_chest",341],["waxed_copper_grate",345],["waxed_cut_copper",395],["waxed_cut_copper_slab",396],["waxed_cut_copper_stairs",397],["waxed_exposed_chiseled_copper",580],["waxed_exposed_copper",581],["waxed_exposed_copper_block",581],["waxed_exposed_copper_bulb",583],["waxed_exposed_copper_chest",585],["waxed_exposed_copper_grate",587],["waxed_exposed_cut_copper",590],["waxed_exposed_cut_copper_slab",591],["waxed_exposed_cut_copper_stairs",592],["waxed_oxidized_chiseled_copper",1014],["waxed_oxidized_copper",1015],["waxed_oxidized_copper_block",1015],["waxed_oxidized_copper_bulb",1017],["waxed_oxidized_copper_chest",1019],["waxed_oxidized_copper_grate",1021],["waxed_oxidized_cut_copper",1024],["waxed_oxidized_cut_copper_slab",1025],["waxed_oxidized_cut_copper_stairs",1026],["waxed_weathered_chiseled_copper",1417],["waxed_weathered_copper",1418],["waxed_weathered_copper_block",1418],["waxed_weathered_copper_bulb",1419],["waxed_weathered_copper_chest",1420],["waxed_weathered_copper_grate",1421],["waxed_weathered_cut_copper",1422],["waxed_weathered_cut_copper_slab",1423],["waxed_weathered_cut_copper_stairs",1424],["wayfinder_armor_trim_smithing_template",1425],["weathered_chiseled_copper",1417],["weathered_copper",1418],["weathered_copper_bars",1426],["weathered_copper_block",1418],["weathered_copper_bulb",1419],["weathered_copper_chain",1427],["weathered_copper_chest",1420],["weathered_copper_door",1428],["weathered_copper_grate",1421],["weathered_copper_lantern",1429],["weathered_copper_trapdoor",1430],["weathered_cut_copper",1422],["weathered_cut_copper_slab",1423],["weathered_cut_copper_stairs",1424],["weathered_lightning_rod",1431],["web",1432],["weeping_vines",1433],["wet_sponge",1434],["wheat",1435],["wheat_seeds",1436],["white_banner",59],["white_bed",1437],["white_bundle",232],["white_candle",1438],["white_carpet",1439],["white_concrete",1440],["white_concrete_powder",1441],["white_cushion",1442],["white_dye",1443],["white_glazed_terracotta",1444],["white_harness",1445],["white_shulker_box",1446],["white_stained_glass",1447],["white_stained_glass_pane",1448],["white_terracotta",1449],["white_tulip",1450],["white_wool",1451],["wild_armor_trim_smithing_template",1452],["wildflowers",1453],["wind_charge",1454],["witch_spawn_egg",552],["wither_rose",1455],["wither_skeleton_skull",1456],["wither_skeleton_spawn_egg",1457],["wither_spawn_egg",553],["wolf_armor",1458],["wolf_armor_dyed",1458],["wolf_spawn_egg",554],["wooden_axe",1459],["wooden_button",597],["wooden_door",1460],["wooden_hoe",1461],["wooden_pickaxe",1462],["wooden_pressure_plate",597],["wooden_shovel",1463],["wooden_slab",988],["wooden_spear",1464],["wooden_sword",1465],["writable_book",1466],["written_book",1467],["yellow_banner",1468],["yellow_bed",1469],["yellow_bundle",235],["yellow_candle",1470],["yellow_carpet",1471],["yellow_concrete",1472],["yellow_concrete_powder",1473],["yellow_cushion",1474],["yellow_dye",1475],["yellow_glazed_terracotta",1476],["yellow_harness",1477],["yellow_shulker_box",1478],["yellow_stained_glass",1479],["yellow_stained_glass_pane",1480],["yellow_terracotta",1481],["yellow_wool",1482],["zoglin_spawn_egg",1483],["zombie_head",1484],["zombie_horse_spawn_egg",556],["zombie_nautilus_spawn_egg",1485],["zombie_pigman_spawn_egg",531],["zombie_spawn_egg",555],["zombie_villager_spawn_egg",557],["zombified_piglin_spawn_egg",531]],"pos":{"0":[0,0],"1":[1,0],"2":[2,0],"3":[3,0],"4":[4,0],"5":[5,0],"6":[6,0],"7":[7,0],"8":[8,0],"9":[9,0],"10":[10,0],"11":[11,0],"12":[12,0],"13":[13,0],"14":[14,0],"15":[15,0],"16":[16,0],"17":[17,0],"18":[18,0],"19":[19,0],"20":[20,0],"21":[21,0],"22":[22,0],"23":[23,0],"24":[24,0],"25":[25,0],"26":[26,0],"27":[27,0],"28":[28,0],"29":[29,0],"30":[30,0],"31":[31,0],"32":[32,0],"33":[33,0],"34":[34,0],"35":[35,0],"36":[36,0],"37":[37,0],"38":[38,0],"39":[39,0],"40":[40,0],"41":[0,1],"42":[1,1],"43":[2,1],"44":[3,1],"45":[4,1],"46":[5,1],"47":[6,1],"48":[7,1],"49":[8,1],"50":[9,1],"51":[10,1],"52":[11,1],"53":[12,1],"54":[13,1],"55":[14,1],"56":[15,1],"57":[16,1],"58":[17,1],"59":[18,1],"60":[19,1],"61":[20,1],"62":[21,1],"63":[22,1],"64":[23,1],"65":[24,1],"66":[25,1],"67":[26,1],"68":[27,1],"69":[28,1],"70":[29,1],"71":[30,1],"72":[31,1],"73":[32,1],"74":[33,1],"75":[34,1],"76":[35,1],"77":[36,1],"78":[37,1],"79":[38,1],"80":[39,1],"81":[40,1],"82":[0,2],"83":[1,2],"84":[2,2],"85":[3,2],"86":[4,2],"87":[5,2],"88":[6,2],"89":[7,2],"90":[8,2],"91":[9,2],"92":[10,2],"93":[11,2],"94":[12,2],"95":[13,2],"96":[14,2],"97":[15,2],"98":[16,2],"99":[17,2],"100":[18,2],"101":[19,2],"102":[20,2],"103":[21,2],"104":[22,2],"105":[23,2],"106":[24,2],"107":[25,2],"108":[26,2],"109":[27,2],"110":[28,2],"111":[29,2],"112":[30,2],"113":[31,2],"114":[32,2],"115":[33,2],"116":[34,2],"117":[35,2],"118":[36,2],"119":[37,2],"120":[38,2],"121":[39,2],"122":[40,2],"123":[0,3],"124":[1,3],"125":[2,3],"126":[3,3],"127":[4,3],"128":[5,3],"129":[6,3],"130":[7,3],"131":[8,3],"132":[9,3],"133":[10,3],"134":[11,3],"135":[12,3],"136":[13,3],"137":[14,3],"138":[15,3],"139":[16,3],"140":[17,3],"141":[18,3],"142":[19,3],"143":[20,3],"144":[21,3],"145":[22,3],"146":[23,3],"147":[24,3],"148":[25,3],"149":[26,3],"150":[27,3],"151":[28,3],"152":[29,3],"153":[30,3],"154":[31,3],"155":[32,3],"156":[33,3],"157":[34,3],"158":[35,3],"159":[36,3],"160":[37,3],"161":[38,3],"162":[39,3],"163":[40,3],"164":[0,4],"165":[1,4],"166":[2,4],"167":[3,4],"168":[4,4],"169":[5,4],"170":[6,4],"171":[7,4],"172":[8,4],"173":[9,4],"174":[10,4],"175":[11,4],"176":[12,4],"177":[13,4],"178":[14,4],"179":[15,4],"180":[16,4],"181":[17,4],"182":[18,4],"183":[19,4],"184":[20,4],"185":[21,4],"186":[22,4],"187":[23,4],"188":[24,4],"189":[25,4],"190":[26,4],"191":[27,4],"192":[28,4],"193":[29,4],"194":[30,4],"195":[31,4],"196":[32,4],"197":[33,4],"198":[34,4],"199":[35,4],"200":[36,4],"201":[37,4],"202":[38,4],"203":[39,4],"204":[40,4],"205":[0,5],"206":[1,5],"207":[2,5],"208":[3,5],"209":[4,5],"210":[5,5],"211":[6,5],"212":[7,5],"213":[8,5],"214":[9,5],"215":[10,5],"216":[11,5],"217":[12,5],"218":[13,5],"219":[14,5],"220":[15,5],"221":[16,5],"222":[17,5],"223":[18,5],"224":[19,5],"225":[20,5],"226":[21,5],"227":[22,5],"228":[23,5],"229":[24,5],"230":[25,5],"231":[26,5],"232":[27,5],"233":[28,5],"234":[29,5],"235":[30,5],"236":[31,5],"237":[32,5],"238":[33,5],"239":[34,5],"240":[35,5],"241":[36,5],"242":[37,5],"243":[38,5],"244":[39,5],"245":[40,5],"246":[0,6],"247":[1,6],"248":[2,6],"249":[3,6],"250":[4,6],"251":[5,6],"252":[6,6],"253":[7,6],"254":[8,6],"255":[9,6],"256":[10,6],"257":[11,6],"258":[12,6],"259":[13,6],"260":[14,6],"261":[15,6],"262":[16,6],"263":[17,6],"264":[18,6],"265":[19,6],"266":[20,6],"267":[21,6],"268":[22,6],"269":[23,6],"270":[24,6],"271":[25,6],"272":[26,6],"273":[27,6],"274":[28,6],"275":[29,6],"276":[30,6],"277":[31,6],"278":[32,6],"279":[33,6],"280":[34,6],"281":[35,6],"282":[36,6],"283":[37,6],"284":[38,6],"285":[39,6],"286":[40,6],"287":[0,7],"288":[1,7],"289":[2,7],"290":[3,7],"291":[4,7],"292":[5,7],"293":[6,7],"294":[7,7],"295":[8,7],"296":[9,7],"297":[10,7],"298":[11,7],"299":[12,7],"300":[13,7],"301":[14,7],"302":[15,7],"303":[16,7],"304":[17,7],"305":[18,7],"306":[19,7],"307":[20,7],"308":[21,7],"309":[22,7],"310":[23,7],"311":[24,7],"312":[25,7],"313":[26,7],"314":[27,7],"315":[28,7],"316":[29,7],"317":[30,7],"318":[31,7],"319":[32,7],"320":[33,7],"321":[34,7],"322":[35,7],"323":[36,7],"324":[37,7],"325":[38,7],"326":[39,7],"327":[40,7],"328":[0,8],"329":[1,8],"330":[2,8],"331":[3,8],"332":[4,8],"333":[5,8],"334":[6,8],"335":[7,8],"336":[8,8],"337":[9,8],"338":[10,8],"339":[11,8],"340":[12,8],"341":[13,8],"342":[14,8],"343":[15,8],"344":[16,8],"345":[17,8],"346":[18,8],"347":[19,8],"348":[20,8],"349":[21,8],"350":[22,8],"351":[23,8],"352":[24,8],"353":[25,8],"354":[26,8],"355":[27,8],"356":[28,8],"357":[29,8],"358":[30,8],"359":[31,8],"360":[32,8],"361":[33,8],"362":[34,8],"363":[35,8],"364":[36,8],"365":[37,8],"366":[38,8],"367":[39,8],"368":[40,8],"369":[0,9],"370":[1,9],"371":[2,9],"372":[3,9],"373":[4,9],"374":[5,9],"375":[6,9],"376":[7,9],"377":[8,9],"378":[9,9],"379":[10,9],"380":[11,9],"381":[12,9],"382":[13,9],"383":[14,9],"384":[15,9],"385":[16,9],"386":[17,9],"387":[18,9],"388":[19,9],"389":[20,9],"390":[21,9],"391":[22,9],"392":[23,9],"393":[24,9],"394":[25,9],"395":[26,9],"396":[27,9],"397":[28,9],"398":[29,9],"399":[30,9],"400":[31,9],"401":[32,9],"402":[33,9],"403":[34,9],"404":[35,9],"405":[36,9],"406":[37,9],"407":[38,9],"408":[39,9],"409":[40,9],"410":[0,10],"411":[1,10],"412":[2,10],"413":[3,10],"414":[4,10],"415":[5,10],"416":[6,10],"417":[7,10],"418":[8,10],"419":[9,10],"420":[10,10],"421":[11,10],"422":[12,10],"423":[13,10],"424":[14,10],"425":[15,10],"426":[16,10],"427":[17,10],"428":[18,10],"429":[19,10],"430":[20,10],"431":[21,10],"432":[22,10],"433":[23,10],"434":[24,10],"435":[25,10],"436":[26,10],"437":[27,10],"438":[28,10],"439":[29,10],"440":[30,10],"441":[31,10],"442":[32,10],"443":[33,10],"444":[34,10],"445":[35,10],"446":[36,10],"447":[37,10],"448":[38,10],"449":[39,10],"450":[40,10],"451":[0,11],"452":[1,11],"453":[2,11],"454":[3,11],"455":[4,11],"456":[5,11],"457":[6,11],"458":[7,11],"459":[8,11],"460":[9,11],"461":[10,11],"462":[11,11],"463":[12,11],"464":[13,11],"465":[14,11],"466":[15,11],"467":[16,11],"468":[17,11],"469":[18,11],"470":[19,11],"471":[20,11],"472":[21,11],"473":[22,11],"474":[23,11],"475":[24,11],"476":[25,11],"477":[26,11],"478":[27,11],"479":[28,11],"480":[29,11],"481":[30,11],"482":[31,11],"483":[32,11],"484":[33,11],"485":[34,11],"486":[35,11],"487":[36,11],"488":[37,11],"489":[38,11],"490":[39,11],"491":[40,11],"492":[0,12],"493":[1,12],"494":[2,12],"495":[3,12],"496":[4,12],"497":[5,12],"498":[6,12],"499":[7,12],"500":[8,12],"501":[9,12],"502":[10,12],"503":[11,12],"504":[12,12],"505":[13,12],"506":[14,12],"507":[15,12],"508":[16,12],"509":[17,12],"510":[18,12],"511":[19,12],"512":[20,12],"513":[21,12],"514":[22,12],"515":[23,12],"516":[24,12],"517":[25,12],"518":[26,12],"519":[27,12],"520":[28,12],"521":[29,12],"522":[30,12],"523":[31,12],"524":[32,12],"525":[33,12],"526":[34,12],"527":[35,12],"528":[36,12],"529":[37,12],"530":[38,12],"531":[39,12],"532":[40,12],"533":[0,13],"534":[1,13],"535":[2,13],"536":[3,13],"537":[4,13],"538":[5,13],"539":[6,13],"540":[7,13],"541":[8,13],"542":[9,13],"543":[10,13],"544":[11,13],"545":[12,13],"546":[13,13],"547":[14,13],"548":[15,13],"549":[16,13],"550":[17,13],"551":[18,13],"552":[19,13],"553":[20,13],"554":[21,13],"555":[22,13],"556":[23,13],"557":[24,13],"558":[25,13],"559":[26,13],"560":[27,13],"561":[28,13],"562":[29,13],"563":[30,13],"564":[31,13],"565":[32,13],"566":[33,13],"567":[34,13],"568":[35,13],"569":[36,13],"570":[37,13],"571":[38,13],"572":[39,13],"573":[40,13],"574":[0,14],"575":[1,14],"576":[2,14],"577":[3,14],"578":[4,14],"579":[5,14],"580":[6,14],"581":[7,14],"582":[8,14],"583":[9,14],"584":[10,14],"585":[11,14],"586":[12,14],"587":[13,14],"588":[14,14],"589":[15,14],"590":[16,14],"591":[17,14],"592":[18,14],"593":[19,14],"594":[20,14],"595":[21,14],"596":[22,14],"597":[23,14],"598":[24,14],"599":[25,14],"600":[26,14],"601":[27,14],"602":[28,14],"603":[29,14],"604":[30,14],"605":[31,14],"606":[32,14],"607":[33,14],"608":[34,14],"609":[35,14],"610":[36,14],"611":[37,14],"612":[38,14],"613":[39,14],"614":[40,14],"615":[0,15],"616":[1,15],"617":[2,15],"618":[3,15],"619":[4,15],"620":[5,15],"621":[6,15],"622":[7,15],"623":[8,15],"624":[9,15],"625":[10,15],"626":[11,15],"627":[12,15],"628":[13,15],"629":[14,15],"630":[15,15],"631":[16,15],"632":[17,15],"633":[18,15],"634":[19,15],"635":[20,15],"636":[21,15],"637":[22,15],"638":[23,15],"639":[24,15],"640":[25,15],"641":[26,15],"642":[27,15],"643":[28,15],"644":[29,15],"645":[30,15],"646":[31,15],"647":[32,15],"648":[33,15],"649":[34,15],"650":[35,15],"651":[36,15],"652":[37,15],"653":[38,15],"654":[39,15],"655":[40,15],"656":[0,16],"657":[1,16],"658":[2,16],"659":[3,16],"660":[4,16],"661":[5,16],"662":[6,16],"663":[7,16],"664":[8,16],"665":[9,16],"666":[10,16],"667":[11,16],"668":[12,16],"669":[13,16],"670":[14,16],"671":[15,16],"672":[16,16],"673":[17,16],"674":[18,16],"675":[19,16],"676":[20,16],"677":[21,16],"678":[22,16],"679":[23,16],"680":[24,16],"681":[25,16],"682":[26,16],"683":[27,16],"684":[28,16],"685":[29,16],"686":[30,16],"687":[31,16],"688":[32,16],"689":[33,16],"690":[34,16],"691":[35,16],"692":[36,16],"693":[37,16],"694":[38,16],"695":[39,16],"696":[40,16],"697":[0,17],"698":[1,17],"699":[2,17],"700":[3,17],"701":[4,17],"702":[5,17],"703":[6,17],"704":[7,17],"705":[8,17],"706":[9,17],"707":[10,17],"708":[11,17],"709":[12,17],"710":[13,17],"711":[14,17],"712":[15,17],"713":[16,17],"714":[17,17],"715":[18,17],"716":[19,17],"717":[20,17],"718":[21,17],"719":[22,17],"720":[23,17],"721":[24,17],"722":[25,17],"723":[26,17],"724":[27,17],"725":[28,17],"726":[29,17],"727":[30,17],"728":[31,17],"729":[32,17],"730":[33,17],"731":[34,17],"732":[35,17],"733":[36,17],"734":[37,17],"735":[38,17],"736":[39,17],"737":[40,17],"738":[0,18],"739":[1,18],"740":[2,18],"741":[3,18],"742":[4,18],"743":[5,18],"744":[6,18],"745":[7,18],"746":[8,18],"747":[9,18],"748":[10,18],"749":[11,18],"750":[12,18],"751":[13,18],"752":[14,18],"753":[15,18],"754":[16,18],"755":[17,18],"756":[18,18],"757":[19,18],"758":[20,18],"759":[21,18],"760":[22,18],"761":[23,18],"762":[24,18],"763":[25,18],"764":[26,18],"765":[27,18],"766":[28,18],"767":[29,18],"768":[30,18],"769":[31,18],"770":[32,18],"771":[33,18],"772":[34,18],"773":[35,18],"774":[36,18],"775":[37,18],"776":[38,18],"777":[39,18],"778":[40,18],"779":[0,19],"780":[1,19],"781":[2,19],"782":[3,19],"783":[4,19],"784":[5,19],"785":[6,19],"786":[7,19],"787":[8,19],"788":[9,19],"789":[10,19],"790":[11,19],"791":[12,19],"792":[13,19],"793":[14,19],"794":[15,19],"795":[16,19],"796":[17,19],"797":[18,19],"798":[19,19],"799":[20,19],"800":[21,19],"801":[22,19],"802":[23,19],"803":[24,19],"804":[25,19],"805":[26,19],"806":[27,19],"807":[28,19],"808":[29,19],"809":[30,19],"810":[31,19],"811":[32,19],"812":[33,19],"813":[34,19],"814":[35,19],"815":[36,19],"816":[37,19],"817":[38,19],"818":[39,19],"819":[40,19],"820":[0,20],"821":[1,20],"822":[2,20],"823":[3,20],"824":[4,20],"825":[5,20],"826":[6,20],"827":[7,20],"828":[8,20],"829":[9,20],"830":[10,20],"831":[11,20],"832":[12,20],"833":[13,20],"834":[14,20],"835":[15,20],"836":[16,20],"837":[17,20],"838":[18,20],"839":[19,20],"840":[20,20],"841":[21,20],"842":[22,20],"843":[23,20],"844":[24,20],"845":[25,20],"846":[26,20],"847":[27,20],"848":[28,20],"849":[29,20],"850":[30,20],"851":[31,20],"852":[32,20],"853":[33,20],"854":[34,20],"855":[35,20],"856":[36,20],"857":[37,20],"858":[38,20],"859":[39,20],"860":[40,20],"861":[0,21],"862":[1,21],"863":[2,21],"864":[3,21],"865":[4,21],"866":[5,21],"867":[6,21],"868":[7,21],"869":[8,21],"870":[9,21],"871":[10,21],"872":[11,21],"873":[12,21],"874":[13,21],"875":[14,21],"876":[15,21],"877":[16,21],"878":[17,21],"879":[18,21],"880":[19,21],"881":[20,21],"882":[21,21],"883":[22,21],"884":[23,21],"885":[24,21],"886":[25,21],"887":[26,21],"888":[27,21],"889":[28,21],"890":[29,21],"891":[30,21],"892":[31,21],"893":[32,21],"894":[33,21],"895":[34,21],"896":[35,21],"897":[36,21],"898":[37,21],"899":[38,21],"900":[39,21],"901":[40,21],"902":[0,22],"903":[1,22],"904":[2,22],"905":[3,22],"906":[4,22],"907":[5,22],"908":[6,22],"909":[7,22],"910":[8,22],"911":[9,22],"912":[10,22],"913":[11,22],"914":[12,22],"915":[13,22],"916":[14,22],"917":[15,22],"918":[16,22],"919":[17,22],"920":[18,22],"921":[19,22],"922":[20,22],"923":[21,22],"924":[22,22],"925":[23,22],"926":[24,22],"927":[25,22],"928":[26,22],"929":[27,22],"930":[28,22],"931":[29,22],"932":[30,22],"933":[31,22],"934":[32,22],"935":[33,22],"936":[34,22],"937":[35,22],"938":[36,22],"939":[37,22],"940":[38,22],"941":[39,22],"942":[40,22],"943":[0,23],"944":[1,23],"945":[2,23],"946":[3,23],"947":[4,23],"948":[5,23],"949":[6,23],"950":[7,23],"951":[8,23],"952":[9,23],"953":[10,23],"954":[11,23],"955":[12,23],"956":[13,23],"957":[14,23],"958":[15,23],"959":[16,23],"960":[17,23],"961":[18,23],"962":[19,23],"963":[20,23],"964":[21,23],"965":[22,23],"966":[23,23],"967":[24,23],"968":[25,23],"969":[26,23],"970":[27,23],"971":[28,23],"972":[29,23],"973":[30,23],"974":[31,23],"975":[32,23],"976":[33,23],"977":[34,23],"978":[35,23],"979":[36,23],"980":[37,23],"981":[38,23],"982":[39,23],"983":[40,23],"984":[0,24],"985":[1,24],"986":[2,24],"987":[3,24],"988":[4,24],"989":[5,24],"990":[6,24],"991":[7,24],"992":[8,24],"993":[9,24],"994":[10,24],"995":[11,24],"996":[12,24],"997":[13,24],"998":[14,24],"999":[15,24],"1000":[16,24],"1001":[17,24],"1002":[18,24],"1003":[19,24],"1004":[20,24],"1005":[21,24],"1006":[22,24],"1007":[23,24],"1008":[24,24],"1009":[25,24],"1010":[26,24],"1011":[27,24],"1012":[28,24],"1013":[29,24],"1014":[30,24],"1015":[31,24],"1016":[32,24],"1017":[33,24],"1018":[34,24],"1019":[35,24],"1020":[36,24],"1021":[37,24],"1022":[38,24],"1023":[39,24],"1024":[40,24],"1025":[0,25],"1026":[1,25],"1027":[2,25],"1028":[3,25],"1029":[4,25],"1030":[5,25],"1031":[6,25],"1032":[7,25],"1033":[8,25],"1034":[9,25],"1035":[10,25],"1036":[11,25],"1037":[12,25],"1038":[13,25],"1039":[14,25],"1040":[15,25],"1041":[16,25],"1042":[17,25],"1043":[18,25],"1044":[19,25],"1045":[20,25],"1046":[21,25],"1047":[22,25],"1048":[23,25],"1049":[24,25],"1050":[25,25],"1051":[26,25],"1052":[27,25],"1053":[28,25],"1054":[29,25],"1055":[30,25],"1056":[31,25],"1057":[32,25],"1058":[33,25],"1059":[34,25],"1060":[35,25],"1061":[36,25],"1062":[37,25],"1063":[38,25],"1064":[39,25],"1065":[40,25],"1066":[0,26],"1067":[1,26],"1068":[2,26],"1069":[3,26],"1070":[4,26],"1071":[5,26],"1072":[6,26],"1073":[7,26],"1074":[8,26],"1075":[9,26],"1076":[10,26],"1077":[11,26],"1078":[12,26],"1079":[13,26],"1080":[14,26],"1081":[15,26],"1082":[16,26],"1083":[17,26],"1084":[18,26],"1085":[19,26],"1086":[20,26],"1087":[21,26],"1088":[22,26],"1089":[23,26],"1090":[24,26],"1091":[25,26],"1092":[26,26],"1093":[27,26],"1094":[28,26],"1095":[29,26],"1096":[30,26],"1097":[31,26],"1098":[32,26],"1099":[33,26],"1100":[34,26],"1101":[35,26],"1102":[36,26],"1103":[37,26],"1104":[38,26],"1105":[39,26],"1106":[40,26],"1107":[0,27],"1108":[1,27],"1109":[2,27],"1110":[3,27],"1111":[4,27],"1112":[5,27],"1113":[6,27],"1114":[7,27],"1115":[8,27],"1116":[9,27],"1117":[10,27],"1118":[11,27],"1119":[12,27],"1120":[13,27],"1121":[14,27],"1122":[15,27],"1123":[16,27],"1124":[17,27],"1125":[18,27],"1126":[19,27],"1127":[20,27],"1128":[21,27],"1129":[22,27],"1130":[23,27],"1131":[24,27],"1132":[25,27],"1133":[26,27],"1134":[27,27],"1135":[28,27],"1136":[29,27],"1137":[30,27],"1138":[31,27],"1139":[32,27],"1140":[33,27],"1141":[34,27],"1142":[35,27],"1143":[36,27],"1144":[37,27],"1145":[38,27],"1146":[39,27],"1147":[40,27],"1148":[0,28],"1149":[1,28],"1150":[2,28],"1151":[3,28],"1152":[4,28],"1153":[5,28],"1154":[6,28],"1155":[7,28],"1156":[8,28],"1157":[9,28],"1158":[10,28],"1159":[11,28],"1160":[12,28],"1161":[13,28],"1162":[14,28],"1163":[15,28],"1164":[16,28],"1165":[17,28],"1166":[18,28],"1167":[19,28],"1168":[20,28],"1169":[21,28],"1170":[22,28],"1171":[23,28],"1172":[24,28],"1173":[25,28],"1174":[26,28],"1175":[27,28],"1176":[28,28],"1177":[29,28],"1178":[30,28],"1179":[31,28],"1180":[32,28],"1181":[33,28],"1182":[34,28],"1183":[35,28],"1184":[36,28],"1185":[37,28],"1186":[38,28],"1187":[39,28],"1188":[40,28],"1189":[0,29],"1190":[1,29],"1191":[2,29],"1192":[3,29],"1193":[4,29],"1194":[5,29],"1195":[6,29],"1196":[7,29],"1197":[8,29],"1198":[9,29],"1199":[10,29],"1200":[11,29],"1201":[12,29],"1202":[13,29],"1203":[14,29],"1204":[15,29],"1205":[16,29],"1206":[17,29],"1207":[18,29],"1208":[19,29],"1209":[20,29],"1210":[21,29],"1211":[22,29],"1212":[23,29],"1213":[24,29],"1214":[25,29],"1215":[26,29],"1216":[27,29],"1217":[28,29],"1218":[29,29],"1219":[30,29],"1220":[31,29],"1221":[32,29],"1222":[33,29],"1223":[34,29],"1224":[35,29],"1225":[36,29],"1226":[37,29],"1227":[38,29],"1228":[39,29],"1229":[40,29],"1230":[0,30],"1231":[1,30],"1232":[2,30],"1233":[3,30],"1234":[4,30],"1235":[5,30],"1236":[6,30],"1237":[7,30],"1238":[8,30],"1239":[9,30],"1240":[10,30],"1241":[11,30],"1242":[12,30],"1243":[13,30],"1244":[14,30],"1245":[15,30],"1246":[16,30],"1247":[17,30],"1248":[18,30],"1249":[19,30],"1250":[20,30],"1251":[21,30],"1252":[22,30],"1253":[23,30],"1254":[24,30],"1255":[25,30],"1256":[26,30],"1257":[27,30],"1258":[28,30],"1259":[29,30],"1260":[30,30],"1261":[31,30],"1262":[32,30],"1263":[33,30],"1264":[34,30],"1265":[35,30],"1266":[36,30],"1267":[37,30],"1268":[38,30],"1269":[39,30],"1270":[40,30],"1271":[0,31],"1272":[1,31],"1273":[2,31],"1274":[3,31],"1275":[4,31],"1276":[5,31],"1277":[6,31],"1278":[7,31],"1279":[8,31],"1280":[9,31],"1281":[10,31],"1282":[11,31],"1283":[12,31],"1284":[13,31],"1285":[14,31],"1286":[15,31],"1287":[16,31],"1288":[17,31],"1289":[18,31],"1290":[19,31],"1291":[20,31],"1292":[21,31],"1293":[22,31],"1294":[23,31],"1295":[24,31],"1296":[25,31],"1297":[26,31],"1298":[27,31],"1299":[28,31],"1300":[29,31],"1301":[30,31],"1302":[31,31],"1303":[32,31],"1304":[33,31],"1305":[34,31],"1306":[35,31],"1307":[36,31],"1308":[37,31],"1309":[38,31],"1310":[39,31],"1311":[40,31],"1312":[0,32],"1313":[1,32],"1314":[2,32],"1315":[3,32],"1316":[4,32],"1317":[5,32],"1318":[6,32],"1319":[7,32],"1320":[8,32],"1321":[9,32],"1322":[10,32],"1323":[11,32],"1324":[12,32],"1325":[13,32],"1326":[14,32],"1327":[15,32],"1328":[16,32],"1329":[17,32],"1330":[18,32],"1331":[19,32],"1332":[20,32],"1333":[21,32],"1334":[22,32],"1335":[23,32],"1336":[24,32],"1337":[25,32],"1338":[26,32],"1339":[27,32],"1340":[28,32],"1341":[29,32],"1342":[30,32],"1343":[31,32],"1344":[32,32],"1345":[33,32],"1346":[34,32],"1347":[35,32],"1348":[36,32],"1349":[37,32],"1350":[38,32],"1351":[39,32],"1352":[40,32],"1353":[0,33],"1354":[1,33],"1355":[2,33],"1356":[3,33],"1357":[4,33],"1358":[5,33],"1359":[6,33],"1360":[7,33],"1361":[8,33],"1362":[9,33],"1363":[10,33],"1364":[11,33],"1365":[12,33],"1366":[13,33],"1367":[14,33],"1368":[15,33],"1369":[16,33],"1370":[17,33],"1371":[18,33],"1372":[19,33],"1373":[20,33],"1374":[21,33],"1375":[22,33],"1376":[23,33],"1377":[24,33],"1378":[25,33],"1379":[26,33],"1380":[27,33],"1381":[28,33],"1382":[29,33],"1383":[30,33],"1384":[31,33],"1385":[32,33],"1386":[33,33],"1387":[34,33],"1388":[35,33],"1389":[36,33],"1390":[37,33],"1391":[38,33],"1392":[39,33],"1393":[40,33],"1394":[0,34],"1395":[1,34],"1396":[2,34],"1397":[3,34],"1398":[4,34],"1399":[5,34],"1400":[6,34],"1401":[7,34],"1402":[8,34],"1403":[9,34],"1404":[10,34],"1405":[11,34],"1406":[12,34],"1407":[13,34],"1408":[14,34],"1409":[15,34],"1410":[16,34],"1411":[17,34],"1412":[18,34],"1413":[19,34],"1414":[20,34],"1415":[21,34],"1416":[22,34],"1417":[23,34],"1418":[24,34],"1419":[25,34],"1420":[26,34],"1421":[27,34],"1422":[28,34],"1423":[29,34],"1424":[30,34],"1425":[31,34],"1426":[32,34],"1427":[33,34],"1428":[34,34],"1429":[35,34],"1430":[36,34],"1431":[37,34],"1432":[38,34],"1433":[39,34],"1434":[40,34],"1435":[0,35],"1436":[1,35],"1437":[2,35],"1438":[3,35],"1439":[4,35],"1440":[5,35],"1441":[6,35],"1442":[7,35],"1443":[8,35],"1444":[9,35],"1445":[10,35],"1446":[11,35],"1447":[12,35],"1448":[13,35],"1449":[14,35],"1450":[15,35],"1451":[16,35],"1452":[17,35],"1453":[18,35],"1454":[19,35],"1455":[20,35],"1456":[21,35],"1457":[22,35],"1458":[23,35],"1459":[24,35],"1460":[25,35],"1461":[26,35],"1462":[27,35],"1463":[28,35],"1464":[29,35],"1465":[30,35],"1466":[31,35],"1467":[32,35],"1468":[33,35],"1469":[34,35],"1470":[35,35],"1471":[36,35],"1472":[37,35],"1473":[38,35],"1474":[39,35],"1475":[40,35],"1476":[0,36],"1477":[1,36],"1478":[2,36],"1479":[3,36],"1480":[4,36],"1481":[5,36],"1482":[6,36],"1483":[7,36],"1484":[8,36],"1485":[9,36]}};           // item list + icon positions, generated from KitX's icon map
   const ATLAS_URL = 'assets/item_atlas.webp';
   const ARMOR=[['head','Helmet'],['chest','Chestplate'],['legs','Leggings'],['feet','Boots']];
-  const kb={sel:null, items:{}};            // items: slotKey -> {id, count}
+  const kb={sel:null, items:{}, moving:null, note:''};            // items: slotKey -> {id, count}
   const slotEls={};
   const ITEM_PATH={}; DATA.items.forEach(([id,pi])=>{ITEM_PATH[id]=pi});
   const prettyId=id=>id.replace(/^minecraft:/,'').split('_').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
@@ -606,7 +687,7 @@
     const b=document.createElement('button'); b.type='button'; b.className='slot'; b.dataset.key=key;
     if(ph){b.dataset.ph=ph; const i=document.createElement('i'); i.className='ph'; b.append(i)}
     b.setAttribute('aria-pressed','false');
-    b.addEventListener('click',()=>selectSlot(kb.sel===key?null:key));
+    b.addEventListener('click',()=>onSlot(key));
     slotEls[key]=b; paintSlot(key); return b;
   }
   function paintSlot(key){
@@ -618,7 +699,7 @@
       b.append(mkIcon(it.id));
       if(it.count>1){const c=document.createElement('span');c.className='cnt';c.textContent=it.count;b.append(c)}
     }
-    b.setAttribute('aria-label',slotInfo(key).label+' ('+(it?prettyId(it.id):'empty')+')');
+    b.setAttribute('aria-label',slotInfo(key).label+' ('+(it?(it.name||prettyId(it.id)):'empty')+')');
   }
   function cap(t){const d=document.createElement('div');d.className='cap';d.textContent=t;return d}
   function buildInv(){
@@ -648,35 +729,105 @@
     const key=kb.sel, it=key&&kb.items[key], ic=document.querySelector('.ip-icon');
     ic.innerHTML=''; if(it) ic.append(mkIcon(it.id));
     if(!key){ $('ipName').textContent='No slot selected'; $('ipWhere').textContent='Tap a slot below'; }
-    else{ $('ipName').textContent=it?prettyId(it.id):'Empty slot'; $('ipWhere').textContent=slotInfo(key).label; }
+    else{ $('ipName').textContent=it?(it.name||prettyId(it.id)):'Empty slot'; $('ipWhere').textContent=slotInfo(key).label; }
     $('ipId').textContent=it?'minecraft:'+it.id:'—';
     $('ipCount').textContent=it?String(it.count):'—';
-    $('ipDur').textContent='—'; $('ipEnch').textContent='—';
+    $('ipDur').textContent=durText(it); $('ipEnch').textContent=enchText(it);
   }
   function actBtn(label,fn){const b=document.createElement('button');b.className='btn';b.textContent=label;if(fn)b.addEventListener('click',fn);else b.disabled=true;return b}
   function renderControls(){
     const key=kb.sel, box=$('cpActions'); box.innerHTML='';
-    if(!key){ $('cpMsg').textContent='Select a slot to see what you can do with it.'; return }
+    const note=kb.note; kb.note='';
+    if(kb.moving!==null){
+      const mit=kb.items[kb.moving];
+      $('cpMsg').textContent=note||('Moving '+prettyId(mit.id)+' from '+slotInfo(kb.moving).label+'. Tap a slot to put it there; an item already there swaps places.');
+      const c=actBtn('Cancel move',stopMove); c.classList.add('ghost'); box.append(c);
+      markSlots(); return;
+    }
+    markSlots();
+    if(!key){ $('cpMsg').textContent=note||'Select a slot to see what you can do with it.'; return }
     const it=kb.items[key];
     if(!it){
-      $('cpMsg').textContent=slotInfo(key).label+' is empty.';
+      $('cpMsg').textContent=note||(slotInfo(key).label+' is empty.');
       box.append(actBtn('Add item',openPicker));
     }else{
-      $('cpMsg').textContent=slotInfo(key).label+': '+prettyId(it.id)+'. More actions are coming in the next parts.';
+      $('cpMsg').textContent=note||(slotInfo(key).label+': '+prettyId(it.id)+'. More actions are coming in the next parts.');
       const rm=actBtn('Remove item',()=>{delete kb.items[key];paintSlot(key);renderItemPanel();renderControls()});
       rm.classList.add('ghost'); box.append(rm);
-      ['Move','Rename','Enchant','Durability','Duplicate'].forEach(t=>box.append(actBtn(t)));
+      const max=maxStack(it.id,key), sa=actBtn('Set Amount',max>1?()=>openAmount():null);
+      if(max<=1) sa.title='This item does not stack';
+      box.append(sa);
+      const en=actBtn('Enchant',enchantsFor(it.id).length?openEnchant:null);
+      if(!enchantsFor(it.id).length) en.title='This item can not be enchanted';
+      box.append(en);
+      const du=actBtn('Durability',maxDur(it.id)?openDurability:null);
+      if(!maxDur(it.id)) du.title='This item has no durability';
+      box.append(du);
+      box.append(actBtn('Rename',openRename));
+      box.append(actBtn('Move',startMove));
+      ['Duplicate'].forEach(t=>box.append(actBtn(t)));
     }
   }
+
+  // ----- what each slot accepts -----
+  // Armor slots take only matching armor (plus heads and carved pumpkin on the head slot, elytra on the chest).
+  // The Bedrock offhand only takes a short list of items (OFFHAND_OK).
+  const HEAD_OK=/^(carved_pumpkin|player_head|zombie_head|creeper_head|dragon_head|piglin_head|skeleton_skull|wither_skeleton_skull)$/;
+  const OFFHAND_OK=/^(shield|totem_of_undying|arrow|spectral_arrow|tipped_arrow|firework_rocket|nautilus_shell|filled_map|empty_map|map|map_[a-z_]+|[a-z_]*sparkler[a-z_]*)$/;
+  function canHold(key,id){
+    switch(key){
+      case 'head':  return /_helmet$/.test(id)||HEAD_OK.test(id);
+      case 'chest': return /_chestplate$/.test(id)||id==='elytra';
+      case 'legs':  return /_leggings$/.test(id);
+      case 'feet':  return /_boots$/.test(id);
+      case 'offhand': return OFFHAND_OK.test(id);
+      default: return true;
+    }
+  }
+  const SLOT_NEEDS={head:'a helmet, mob head or carved pumpkin',chest:'a chestplate or elytra',legs:'leggings',feet:'boots',offhand:'a shield, totem, arrow, firework rocket, map or nautilus shell'};
+  // Why can't item `it` go into slot `dst`? Returns '' when it fits.
+  function whyNot(dst,it){
+    if(!canHold(dst,it.id)) return slotInfo(dst).label+' only takes '+(SLOT_NEEDS[dst]||'matching items')+'.';
+    if(it.count>maxStack(it.id,dst)) return slotInfo(dst).label+' holds only '+maxStack(it.id,dst)+' of this item.';
+    return '';
+  }
+
+  // ----- move -----
+  function startMove(){ if(kb.sel&&kb.items[kb.sel]){ kb.moving=kb.sel; renderControls() } }
+  function stopMove(){ kb.moving=null; renderControls() }
+  function moveCheck(src,dst){
+    const a=kb.items[src], b=kb.items[dst];
+    return whyNot(dst,a)||(b?whyNot(src,b):'');
+  }
+  function markSlots(){
+    for(const k in slotEls){
+      const bad = kb.moving!==null && k!==kb.moving && !!moveCheck(kb.moving,k);
+      slotEls[k].classList.toggle('bad',bad);
+    }
+  }
+  function tryMove(dst){
+    const src=kb.moving, a=kb.items[src], b=kb.items[dst];
+    const why=moveCheck(src,dst);
+    if(why){ kb.note=why; renderControls(); return }
+    kb.items[dst]=a; if(b) kb.items[src]=b; else delete kb.items[src];
+    paintSlot(src); paintSlot(dst);
+    kb.moving=null; selectSlot(dst);
+  }
+  function onSlot(key){
+    if(kb.moving!==null){ if(key===kb.moving) stopMove(); else tryMove(key); return }
+    selectSlot(kb.sel===key?null:key);
+  }
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&kb.moving!==null&&!document.querySelector('.dlg.on,.sheet.on')) stopMove() });
 
   // ----- item picker -----
   const ALL=DATA.items.map(([id])=>({id,name:prettyId(id).toLowerCase()}));
   const PAGE=60; let results=[], shown=0, pickTimer=0;
   function runSearch(q){
     const terms=q.toLowerCase().trim().split(/[\s_]+/).filter(Boolean);
-    if(!terms.length) return ALL;
+    const pool=ALL.filter(it=>canHold(kb.sel,it.id));
+    if(!terms.length) return pool;
     const scored=[];
-    for(const it of ALL){
+    for(const it of pool){
       if(!terms.every(t=>it.name.includes(t))) continue;
       const first=terms[0];
       const sc = it.name===terms.join(' ') ? 0 : it.name.startsWith(first) ? 1 : (' '+it.name).includes(' '+first) ? 2 : 3;
@@ -710,7 +861,7 @@
   function doSearch(){ results=runSearch($('pickQ').value); shown=0; renderResults(false); $('pickList').scrollTop=0 }
   function openPicker(){
     if(!kb.sel) return;
-    $('pickTitle').textContent='Add item to: '+slotInfo(kb.sel).label;
+    $('pickTitle').textContent='Add item to: '+slotInfo(kb.sel).label+(SLOT_NEEDS[kb.sel]?' ('+SLOT_NEEDS[kb.sel]+')':'');
     $('pickQ').value=''; doSearch();
     $('picker').classList.add('on'); document.body.classList.add('lock');
     if(matchMedia('(pointer:fine)').matches) $('pickQ').focus();
@@ -724,6 +875,235 @@
   $('pickClose').addEventListener('click',closePicker);
   $('pickQ').addEventListener('input',()=>{clearTimeout(pickTimer);pickTimer=setTimeout(doSearch,120)});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('picker').classList.contains('on'))closePicker()});
+
+  // ----- stack sizes + Set Amount -----
+  // Bedrock max stack per item: 1, 16 or 64. Anything not matched below stacks to 64.
+  const STACK_1=/(_(sword|pickaxe|axe|shovel|hoe|spear|helmet|chestplate|leggings|boots|horse_armor|harness|bundle|boat|raft|minecart|bed|shulker_box|stew|soup)$)|^(bow|crossbow|crossbow_[a-z_0-9]+|shield|elytra|broken_elytra|trident|mace|totem_of_undying|saddle|fishing_rod|fishing_rod_cast|flint_and_steel|shears|brush|spyglass|carrot_on_a_stick|warped_fungus_on_a_stick|goat_horn|cake|boat|boat_dark_oak|bundle|bundle_[a-z_]+|potion|splash_potion|lingering_potion|enchanted_book|writable_book|banner_pattern|turtle_helmet|wolf_armor|undyed_shulker_box|straw_bed|chest_minecart|[a-z_]+_banner_pattern|music_disc_[a-z_0-9]+)$/;
+  const STACK_16=/(_(banner|sign|hanging_sign|egg)$)|^(banner|egg|snowball|ender_pearl|bucket|honey_bottle|written_book|armor_stand|sign)$/;
+  function maxStack(id,key){
+    if(ARMOR.some(a=>a[0]===key)) return 1;                 // armor slots hold one piece
+    if(/^(blue|brown)_egg$/.test(id)) return 16;
+    if(/_spawn_egg$/.test(id)||/^egg_/.test(id)||/^(sniffer|turtle|dragon)_egg$/.test(id)) return 64;
+    if(/_(bucket)$/.test(id)) return 1;                      // filled buckets (empty bucket handled above: 16)
+    if(STACK_1.test(id)) return 1;
+    if(STACK_16.test(id)) return 16;
+    return 64;
+  }
+  let amtMax=1, amtCb=null;
+  const amtOpen=()=>$('amtDlg').classList.contains('on');
+  function updateLock(){ document.body.classList.toggle('lock',!!document.querySelector('.dlg.on,.sheet.on')) }
+  function amtClamp(raw){
+    const n=parseInt(String(raw).replace(/\D/g,''),10);
+    return Number.isFinite(n)?Math.max(1,Math.min(amtMax,n)):null;
+  }
+  // Shared 1..max number dialog (slider + typed box). Used by Set Amount and the enchant levels.
+  function openNum({title,name,id,max,value,what,onSet}){
+    amtMax=max; amtCb=onSet; amtWhat=what||'this item';
+    $('amtTitle').textContent=title; $('amtName').textContent=name;
+    const ic=$('amtIcon'); ic.innerHTML=''; ic.append(mkIcon(id));
+    const r=$('amtRange'); r.max=String(max); r.value=String(value);
+    $('amtNum').value=String(value); $('amtMax').textContent=String(max); $('amtErr').textContent='';
+    $('amtDlg').classList.add('on'); updateLock();
+    const num=$('amtNum'); if(matchMedia('(pointer:fine)').matches){num.focus();num.select()}
+  }
+  let amtWhat='this item';
+  function openAmount(){
+    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    const max=maxStack(it.id,key); if(max<=1) return;
+    openNum({title:'Set amount',name:prettyId(it.id)+' · '+slotInfo(key).label,id:it.id,max,value:it.count,what:'this item',
+      onSet:n=>{ it.count=n; paintSlot(key); renderItemPanel() }});
+  }
+  function closeAmount(){ $('amtDlg').classList.remove('on'); amtCb=null; updateLock() }
+  function applyAmount(){
+    const n=amtClamp($('amtNum').value);
+    if(n===null){ $('amtErr').textContent='Type a number from 1 to '+amtMax+'.'; return }
+    const cb=amtCb; closeAmount(); if(cb) cb(n);
+  }
+  $('amtRange').addEventListener('input',e=>{ $('amtNum').value=e.target.value; $('amtErr').textContent='' });
+  $('amtNum').addEventListener('input',e=>{
+    const raw=e.target.value.replace(/\D/g,''); if(raw!==e.target.value) e.target.value=raw;
+    const n=parseInt(raw,10);
+    if(!raw){ $('amtErr').textContent=''; return }
+    if(n>amtMax) $('amtErr').textContent='Max for '+amtWhat+' is '+amtMax+'.';
+    else if(n<1) $('amtErr').textContent='Minimum is 1.';
+    else { $('amtErr').textContent=''; $('amtRange').value=String(n) }
+  });
+  $('amtNum').addEventListener('blur',()=>{
+    const n=amtClamp($('amtNum').value);
+    if(n!==null){ $('amtNum').value=String(n); $('amtRange').value=String(n); $('amtErr').textContent='' }
+  });
+  $('amtNum').addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();applyAmount()} });
+  $('amtOk').addEventListener('click',applyAmount);
+  $('amtCancel').addEventListener('click',closeAmount);
+  $('amtClose').addEventListener('click',closeAmount);
+  $('amtDlg').addEventListener('click',e=>{ if(e.target===$('amtDlg')) closeAmount() });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&amtOpen()){ e.preventDefault(); closeAmount() } });
+
+  // ----- enchantments (Bedrock) -----
+  const ENCH={
+    protection:['Protection',4],fire_protection:['Fire Protection',4],blast_protection:['Blast Protection',4],projectile_protection:['Projectile Protection',4],
+    thorns:['Thorns',3],respiration:['Respiration',3],aqua_affinity:['Aqua Affinity',1],
+    feather_falling:['Feather Falling',4],depth_strider:['Depth Strider',3],frost_walker:['Frost Walker',2],soul_speed:['Soul Speed',3],swift_sneak:['Swift Sneak',3],
+    sharpness:['Sharpness',5],smite:['Smite',5],bane_of_arthropods:['Bane of Arthropods',5],knockback:['Knockback',2],fire_aspect:['Fire Aspect',2],looting:['Looting',3],
+    lunge:['Lunge',3],density:['Density',5],breach:['Breach',4],wind_burst:['Wind Burst',3],
+    efficiency:['Efficiency',5],silk_touch:['Silk Touch',1],fortune:['Fortune',3],
+    power:['Power',5],punch:['Punch',2],flame:['Flame',1],infinity:['Infinity',1],
+    multishot:['Multishot',1],piercing:['Piercing',4],quick_charge:['Quick Charge',3],
+    loyalty:['Loyalty',3],impaling:['Impaling',5],riptide:['Riptide',3],channeling:['Channeling',1],
+    luck_of_the_sea:['Luck of the Sea',3],lure:['Lure',3],
+    unbreaking:['Unbreaking',3],mending:['Mending',1],vanishing:['Curse of Vanishing',1],binding:['Curse of Binding',1]
+  };
+  // Groups of enchantments that can not be on the same item together.
+  const EXCL=[
+    ['protection','fire_protection','blast_protection','projectile_protection'],
+    ['sharpness','smite','bane_of_arthropods','density','breach'],
+    ['depth_strider','frost_walker'],['fortune','silk_touch'],['infinity','mending'],['multishot','piercing'],
+    ['riptide','loyalty'],['riptide','channeling']
+  ];
+  const conflicts=(a,b)=>a!==b&&EXCL.some(g=>g.includes(a)&&g.includes(b));
+  const COMMON=['unbreaking','mending','vanishing'];
+  const ARMOR_ALL=['protection','fire_protection','blast_protection','projectile_protection','thorns',...COMMON,'binding'];
+  const MELEE=['sharpness','smite','bane_of_arthropods','knockback','fire_aspect','looting'];
+  const DIG=['efficiency','silk_touch','fortune'];
+  function enchantsFor(id){
+    if(/_helmet$/.test(id)) return [...ARMOR_ALL,'respiration','aqua_affinity'];
+    if(/_chestplate$/.test(id)) return ARMOR_ALL;
+    if(/_leggings$/.test(id)) return [...ARMOR_ALL,'swift_sneak'];
+    if(/_boots$/.test(id)) return [...ARMOR_ALL,'feather_falling','depth_strider','frost_walker','soul_speed'];
+    if(id==='elytra') return ['unbreaking','mending','vanishing','binding'];
+    if(HEAD_OK.test(id)) return ['binding','vanishing'];
+    if(/_sword$/.test(id)) return [...MELEE,...COMMON];
+    if(/_spear$/.test(id)) return [...MELEE,'lunge',...COMMON];
+    if(/_axe$/.test(id)) return ['sharpness','smite','bane_of_arthropods',...DIG,...COMMON];
+    if(/_(pickaxe|shovel|hoe)$/.test(id)) return [...DIG,...COMMON];
+    if(id==='shears') return ['efficiency',...COMMON];
+    if(id==='bow') return ['power','punch','flame','infinity',...COMMON];
+    if(id==='crossbow') return ['quick_charge','multishot','piercing',...COMMON];
+    if(id==='trident') return ['loyalty','impaling','riptide','channeling',...COMMON];
+    if(id==='mace') return ['smite','bane_of_arthropods','fire_aspect','density','breach','wind_burst',...COMMON];
+    if(id==='fishing_rod') return ['luck_of_the_sea','lure',...COMMON];
+    if(/^(shield|flint_and_steel|brush|carrot_on_a_stick|warped_fungus_on_a_stick)$/.test(id)) return COMMON;
+    if(/^(compass|recovery_compass|lodestone_compass)$/.test(id)) return ['vanishing'];
+    if(id==='enchanted_book') return Object.keys(ENCH);
+    return [];
+  }
+  const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+  const roman=n=>ROMAN[n]||String(n);
+  function enchText(it){
+    const e=it&&it.ench; if(!e) return '—';
+    const ids=Object.keys(e); if(!ids.length) return '—';
+    return ids.map(k=>ENCH[k][0]+(ENCH[k][1]>1?' '+roman(e[k]):'')).join(', ');
+  }
+
+  let enchDraft={}, enchFor=null;
+  const enchOpen=()=>$('enchDlg').classList.contains('on');
+  function renderEnch(){
+    const list=$('enchList'), top=list.scrollTop; list.innerHTML='';
+    const it=kb.items[enchFor]; if(!it) return;
+    const sel=Object.keys(enchDraft);
+    for(const id of enchantsFor(it.id)){
+      const [name,max]=ENCH[id], on=id in enchDraft;
+      const clash=on?null:sel.find(k=>conflicts(id,k));
+      const row=document.createElement('div'); row.className='er'+(on?' on':'')+(clash?' off':'');
+      const pick=document.createElement('button'); pick.type='button'; pick.className='pick';
+      pick.setAttribute('role','checkbox'); pick.setAttribute('aria-checked',String(on)); if(clash) pick.setAttribute('aria-disabled','true');
+      const box=document.createElement('span'); box.className='box';
+      const en=document.createElement('span'); en.className='en';
+      const b=document.createElement('b'); b.textContent=name;
+      const sm=document.createElement('span');
+      sm.textContent=clash?('Can not combine with '+ENCH[clash][0]):(max>1?('Levels I to '+roman(max)):'Single level');
+      en.append(b,sm); pick.append(box,en);
+      pick.addEventListener('click',()=>{
+        if(clash) return;
+        if(on) delete enchDraft[id]; else enchDraft[id]=max;
+        renderEnch();
+      });
+      row.append(pick);
+      if(on&&max>1){
+        const lv=document.createElement('button'); lv.type='button'; lv.className='btn ghost lv'; lv.textContent='Level '+roman(enchDraft[id]);
+        lv.addEventListener('click',()=>openNum({title:'Set level',name:name+' · '+prettyId(it.id),id:it.id,max,value:enchDraft[id],what:name,
+          onSet:n=>{ enchDraft[id]=n; renderEnch() }}));
+        row.append(lv);
+      }
+      list.append(row);
+    }
+    list.scrollTop=top;
+  }
+  function openEnchant(){
+    const key=kb.sel, it=key&&kb.items[key]; if(!it||!enchantsFor(it.id).length) return;
+    enchFor=key; enchDraft=Object.assign({},it.ench||{});
+    $('enchName').textContent=prettyId(it.id)+' · '+slotInfo(key).label;
+    const ic=$('enchIcon'); ic.innerHTML=''; ic.append(mkIcon(it.id));
+    $('enchHint').textContent='Tap to pick enchantments. New ones start at their max level; use Level to change it.';
+    $('enchDlg').classList.add('on'); updateLock(); renderEnch(); $('enchList').scrollTop=0;
+  }
+  function closeEnchant(){ $('enchDlg').classList.remove('on'); enchFor=null; updateLock() }
+  function applyEnchant(){
+    const it=kb.items[enchFor];
+    if(it){ if(Object.keys(enchDraft).length) it.ench=Object.assign({},enchDraft); else delete it.ench; renderItemPanel() }
+    closeEnchant();
+  }
+  $('enchOk').addEventListener('click',applyEnchant);
+  $('enchCancel').addEventListener('click',closeEnchant);
+  $('enchClose').addEventListener('click',closeEnchant);
+  $('enchClear').addEventListener('click',()=>{ enchDraft={}; renderEnch() });
+  $('enchDlg').addEventListener('click',e=>{ if(e.target===$('enchDlg')) closeEnchant() });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&enchOpen()) closeEnchant() });
+
+  // ----- durability (Bedrock max durability) -----
+  const TIER_TOOL={wooden:59,stone:131,copper:190,iron:250,golden:32,diamond:1561,netherite:2031};
+  const TIER_ARMOR={leather:[55,80,75,65],chainmail:[165,240,225,195],iron:[165,240,225,195],golden:[77,112,105,91],diamond:[363,528,495,429],netherite:[407,592,555,481],copper:[121,176,165,143]};
+  const PIECE=['helmet','chestplate','leggings','boots'];
+  const MISC_DUR={turtle_helmet:275,elytra:432,shield:336,bow:384,crossbow:465,trident:250,mace:500,fishing_rod:64,shears:238,flint_and_steel:64,carrot_on_a_stick:25,warped_fungus_on_a_stick:100,brush:64};
+  function maxDur(id){
+    if(MISC_DUR[id]) return MISC_DUR[id];
+    let m=id.match(/^([a-z]+)_(sword|pickaxe|axe|shovel|hoe|spear)$/);
+    if(m&&TIER_TOOL[m[1]]) return TIER_TOOL[m[1]];
+    m=id.match(/^([a-z]+)_(helmet|chestplate|leggings|boots)$/);
+    if(m&&TIER_ARMOR[m[1]]) return TIER_ARMOR[m[1]][PIECE.indexOf(m[2])];
+    return 0;
+  }
+  function durText(it){
+    if(!it) return '—';
+    const mx=maxDur(it.id); if(!mx) return '—';
+    return (it.dur==null?mx:it.dur)+' / '+mx;
+  }
+  function openDurability(){
+    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    const mx=maxDur(it.id); if(!mx) return;
+    openNum({title:'Set durability',name:prettyId(it.id)+' · '+slotInfo(key).label,id:it.id,max:mx,value:it.dur==null?mx:it.dur,what:'this item',
+      onSet:n=>{ if(n>=mx) delete it.dur; else it.dur=n; renderItemPanel() }});
+  }
+
+  // ----- rename -----
+  let nameFor=null;
+  const nameOpen=()=>$('nameDlg').classList.contains('on');
+  function openRename(){
+    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    nameFor=key;
+    $('nameItem').textContent=prettyId(it.id)+' · '+slotInfo(key).label;
+    const ic=$('nameIcon'); ic.innerHTML=''; ic.append(mkIcon(it.id));
+    $('nameInput').value=it.name||'';
+    $('nameDlg').classList.add('on'); updateLock();
+    if(matchMedia('(pointer:fine)').matches){$('nameInput').focus();$('nameInput').select()}
+  }
+  function closeRename(){ $('nameDlg').classList.remove('on'); nameFor=null; updateLock() }
+  function applyRename(){
+    const it=kb.items[nameFor];
+    if(it){
+      const v=$('nameInput').value.trim().slice(0,50);
+      if(v) it.name=v; else delete it.name;
+      paintSlot(nameFor); renderItemPanel();
+    }
+    closeRename();
+  }
+  $('nameOk').addEventListener('click',applyRename);
+  $('nameCancel').addEventListener('click',closeRename);
+  $('nameClose').addEventListener('click',closeRename);
+  $('nameReset').addEventListener('click',()=>{ $('nameInput').value=''; $('nameInput').focus() });
+  $('nameInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();applyRename()} });
+  $('nameDlg').addEventListener('click',e=>{ if(e.target===$('nameDlg')) closeRename() });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&nameOpen()) closeRename() });
 
   buildInv(); renderItemPanel(); renderControls();
 })();
