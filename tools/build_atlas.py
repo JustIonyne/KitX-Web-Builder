@@ -442,6 +442,20 @@ def potion_variants(items):
     return [v for v in out if v[3] is not None]
 
 
+def is_block_item(e):
+    """Block items carry a `Block` compound in kit structures (e.g. cobblestone, web); plain items do not."""
+    m = C.models.get(e.get('model') or '') or {}
+    r = e['render']
+    if r in ('cube', 'model3d') and (e.get('model') or '').startswith('block/'):
+        return True
+    if r == 'special':
+        return (e.get('special') or {}).get('type') in ('chest', 'shulker_box', 'head', 'player_head', 'conduit', 'decorated_pot')
+    if r == 'sprite':
+        L = m.get('layers') or []
+        return bool(L) and L[0].startswith('block/')
+    return False
+
+
 def load_json_c(path):
     import re
     return json.loads(re.sub(r'^\s*//.*$', '', open(path, encoding='utf-8').read(), flags=re.M))
@@ -605,16 +619,20 @@ def main():
     print(f'atlas {atlas.size}, {len(order)} unique icons, {os.path.getsize(a.out)/1024:.0f} KB')
 
     data = {'cols': cols, 'rows': rows, 'cell': CELL,
-            'items': [[i, key_of.get(i)] for i in ids], 'vars': var_rows, 'pos': pos}
+            'items': [[i, key_of.get(i)] for i in ids], 'vars': var_rows,
+            'blk': [i for i in ids if is_block_item(items[i])], 'pos': pos}
     s = open(a.html, encoding='utf-8').read()
     k = s.index('const DATA = ')
     _, end = json.JSONDecoder().raw_decode(s[k + len('const DATA = '):])
     s = s[:k] + 'const DATA = ' + json.dumps(data, separators=(',', ':')) + s[k + len('const DATA = ') + end:]
     rel = os.path.relpath(a.out, os.path.dirname(os.path.abspath(a.html))).replace(os.sep, '/')
     import re
-    s = re.sub(r"const ATLAS_URL = '[^']*';", f"const ATLAS_URL = '{rel}';", s)
+    # version the atlas address with a content hash: a browser/CDN can then never pair a new index.html with a cached
+    # older atlas (that mismatch shifts every icon by a cell)
+    ver = hashlib.md5(open(a.out, 'rb').read()).hexdigest()[:8]
+    s = re.sub(r"const ATLAS_URL = '[^']*';", f"const ATLAS_URL = '{rel}?v={ver}';", s)
     open(a.html, 'w', encoding='utf-8').write(s)
-    print('patched', a.html, '->', rel)
+    print('patched', a.html, '->', rel + '?v=' + ver)
 
     if a.qa:
         qa_ids = ['furnace', 'crafting_table', 'grass_block', 'oak_log', 'stone', 'tnt', 'bookshelf', 'oak_leaves',
