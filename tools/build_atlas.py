@@ -34,6 +34,12 @@ TINT_FALLBACK = {'grass': '#79C05A', 'foliage': '#48B518', 'dye': '#A06540',
                  'potion': '#385DC6', 'firework': '#8A8A8A', 'constant': '#FFFFFF'}
 
 
+# Ids that are not holdable Bedrock items: block-only / technical ids that only got in through low-confidence
+# stand-in textures (the item forms are powder_snow_bucket, redstone, ...). Add more here to hide them from the picker.
+# Items with no icon at all (Education-only agent_spawn_egg, npc_spawn_egg) are dropped automatically.
+EXCLUDE_IDS = {'cave_vines', 'powder_snow', 'frosted_ice', 'redstone_wire'}
+
+
 def hex2rgb(h):
     h = h.lstrip('#')
     return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)], float) / 255.0
@@ -566,7 +572,7 @@ def main():
     # Only real Bedrock item identifiers go into the Kit Builder. The mapping also contains
     # texture keys (bundle_*_open/_front/_back, bow_pulling_*, potion_overlay, empty_armor_slot_*,
     # egg_*, map_*, *_atlas ...): those are art for other items, not items, so they are dropped.
-    ids = sorted(i for i, e in items.items() if e.get('class') in ('item', 'bedrock_only'))
+    ids = sorted(i for i, e in items.items() if e.get('class') in ('item', 'bedrock_only') and i not in EXCLUDE_IDS)
     dropped = sorted(set(items) - set(ids))
     print(f'items kept: {len(ids)}  dropped texture keys: {len(dropped)}')
     if a.bedrock:
@@ -584,7 +590,9 @@ def main():
         if img is None:
             missing.append(id_)
     print('sources:', dict(tags))
-    print('no art :', missing)
+    print('dropped (no icon):', missing)
+    ids = [i for i in ids if imgs[i] is not None]        # an item without an icon is not listed
+    print(f'final item count: {len(ids)}')
 
     variants = potion_variants(items)
     print(f'potion variants: {len(variants)}')
