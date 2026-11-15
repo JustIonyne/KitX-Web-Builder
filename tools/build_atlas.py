@@ -22,7 +22,7 @@ Usage:
 
 Requires: Pillow, numpy
 """
-import argparse, collections, hashlib, json, math, os
+import argparse, collections, hashlib, json, math, os, sys
 import numpy as np
 from PIL import Image
 
@@ -382,7 +382,8 @@ EFFECT_RGB = {'night_vision': '1F1FA1', 'invisibility': 'F6F6F6', 'jump': 'FDFF8
               'speed': '33EBFF', 'slowness': '8BAFE0', 'water_breathing': '98DAC0', 'instant_health': 'F82423',
               'instant_damage': 'A9656A', 'poison': '4E9331', 'regeneration': 'CD5CAB', 'strength': '932423',
               'weakness': '484D48', 'wither': '352A27', 'resistance': '9146F0', 'slow_falling': 'F3CFB9',
-              'wind_charged': 'BDC9FF', 'weaving': '78695A', 'oozing': '99FFA3', 'infested': '8C9B8C'}
+              'wind_charged': 'BDC9FF', 'weaving': '78695A', 'oozing': '99FFA3', 'infested': '8C9B8C',
+              'freezing': 'A5D8F2'}   # freezing: colour is a guess (new effect, no Java reference)
 NO_EFFECT_RGB = '385DC6'
 # (aux, name, suffix, [(effect, weight)], bedrock texture key)
 _E, _II = ' (Extended)', ' II'
@@ -409,6 +410,8 @@ POTION_TYPES = [
     (42, 'Slowness IV', '', [('slowness', 1)], 'moveSlowdown'),
     (43, 'Wind Charging', '', [('wind_charged', 1)], 'windCharged'), (44, 'Weaving', '', [('weaving', 1)], 'weaving'),
     (45, 'Oozing', '', [('oozing', 1)], 'oozing'), (46, 'Infestation', '', [('infested', 1)], 'infested'),
+    # in the official potion list (mojang-potion-effects.json) but not in Bedrock's older texture lists; aux values assumed
+    (47, 'Freezing', '', [('freezing', 1)], None), (48, 'Freezing', _E, [('freezing', 1)], None),
 ]
 PLAIN_TYPES = [(0, 'Water Bottle', 'Splash Water Bottle', 'Lingering Water Bottle'),
                (1, 'Mundane Potion', 'Mundane Splash Potion', 'Mundane Lingering Potion'),
@@ -423,16 +426,24 @@ def mix_rgb(effects):
     return '#%02X%02X%02X' % tuple(int(round(v * 255)) for v in c)
 
 
+BED_COLORS = ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray', 'cyan',
+              'purple', 'blue', 'brown', 'green', 'red', 'black']                      # Bedrock `bed` aux 0-15
+BANNER_COLORS = ['black', 'red', 'green', 'brown', 'blue', 'purple', 'cyan', 'light_gray', 'gray', 'pink', 'lime',
+                 'yellow', 'light_blue', 'magenta', 'orange', 'white']                  # Bedrock `banner` aux 0-15 (reversed)
+VARIANT_BASES = {'potion', 'splash_potion', 'lingering_potion', 'bed', 'banner'}      # base entry replaced by its variants
+
+
 def potion_variants(items):
-    """-> [(id, aux, title, icon)] for potion / splash_potion / lingering_potion (aux 0-46) and tipped_arrow (aux 6-47)."""
+    """-> [(id, aux, title, icon)]
+    potion / splash_potion / lingering_potion: aux 0-48; arrow (tipped): aux 6-49; bed / banner: aux 0-15 (colour)."""
     out = []
 
     def layers(id_):
         return C.models[items[id_]['model']]['layers']
 
-    def icon(id_, hexcol):
+    def icon(src, hexcol):
         # the tinted layer is layer 0 (potion_overlay / tipped_arrow_head)
-        return render_layers(layers(id_), [{'type': 'constant', 'value': hexcol}])
+        return render_layers(layers(src), [{'type': 'constant', 'value': hexcol}])
 
     for kind, prefix in (('potion', 'Potion of '), ('splash_potion', 'Splash Potion of '), ('lingering_potion', 'Lingering Potion of ')):
         if kind not in items:
@@ -442,10 +453,46 @@ def potion_variants(items):
             out.append((kind, aux, title, icon(kind, '#' + NO_EFFECT_RGB)))
         for aux, name, suf, eff, _bk in POTION_TYPES:
             out.append((kind, aux, f'{prefix}{name}{suf}', icon(kind, mix_rgb(eff))))
-    if 'tipped_arrow' in items:
+    if 'tipped_arrow' in items:        # Bedrock: `arrow` with a data value (potion aux + 1); icon art from the Java tipped_arrow
         for aux, name, suf, eff, _bk in POTION_TYPES:
-            out.append(('tipped_arrow', aux + 1, f'Arrow of {name}{suf}', icon('tipped_arrow', mix_rgb(eff))))
+            out.append(('arrow', aux + 1, f'Arrow of {name}{suf}', icon('tipped_arrow', mix_rgb(eff))))
+    for base, order in (('bed', BED_COLORS), ('banner', BANNER_COLORS)):
+        for aux, col in enumerate(order):
+            e = items.get(f'{col}_{base}')
+            img = resolve(f'{col}_{base}', e)[0] if e else None
+            if img is not None:
+                out.append((base, aux, f"{col.replace('_', ' ').title()} {base.title()}", img))
     return [v for v in out if v[3] is not None]
+
+
+def load_lang(path):
+    d = {}
+    for line in open(path, encoding='utf-8'):
+        line = line.rstrip('\n')
+        if '=' in line and not line.startswith('#'):
+            k, v = line.split('=', 1)
+            d[k.strip()] = v.split('\t#')[0].strip()
+    return d
+
+
+def pretty_id(i):           # same as prettyId() in index.html
+    return ' '.join(w[:1].upper() + w[1:] for w in i.split('_'))
+
+
+def official_names(records, ids, lang):
+    """Display names from en_US.lang, stored only where they differ from the generated name."""
+    rec = {r['name'].replace('minecraft:', ''): r for r in records}
+    nm = {}
+    for i in ids:
+        keys = [rec[i]['serialization_id'] + '.name'] if i in rec and rec[i].get('serialization_id') else []
+        keys += ['item.%s.name' % i, 'tile.%s.name' % i]
+        for k in keys:
+            v = lang.get(k)
+            if v and '%' not in v:
+                if v != pretty_id(i):
+                    nm[i] = v
+                break
+    return nm
 
 
 def is_block_item(e):
@@ -467,7 +514,7 @@ def load_json_c(path):
     return json.loads(re.sub(r'^\s*//.*$', '', open(path, encoding='utf-8').read(), flags=re.M))
 
 
-def verify_bedrock(dirpath, items, ids):
+def verify_bedrock(dirpath, items, ids, ids_check=True):
     """Cross-check the id list and potion table against the Bedrock identifier files."""
     it = load_json_c(os.path.join(dirpath, 'item_texture.json'))['texture_data']
     te = load_json_c(os.path.join(dirpath, 'terrain_texture.json'))['texture_data']
@@ -482,17 +529,18 @@ def verify_bedrock(dirpath, items, ids):
                     paths.add(x['path'])
     kitx = {f[:-4] for f in os.listdir(C.baked)} if os.path.isdir(C.baked) else set()
     bad = []
-    for i in ids:
+    for i in (ids if ids_check else []):
         bi = items[i].get('bedrock_icon')
         if bi and bi not in paths and not (bi.startswith('textures/ui/kitx/blocks/') and bi.rsplit('/', 1)[1] in kitx):
             bad.append((i, bi))
-    print(f'bedrock check: {len(ids) - len(bad)}/{len(ids)} ids resolve to a Bedrock texture in item_texture/terrain_texture/KitX blocks')
+    if ids_check:
+        print(f'bedrock check: {len(ids) - len(bad)}/{len(ids)} ids resolve to a Bedrock texture in item_texture/terrain_texture/KitX blocks')
     if bad:
         print('  not in the Bedrock identifier files -> dropped:', [b[0] for b in bad])
     pk = {k: [x.split('/')[-1] for x in (it[k]['textures'] if isinstance(it[k]['textures'], list) else [it[k]['textures']])]
           for k in ('potion_bottle_drinkable', 'potion_bottle_splash', 'potion_bottle_lingering')}
     miss = sorted({bk for *_, bk in POTION_TYPES
-                   if 'potion_bottle_' + bk not in pk['potion_bottle_drinkable']})
+                   if bk and 'potion_bottle_' + bk not in pk['potion_bottle_drinkable']})
     print('potion types vs Bedrock potion_bottle_drinkable list:', 'all effect keys found' if not miss else f'MISSING {miss}')
     return {b[0] for b in bad}
 
@@ -562,6 +610,8 @@ def main():
     ap.add_argument('--html', required=True)
     ap.add_argument('--out', required=True)
     ap.add_argument('--bedrock', help='folder with Bedrock item_texture.json + terrain_texture.json (verification)')
+    ap.add_argument('--official', help='mojang-items.json (vanilladata_modules): the official Bedrock item ids = the item list')
+    ap.add_argument('--lang', help='en_US.lang: official display names')
     ap.add_argument('--qa', help='write a QA contact sheet (ours vs baked) to this png')
     ap.add_argument('--cols', type=int, default=41)
     a = ap.parse_args()
@@ -569,18 +619,23 @@ def main():
     items = json.load(open(a.map))['items']
     C.models = json.load(open(a.models))
 
-    # Only real Bedrock item identifiers go into the Kit Builder. The mapping also contains
-    # texture keys (bundle_*_open/_front/_back, bow_pulling_*, potion_overlay, empty_armor_slot_*,
-    # egg_*, map_*, *_atlas ...): those are art for other items, not items, so they are dropped.
-    ids = sorted(i for i, e in items.items() if e.get('class') in ('item', 'bedrock_only') and i not in EXCLUDE_IDS)
-    dropped = sorted(set(items) - set(ids))
-    print(f'items kept: {len(ids)}  dropped texture keys: {len(dropped)}')
-    if a.bedrock:
-        # an id must resolve in the Bedrock identifier files to be listed (drops texture-name duplicates like
-        # `boat` / `spawn_egg_sulfur_cube` and stand-ins like `hoglin_meat_*`)
-        bad = verify_bedrock(a.bedrock, items, ids)
-        ids = [i for i in ids if i not in bad]
-        print(f'items listed: {len(ids)}')
+    records = []
+    if a.official:
+        # The official Bedrock item list (mojang-items.json) is the authority for which ids exist.
+        records = json.load(open(a.official, encoding='utf-8'))['data_items']
+        off = [r['name'].replace('minecraft:', '') for r in records]
+        no_map = [i for i in off if i not in items]
+        ids = sorted(i for i in off if i in items and i not in EXCLUDE_IDS)
+        print(f'official items: {len(off)} | not in the Java mapping: {len(no_map)} {no_map[:10]}')
+        if a.bedrock:
+            verify_bedrock(a.bedrock, items, ids, ids_check=False)
+    else:
+        # fallback (no official list): real item ids only; texture keys (bundle_*_open, bow_pulling_*, ...) are dropped
+        ids = sorted(i for i, e in items.items() if e.get('class') in ('item', 'bedrock_only') and i not in EXCLUDE_IDS)
+        if a.bedrock:
+            bad = verify_bedrock(a.bedrock, items, ids)
+            ids = [i for i in ids if i not in bad]
+    print(f'items to render: {len(ids)}')
     imgs, tags = {}, collections.Counter()
     missing = []
     for id_ in ids:
@@ -595,7 +650,8 @@ def main():
     print(f'final item count: {len(ids)}')
 
     variants = potion_variants(items)
-    print(f'potion variants: {len(variants)}')
+    vbase = sorted(b for b in VARIANT_BASES if b in ids and any(v[0] == b for v in variants))
+    print(f'variants: {len(variants)} (replace the base entries of {vbase})')
     # dedupe identical icons (many ids share art) and pack
     uniq, key_of, order = {}, {}, []
     for id_ in ids:
@@ -614,6 +670,11 @@ def main():
             uniq[h] = len(order)
             order.append(img)
         var_rows.append([id_, aux, title, uniq[h]])
+    # creative-inventory layout (tabs -> groups -> items); edit tools/layout.py / tools/groups.py to change it
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from creative import build_tabs
+    tabs, crep = build_tabs(ids, var_rows)
+    print('creative layout:', {t['n']: len(t['e']) for t in tabs}, '| warnings:', crep['warnings'], '| auto-placed (not in layout.py):', crep['unplaced'])
     cols = a.cols
     rows = math.ceil(len(order) / cols)
     atlas = Image.new('RGBA', (cols * CELL, rows * CELL), (0, 0, 0, 0))
@@ -628,7 +689,8 @@ def main():
 
     data = {'cols': cols, 'rows': rows, 'cell': CELL,
             'items': [[i, key_of.get(i)] for i in ids], 'vars': var_rows,
-            'blk': [i for i in ids if is_block_item(items[i])], 'pos': pos}
+            'blk': [i for i in ids if is_block_item(items[i])], 'vbase': vbase, 'tabs': tabs,
+            'nm': official_names(records, ids, load_lang(a.lang)) if (records and a.lang) else {}, 'pos': pos}
     s = open(a.html, encoding='utf-8').read()
     k = s.index('const DATA = ')
     _, end = json.JSONDecoder().raw_decode(s[k + len('const DATA = '):])
