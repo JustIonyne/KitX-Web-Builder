@@ -428,9 +428,8 @@ def mix_rgb(effects):
 
 BED_COLORS = ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray', 'cyan',
               'purple', 'blue', 'brown', 'green', 'red', 'black']                      # Bedrock `bed` aux 0-15
-BANNER_COLORS = ['black', 'red', 'green', 'brown', 'blue', 'purple', 'cyan', 'light_gray', 'gray', 'pink', 'lime',
-                 'yellow', 'light_blue', 'magenta', 'orange', 'white']                  # Bedrock `banner` aux 0-15 (reversed)
-VARIANT_BASES = {'potion', 'splash_potion', 'lingering_potion', 'bed', 'banner'}      # base entry replaced by its variants
+BANNER_COLORS = BED_COLORS    # banners, beds and firework stars share the dye colour data values (confirmed by the creative dump)
+VARIANT_BASES = {'potion', 'splash_potion', 'lingering_potion', 'bed', 'banner', 'firework_star', 'goat_horn', 'ominous_bottle'}      # base entry replaced by its variants
 
 
 def potion_variants(items):
@@ -462,6 +461,20 @@ def potion_variants(items):
             img = resolve(f'{col}_{base}', e)[0] if e else None
             if img is not None:
                 out.append((base, aux, f"{col.replace('_', ' ').title()} {base.title()}", img))
+    # firework stars (16 colours), goat horns (8 sounds), ominous bottles (5 levels): data values from the creative dump
+    if 'firework_star' in items:
+        for aux, col in enumerate(BED_COLORS):
+            img = render_layers(layers('firework_star'), [{'type': 'constant', 'value': '#FFFFFF'},
+                                                          {'type': 'constant', 'value': '#' + DYE[col]}])
+            out.append(('firework_star', aux, f"{col.replace('_', ' ').title()} Firework Star", img))
+    if 'goat_horn' in items:
+        img = resolve('goat_horn', items['goat_horn'])[0]
+        for aux, n in enumerate(['Ponder', 'Sing', 'Seek', 'Feel', 'Admire', 'Call', 'Yearn', 'Dream']):
+            out.append(('goat_horn', aux, f'Goat Horn ({n})', img))
+    if 'ominous_bottle' in items:
+        img = resolve('ominous_bottle', items['ominous_bottle'])[0]
+        for aux, n in enumerate(['I', 'II', 'III', 'IV', 'V']):
+            out.append(('ominous_bottle', aux, f'Ominous Bottle ({n})', img))
     return [v for v in out if v[3] is not None]
 
 
@@ -612,6 +625,7 @@ def main():
     ap.add_argument('--bedrock', help='folder with Bedrock item_texture.json + terrain_texture.json (verification)')
     ap.add_argument('--official', help='mojang-items.json (vanilladata_modules): the official Bedrock item ids = the item list')
     ap.add_argument('--lang', help='en_US.lang: official display names')
+    ap.add_argument('--creative', help='creative_items.json: the game\'s creative inventory dump (tabs, groups, order)')
     ap.add_argument('--qa', help='write a QA contact sheet (ours vs baked) to this png')
     ap.add_argument('--cols', type=int, default=41)
     a = ap.parse_args()
@@ -672,9 +686,15 @@ def main():
         var_rows.append([id_, aux, title, uniq[h]])
     # creative-inventory layout (tabs -> groups -> items); edit tools/layout.py / tools/groups.py to change it
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from creative import build_tabs
-    tabs, crep = build_tabs(ids, var_rows)
-    print('creative layout:', {t['n']: len(t['e']) for t in tabs}, '| warnings:', crep['warnings'], '| auto-placed (not in layout.py):', crep['unplaced'])
+    if a.creative:
+        from creative_dump import build_tabs_from_dump
+        tabs, crep = build_tabs_from_dump(a.creative, load_lang(a.lang) if a.lang else {}, ids, [(v[0], v[1]) for v in var_rows])
+        print('creative dump:', {t['n']: len(t['e']) for t in tabs}, '| in dump but not listed here:', crep['not_in_our_list'])
+        print('  listed items that are not in the creative inventory (Search tab only):', crep['search_only'])
+    else:
+        from creative import build_tabs
+        tabs, crep = build_tabs(ids, var_rows)
+        print('creative layout (fallback, no dump):', {t['n']: len(t['e']) for t in tabs}, '| warnings:', crep['warnings'], '| auto-placed:', crep['unplaced'])
     cols = a.cols
     rows = math.ceil(len(order) / cols)
     atlas = Image.new('RGBA', (cols * CELL, rows * CELL), (0, 0, 0, 0))
