@@ -200,6 +200,20 @@
   .sheet-inner{max-width:720px;margin:0 auto}
   .row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;appearance:none;background:var(--card);border:1px solid var(--line);color:inherit;font:inherit;border-radius:10px;padding:6px 10px;margin-bottom:6px;cursor:pointer}
   .row:hover,.row:focus-visible{border-color:var(--accent);outline:none}
+  .row.pick{border-color:var(--accent);background:rgba(91,140,255,.14)}
+  .pk-grid .slot.pick,.pk-sub .slot.pick{outline:2px solid #fff;outline-offset:-2px;z-index:1}
+  /* fixed details panel under the scrolling list */
+  .pk-detail{flex:none;border-top:1px solid var(--line);background:var(--bar);padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+  .pkd{max-width:720px;margin:0 auto;height:182px;display:flex;flex-direction:column;gap:8px}
+  .pkd-top{flex:none;display:flex;align-items:center;gap:10px}
+  .pkd-icon{flex:none;width:52px;height:52px;position:relative;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
+  .pkd-icon .ico{position:absolute;inset:9%;width:auto;height:auto}
+  .pkd-name{flex:1;min-width:0;font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+  .pkd-add{flex:none;padding:8px 16px}
+  .pkd-stats{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-content:start;font-size:12px;line-height:1.3}
+  .pkd-stats dt{color:var(--mute)}
+  .pkd-stats dd{margin:0;overflow-wrap:anywhere}
+  .pkd-hint{color:var(--mute);font-size:12px;margin:auto 0;text-align:center}
   .row .ri{flex:none;width:40px;height:40px;position:relative}
   .row .rn{min-width:0}
   .row .rn b{display:block;font-weight:600;line-height:1.2}
@@ -375,6 +389,7 @@
   <div class="sheet-title" id="pickTitle">Add item</div>
   <div class="sheet-count" id="pickCount"></div>
   <div class="sheet-list" id="pickList"><div class="sheet-inner" id="pickInner"></div></div>
+  <div class="pk-detail" id="pkDetail" aria-live="polite"></div>
 </div>
 
 <div class="dlg" id="nameDlg" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
@@ -905,8 +920,73 @@
   let pkTab=0, pkOpen=null;
   const parseKey=m=>{const p=m.split(':');return p[1]!==undefined?{id:p[0],aux:+p[1]}:{id:p[0]}};
   const memberItems=e=>(e[0]==='i'?[e[1]]:e[2]).map(parseKey).filter(it=>canHold(kb.sel,it.id));
+  // ----- picker details panel: tap an item to select it (details show in the fixed panel), tap it again or press Add -----
+  // Bedrock potion data values 0-48 -> effects [name, level, seconds] (seconds 0 = instant). Tipped arrows use aux = potion aux + 1.
+  const PFX=[[],[],[],[],[],
+    [['Night Vision',1,180]],[['Night Vision',1,480]],[['Invisibility',1,180]],[['Invisibility',1,480]],
+    [['Jump Boost',1,180]],[['Jump Boost',1,480]],[['Jump Boost',2,90]],
+    [['Fire Resistance',1,180]],[['Fire Resistance',1,480]],
+    [['Speed',1,180]],[['Speed',1,480]],[['Speed',2,90]],
+    [['Slowness',1,90]],[['Slowness',1,240]],
+    [['Water Breathing',1,180]],[['Water Breathing',1,480]],
+    [['Instant Health',1,0]],[['Instant Health',2,0]],[['Instant Damage',1,0]],[['Instant Damage',2,0]],
+    [['Poison',1,45]],[['Poison',1,90]],[['Poison',2,21]],
+    [['Regeneration',1,45]],[['Regeneration',1,90]],[['Regeneration',2,22]],
+    [['Strength',1,180]],[['Strength',1,480]],[['Strength',2,90]],
+    [['Weakness',1,90]],[['Weakness',1,240]],
+    [['Wither',2,40]],
+    [['Slowness',4,20],['Resistance',3,20]],[['Slowness',4,40],['Resistance',3,40]],[['Slowness',6,20],['Resistance',4,20]],
+    [['Slow Falling',1,90]],[['Slow Falling',1,240]],
+    [['Slowness',4,20]],
+    [['Wind Charged',1,180]],[['Weaving',1,180]],[['Oozing',1,180]],[['Infestation',1,180]],
+    [['Freezing',1,null]],[['Freezing',1,null]]];
+  const fmtTime=t=>Math.floor(t/60)+':'+String(t%60).padStart(2,'0');
+  function effectLines(it){
+    const aux=it.aux||0; let list=null, div=1;
+    if(it.id==='potion'||it.id==='splash_potion') list=PFX[aux];
+    else if(it.id==='lingering_potion'){ list=PFX[aux]; div=4 }
+    else if(it.id==='arrow'&&aux>=6){ list=PFX[aux-1]; div=8 }
+    else if(it.id==='ominous_bottle') return ['Bad Omen '+ROMAN[aux+1]+' · '+fmtTime(6000)];
+    if(!list) return null;
+    if(!list.length) return ['No effects'];
+    return list.map(([n,l,t])=>n+(l>1?' '+ROMAN[l]:'')+(t===0?' · instant':t==null?'':' · '+fmtTime(Math.round(t/div))));
+  }
+  let pkSel=null;
+  const pkKey=it=>it.id+':'+(it.aux!=null?it.aux:'');
+  function markPick(){
+    const k=pkSel?pkKey(pkSel):null;
+    document.querySelectorAll('#pickInner [data-pk]').forEach(el=>el.classList.toggle('pick',el.dataset.pk===k));
+  }
+  function renderPkDetail(){
+    const box=$('pkDetail'); box.innerHTML='';
+    const w=document.createElement('div'); w.className='pkd'; box.append(w);
+    if(!pkSel){
+      const h=document.createElement('div'); h.className='pkd-hint';
+      h.textContent='Tap an item to see its details. Tap it again, or press Add, to put it in the slot.'; w.append(h); return;
+    }
+    const it=pkSel, top=document.createElement('div'); top.className='pkd-top';
+    const ic=document.createElement('span'); ic.className='pkd-icon'; ic.append(mkIcon(it));
+    const nm=document.createElement('div'); nm.className='pkd-name'; nm.textContent=itemLabel(it);
+    const add=document.createElement('button'); add.type='button'; add.className='btn pkd-add'; add.textContent='Add';
+    add.addEventListener('click',()=>chooseItem(it.id,it.aux));
+    top.append(ic,nm,add);
+    const dl=document.createElement('dl'); dl.className='pkd-stats';
+    const row=(k,v)=>{const dt=document.createElement('dt'); dt.textContent=k; const dd=document.createElement('dd'); dd.textContent=v; dl.append(dt,dd)};
+    row('Item ID','minecraft:'+it.id);
+    row('Aux value',String(it.aux!=null?it.aux:0));
+    const md=maxDur(it.id); row('Max durability',md?String(md):'None');
+    row('Max stack',String(maxStack(it.id,kb.sel)));
+    const fx=effectLines(it);
+    if(fx){ const dt=document.createElement('dt'); dt.textContent='Effects'; const dd=document.createElement('dd'); dd.innerHTML=''; fx.forEach((l,i)=>{if(i)dd.append(document.createElement('br')); dd.append(l)}); dl.append(dt,dd) }
+    w.append(top,dl);
+  }
+  function pickItem(it){
+    if(pkSel&&pkKey(pkSel)===pkKey(it)){ chooseItem(it.id,it.aux); return }
+    pkSel={id:it.id,aux:it.aux}; markPick(); renderPkDetail();
+  }
   function pkCell(it,title,plus,open){
     const b=document.createElement('button'); b.type='button'; b.className='slot'+(open?' open':''); b.title=title; b.setAttribute('aria-label',title);
+    if(!plus) b.dataset.pk=pkKey(it);
     b.append(mkIcon(it));
     if(plus){const p=document.createElement('span'); p.className='pk-plus'; p.textContent=open?'−':'+'; b.append(p)}
     return b;
@@ -924,7 +1004,7 @@
     TABS[pkTab].e.forEach((e,idx)=>{
       const items=memberItems(e); if(!items.length) return;
       if(e[0]==='i'||items.length===1){
-        const it=items[0], b=pkCell(it,itemLabel(it)); b.addEventListener('click',()=>chooseItem(it.id,it.aux)); cells.push({el:b}); return;
+        const it=items[0], b=pkCell(it,itemLabel(it)); b.addEventListener('click',()=>pickItem(it)); cells.push({el:b}); return;
       }
       const rep=(e[3]&&items.find(it=>it.id===parseKey(e[3]).id&&it.aux===parseKey(e[3]).aux))||items[0];   // the group's own icon
       const open=pkOpen===idx, g=pkCell(rep,e[1],true,open);
@@ -934,7 +1014,7 @@
         const box=document.createElement('div'); box.className='pk-open';
         const h=document.createElement('div'); h.className='pk-head'; h.textContent=e[1]+' ('+items.length+')'; box.append(h);
         const sub=document.createElement('div'); sub.className='pk-sub';
-        for(const it of items){ const b=pkCell(it,itemLabel(it)); b.addEventListener('click',()=>chooseItem(it.id,it.aux)); sub.append(b) }
+        for(const it of items){ const b=pkCell(it,itemLabel(it)); b.addEventListener('click',()=>pickItem(it)); sub.append(b) }
         box.append(sub); c.panel=box;
       }
       cells.push(c);
@@ -946,7 +1026,8 @@
       if(pend&&i===pend.end){ grid.append(pend.panel); panelEl=pend.panel; pend=null }
     });
     if(!cells.length){const n=document.createElement('div'); n.className='none'; n.textContent='Nothing in this tab fits this slot.'; inner.append(n)}
-    $('pickCount').textContent=TABS[pkTab].n+' · tap a + to open a group';
+    $('pickCount').textContent=TABS[pkTab].n+' · tap a + to open a group · tap an item for details, tap again to add';
+    markPick();
     if(reveal&&panelEl) panelEl.scrollIntoView({block:'nearest'});
   }
   window.addEventListener('resize',()=>{
@@ -964,7 +1045,7 @@
     s.addEventListener('click',()=>showTab(SEARCH_TAB)); bar.append(s);
   }
   function showTab(i){
-    pkTab=i; pkOpen=null;
+    pkTab=i; pkOpen=null; pkSel=null; renderPkDetail();
     [...$('pkTabs').children].forEach((b,k)=>{b.classList.toggle('on',k===i); b.setAttribute('aria-selected',k===i)});
     if(i===SEARCH_TAB) doSearch(); else renderTab();
     $('pickList').scrollTop=0;
@@ -995,7 +1076,7 @@
       const b=document.createElement('b'); b.textContent=itemLabel(it);
       const sp=document.createElement('span'); sp.textContent=idText(it);
       rn.append(b,sp); r.append(ri,rn);
-      r.addEventListener('click',()=>chooseItem(it.id,it.aux));
+      r.dataset.pk=pkKey(it); r.addEventListener('click',()=>pickItem(it));
       inner.append(r);
     }
     shown=to;
@@ -1004,13 +1085,14 @@
       const m=document.createElement('button'); m.type='button'; m.className='btn ghost more'; m.style.cssText='width:100%;margin:6px 0 10px';
       m.textContent='Show more ('+(results.length-shown)+' left)'; m.addEventListener('click',()=>renderResults(true)); inner.append(m);
     }
-    $('pickCount').textContent=results.length+(results.length===1?' item':' items');
+    $('pickCount').textContent=results.length+(results.length===1?' item':' items')+' · tap for details, tap again to add';
+    markPick();
   }
   function doSearch(){ results=runSearch($('pickQ').value); shown=0; renderResults(false); $('pickList').scrollTop=0 }
   function openPicker(){
     if(!kb.sel) return;
     $('pickTitle').textContent='Add item to: '+slotInfo(kb.sel).label+(SLOT_NEEDS[kb.sel]?' ('+SLOT_NEEDS[kb.sel]+')':'');
-    $('pickQ').value='';
+    $('pickQ').value=''; pkSel=null;
     if(!$('pkTabs').children.length) buildTabBar();
     $('picker').classList.add('on'); document.body.classList.add('lock');
     showTab(SLOT_NEEDS[kb.sel]?1:Math.min(pkTab,SEARCH_TAB));
