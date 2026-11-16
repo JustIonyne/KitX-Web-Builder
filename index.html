@@ -130,6 +130,18 @@
   .slot.sel::after{content:"";position:absolute;inset:-16.667%;background:var(--t-sel) center/100% 100% no-repeat;image-rendering:pixelated;pointer-events:none}
   .slot:focus-visible{outline:2px solid var(--accent);outline-offset:1px;z-index:4}
   .gap{height:10px}
+  /* container panel */
+  [hidden]{display:none!important}
+  .ctn-top{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .ctn-ic{flex:none;width:44px;height:44px;position:relative;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
+  .ctn-ic .ico{position:absolute;inset:9%;width:auto;height:auto}
+  .ctn-title{min-width:0;flex:1}
+  .ctn-title b{display:block;font-size:12px;line-height:1.2;overflow-wrap:anywhere}
+  .ctn-title span{display:block;color:var(--mute);font-size:10px;margin-top:2px}
+  .ctn-top .btn{flex:none;padding:8px 12px}
+  .ctn-cap{height:12px;margin:0 0 10px;background:#8b8b8b;border:2px solid #555;border-right-color:#fff;border-bottom-color:#fff}
+  .ctn-cap i{display:block;height:100%;width:0;background:#3f8f2f}
+  .ctn-cap.full i{background:var(--bad)}
   /* control panel */
   .cp{position:sticky;bottom:10px;z-index:10;box-shadow:0 6px 24px rgba(0,0,0,.35)}
   .cp-msg{color:var(--mute);font-size:10px;margin:0 0 10px}
@@ -345,6 +357,7 @@
               <dt>Count</dt><dd id="ipCount">—</dd>
               <dt>Durability</dt><dd id="ipDur">—</dd>
               <dt>Enchants</dt><dd id="ipEnch">—</dd>
+              <dt id="ipCntT" hidden>Contents</dt><dd id="ipCnt" hidden>—</dd>
             </dl>
           </div>
         </div>
@@ -353,6 +366,20 @@
       <div class="panel" aria-label="Inventory Panel">
         <h3>Inventory</h3>
         <div class="invp" id="invp"></div>
+      </div>
+
+      <div class="panel" id="ctnPanel" aria-label="Container Panel" hidden>
+        <h3>Container</h3>
+        <div class="ctn-top">
+          <span class="ctn-ic" id="ctnIc" aria-hidden="true"></span>
+          <div class="ctn-title"><b id="ctnName"></b><span id="ctnInfo"></span></div>
+          <button type="button" class="btn ghost" id="ctnBack" hidden>Back</button>
+          <button type="button" class="btn ghost" id="ctnClose">Close</button>
+        </div>
+        <div class="invp">
+          <div class="ctn-cap" id="ctnCap" hidden><i id="ctnBar"></i></div>
+          <div class="sgrid" id="ctnGrid"></div>
+        </div>
       </div>
 
       <div class="panel cp" aria-label="Control Panel">
@@ -763,7 +790,7 @@
     im.src=ATLAS_URL;
   })();
   const ARMOR=[['head','Helmet'],['chest','Chestplate'],['legs','Leggings'],['feet','Boots']];
-  const kb={sel:null, items:{}, moving:null, dup:null, note:''};            // items: slotKey -> {id, count}
+  const kb={sel:null, items:{}, moving:null, dup:null, note:'', path:[]};   // path: [top-level slot key, 'in:N', ...] of the open container(s)            // items: slotKey -> {id, count}
   const slotEls={};
   const ITEM_PATH={}; DATA.items.forEach(([id,pi])=>{ITEM_PATH[id]=pi});
   // Bedrock potions are one item id; the potion type is the data value (aux / Damage). DATA.vars = [id, aux, title, icon].
@@ -786,7 +813,49 @@
     }else{ d.classList.add('mono'); d.textContent=mono(id); d.style.setProperty('--h',hue(id)); }
     return d;
   }
+  // ----- containers (shulker boxes + bundles) -----
+  // A container item keeps its contents in item.contents = {slotIndex: item}. Slot keys 'in:N' mean "slot N of the open container".
+  // kb.path is the chain of open containers: [top-level slot key] or [top-level key, 'in:N'] for a bundle opened inside a shulker box.
+  const SHULKER_SLOTS=27, BUNDLE_CAP=64, BUNDLE_SLOTS_MAX=72;
+  const isIn=k=>typeof k==='string'&&k.startsWith('in:');
+  const inIdx=k=>+k.slice(3);
+  const isShulker=id=>/shulker_box$/.test(id);
+  const isBundle=id=>/(^|_)bundle$/.test(id);
+  const isContainer=id=>isShulker(id)||isBundle(id);
+  function resolvePath(path){ let it=kb.items[path[0]]; for(let i=1;i<path.length&&it;i++) it=it.contents&&it.contents[inIdx(path[i])]; return it||null }
+  const curCtn=()=>kb.path.length?resolvePath(kb.path):null;
+  const isOpenTop=k=>kb.path.length>0&&!isIn(k)&&kb.path[0]===k;
+  function getItem(k){ if(!isIn(k)) return kb.items[k]; const c=curCtn(); return c&&c.contents?c.contents[inIdx(k)]:undefined }
+  function setItem(k,it){ if(!isIn(k)){ kb.items[k]=it; return } const c=curCtn(); if(c) (c.contents||(c.contents={}))[inIdx(k)]=it }
+  function delItem(k){ if(!isIn(k)){ delete kb.items[k]; return } const c=curCtn(); if(c&&c.contents) delete c.contents[inIdx(k)] }
+  // Bundle weight: a stack counts 64 / (its max stack size), so 64-stackable = 1 each, 16-stackable = 4 each, unstackable = 64. Capacity 64.
+  const unitW=id=>BUNDLE_CAP/maxStack(id,null);
+  const entW=e=>e.count*unitW(e.id);
+  function bundleUsed(c,skipIdx){ let t=0; const co=c.contents||{}; for(const k in co){ if(+k===skipIdx) continue; t+=entW(co[k]) } return t }
+  // '' when item `it` may go into container `c` at slot `idx`; otherwise the reason
+  function ctnWhy(c,it,idx){
+    if(isShulker(c.id)&&isShulker(it.id)) return 'A shulker box can not hold another shulker box.';
+    if(isBundle(c.id)){
+      if(isShulker(it.id)) return 'A bundle can not hold a shulker box.';
+      if(isBundle(it.id)) return 'A bundle can not hold another bundle.';
+      const left=BUNDLE_CAP-bundleUsed(c,idx), w=entW(it);
+      if(w>left) return 'Not enough room in the bundle: '+left+' of '+BUNDLE_CAP+' free, this needs '+w+'.';
+    }
+    return '';
+  }
+  // Max amount for the item in slot `key`: its stack size, and inside a bundle also what still fits.
+  function slotMax(key,id){
+    const m=maxStack(id,key);
+    if(isIn(key)){ const c=curCtn(); if(c&&isBundle(c.id)) return Math.max(0,Math.min(m,Math.floor((BUNDLE_CAP-bundleUsed(c,inIdx(key)))/unitW(id)))) }
+    return m;
+  }
+  function ctnText(it){
+    if(!it||!isContainer(it.id)) return '';
+    const n=Object.keys(it.contents||{}).length;
+    return isBundle(it.id) ? bundleUsed(it,-1)+' / '+BUNDLE_CAP+' · '+n+(n===1?' stack':' stacks') : n+' / '+SHULKER_SLOTS+' slots used';
+  }
   function slotInfo(key){
+    if(isIn(key)){ const c=curCtn(); return {label:(c?itemLabel(c):'Container')+' slot '+(inIdx(key)+1)} }
     if(key==='offhand') return {label:'Offhand',kind:'off'};
     const a=ARMOR.find(x=>x[0]===key); if(a) return {label:a[1],kind:a[0]};
     const n=+key;
@@ -802,14 +871,71 @@
   function paintSlot(key){
     const b=slotEls[key]; if(!b) return;
     b.querySelectorAll('.ico,.cnt').forEach(n=>n.remove());
-    const it=kb.items[key], ph=b.querySelector('.ph');
+    const it=getItem(key), ph=b.querySelector('.ph');
     if(ph) ph.style.display=it?'none':'';
     if(it){
       b.append(mkIcon(it));
       if(it.count>1){const c=document.createElement('span');c.className='cnt';c.textContent=it.count;b.append(c)}
     }
     b.setAttribute('aria-label',slotInfo(key).label+' ('+(it?(it.name||itemLabel(it)):'empty')+')');
+    ctnSync();
   }
+  function ctnWanted(c){
+    if(isShulker(c.id)) return SHULKER_SLOTS;
+    const ks=Object.keys(c.contents||{}).map(Number), mx=ks.length?Math.max(...ks):-1;
+    return Math.min(BUNDLE_SLOTS_MAX,Math.max(9,Math.ceil((mx+2)/9)*9));   // bundles have no fixed size: filled slots plus a free row
+  }
+  let ctnBusy=false, ctnBuiltFor=null, ctnBuilt=0;
+  function ctnSync(){
+    if(ctnBusy) return; ctnBusy=true;
+    try{
+      if(kb.path.length&&!curCtn()) kb.path=[];
+      const c=curCtn(), panel=$('ctnPanel');
+      if(!c){
+        panel.hidden=true; $('ctnGrid').innerHTML=''; ctnBuiltFor=null; ctnBuilt=0;
+        for(const k of Object.keys(slotEls)) if(isIn(k)) delete slotEls[k];
+        if(isIn(kb.sel)) kb.sel=null;
+        return;
+      }
+      panel.hidden=false;
+      const ic=$('ctnIc'); ic.innerHTML=''; ic.append(mkIcon(c));
+      $('ctnName').textContent=c.name||itemLabel(c);
+      $('ctnBack').hidden=kb.path.length<2;
+      const bundle=isBundle(c.id), used=bundle?bundleUsed(c,-1):0;
+      $('ctnInfo').textContent=(bundle?'Bundle · ':'Shulker box · ')+ctnText(c);
+      $('ctnCap').hidden=!bundle;
+      if(bundle){ $('ctnBar').style.width=(used/BUNDLE_CAP*100)+'%'; $('ctnCap').classList.toggle('full',used>=BUNDLE_CAP) }
+      const want=ctnWanted(c);
+      if(ctnBuiltFor!==c||ctnBuilt!==want){
+        const grid=$('ctnGrid'); grid.innerHTML='';
+        for(const k of Object.keys(slotEls)) if(isIn(k)) delete slotEls[k];
+        for(let i=0;i<want;i++) grid.append(mkSlot('in:'+i));
+        ctnBuiltFor=c; ctnBuilt=want;
+        if(isIn(kb.sel)&&!slotEls[kb.sel]) kb.sel=null;
+        for(const k in slotEls){const on=k===kb.sel; slotEls[k].classList.toggle('sel',on); slotEls[k].setAttribute('aria-pressed',String(on))}
+        markSlots();
+      }
+    } finally { ctnBusy=false }
+  }
+  function ctnLeave(){ kb.moving=null; kb.dup=null }      // a pending move or duplicate can not survive the open container changing
+  function openCtn(key){
+    const it=getItem(key); if(!it||!isContainer(it.id)) return;
+    ctnLeave();
+    kb.path=isIn(key)?[...kb.path,key]:[key];
+    if(isIn(key)) kb.sel=null;
+    ctnSync(); selectSlot(kb.sel);
+  }
+  function closeCtn(){
+    ctnLeave(); kb.path=[]; if(isIn(kb.sel)) kb.sel=null;
+    ctnSync(); selectSlot(kb.sel);
+  }
+  function backCtn(){
+    if(kb.path.length<2){ closeCtn(); return }
+    ctnLeave(); kb.path=kb.path.slice(0,-1); kb.sel=null;
+    ctnSync(); selectSlot(null);
+  }
+  $('ctnClose').addEventListener('click',closeCtn);
+  $('ctnBack').addEventListener('click',backCtn);
   function cap(t){const d=document.createElement('div');d.className='cap';d.textContent=t;return d}
   function buildInv(){
     const root=$('invp'); root.innerHTML='';
@@ -835,42 +961,51 @@
     renderItemPanel(); renderControls();
   }
   function renderItemPanel(){
-    const key=kb.sel, it=key&&kb.items[key], ic=document.querySelector('.ip-icon');
+    const key=kb.sel, it=key&&getItem(key), ic=document.querySelector('.ip-icon');
     ic.innerHTML=''; if(it) ic.append(mkIcon(it));
     if(!key){ $('ipName').textContent='No slot selected'; $('ipWhere').textContent='Tap a slot below'; }
     else{ $('ipName').textContent=it?(it.name||itemLabel(it)):'Empty slot'; $('ipWhere').textContent=slotInfo(key).label; }
     $('ipId').textContent=it?idText(it):'—';
     $('ipCount').textContent=it?String(it.count):'—';
     $('ipDur').textContent=durText(it); $('ipEnch').textContent=enchText(it);
+    const ct=ctnText(it); $('ipCntT').hidden=$('ipCnt').hidden=!ct; $('ipCnt').textContent=ct||'—';
   }
   function actBtn(label,fn){const b=document.createElement('button');b.className=label==='Add item'?'btn go':'btn';b.textContent=label;if(fn)b.addEventListener('click',fn);else b.disabled=true;return b}
   function renderControls(){
     const key=kb.sel, box=$('cpActions'); box.innerHTML='';
     const note=kb.note; kb.note='';
     if(kb.dup!==null){
-      const dit=kb.items[kb.dup];
+      const dit=getItem(kb.dup);
       $('cpMsg').textContent=note||('Duplicating '+itemLabel(dit)+' from '+slotInfo(kb.dup).label+'. Tap an empty slot to put the copy there (dimmed slots cannot take it).');
       const c=actBtn('Cancel duplicate',stopDup); c.classList.add('ghost'); box.append(c);
       markSlots(); return;
     }
     if(kb.moving!==null){
-      const mit=kb.items[kb.moving];
+      const mit=getItem(kb.moving);
       $('cpMsg').textContent=note||('Moving '+itemLabel(mit)+' from '+slotInfo(kb.moving).label+'. Tap a slot to put it there; an item already there swaps places.');
       const c=actBtn('Cancel move',stopMove); c.classList.add('ghost'); box.append(c);
       markSlots(); return;
     }
     markSlots();
     if(!key){ $('cpMsg').textContent=note||'Select a slot to see what you can do with it.'; return }
-    const it=kb.items[key];
+    const it=getItem(key);
     if(!it){
-      $('cpMsg').textContent=note||(slotInfo(key).label+' is empty.');
-      box.append(actBtn('Add item',openPicker));
+      const c=isIn(key)?curCtn():null, full=!!(c&&isBundle(c.id)&&BUNDLE_CAP-bundleUsed(c,inIdx(key))<1);
+      $('cpMsg').textContent=note||(slotInfo(key).label+' is empty.'+(full?' The bundle is full.':''));
+      const ab=actBtn('Add item',full?null:openPicker); if(full) ab.title='The bundle is full';
+      box.append(ab);
     }else{
-      $('cpMsg').textContent=note||(slotInfo(key).label+': '+itemLabel(it)+'.');
-      const rm=actBtn('Remove item',()=>{delete kb.items[key];paintSlot(key);renderItemPanel();renderControls()});
+      const inside=isContainer(it.id)?ctnText(it):'';
+      $('cpMsg').textContent=note||(slotInfo(key).label+': '+itemLabel(it)+(inside?' ('+inside+').':'.'));
+      const rm=actBtn('Remove item',()=>{ if(isOpenTop(key)) kb.path=[]; delItem(key);paintSlot(key);renderItemPanel();renderControls()});
       rm.classList.add('ghost'); box.append(rm);
-      const max=maxStack(it.id,key), sa=actBtn('Set Amount',max>1?()=>openAmount():null);
-      if(max<=1) sa.title='This item does not stack';
+      if(isContainer(it.id)){
+        const open=isOpenTop(key), ob=actBtn(open?'Close':'Open',open?closeCtn:()=>openCtn(key));
+        if(!open) ob.classList.add('go');
+        box.append(ob);
+      }
+      const stk=maxStack(it.id,key), max=slotMax(key,it.id), sa=actBtn('Set Amount',max>1?()=>openAmount():null);
+      if(max<=1) sa.title=stk>1?'The bundle has no room for more of this item':'This item does not stack';
       box.append(sa);
       const en=actBtn('Enchant',openEnchant);
       box.append(en);
@@ -887,13 +1022,13 @@
   // Duplicate asks where the copy goes: tap an EMPTY slot that can hold the item (armor and offhand slots only accept
   // matching items, exactly like Move). Occupied or unsuitable slots are dimmed.
   function dupCheck(src,dst){
-    const it=kb.items[src];
+    const it=getItem(src);
     if(dst===src) return 'Pick a different slot for the copy.';
-    if(kb.items[dst]) return slotInfo(dst).label+' is not empty. Pick an empty slot.';
+    if(getItem(dst)) return slotInfo(dst).label+' is not empty. Pick an empty slot.';
     return whyNot(dst,it);
   }
   function startDup(){
-    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    const key=kb.sel, it=key&&getItem(key); if(!it) return;
     if(!Object.keys(slotEls).some(k=>!dupCheck(key,k))){ kb.note='There is no empty slot this item can be duplicated into.'; renderControls(); return }
     kb.dup=key; renderControls();
   }
@@ -901,7 +1036,7 @@
   function tryDup(dst){
     const src=kb.dup, why=dupCheck(src,dst);
     if(why){ kb.note=why; renderControls(); return }
-    kb.items[dst]=JSON.parse(JSON.stringify(kb.items[src])); paintSlot(dst);
+    setItem(dst,JSON.parse(JSON.stringify(getItem(src)))); paintSlot(dst);
     kb.dup=null; kb.note='Duplicated into '+slotInfo(dst).label+'.'; selectSlot(dst);
   }
 
@@ -911,6 +1046,7 @@
   const HEAD_OK=/^(carved_pumpkin|player_head|zombie_head|creeper_head|dragon_head|piglin_head|skeleton_skull|wither_skeleton_skull)$/;
   const OFFHAND_OK=/^(shield|totem_of_undying|arrow|spectral_arrow|tipped_arrow|firework_rocket|nautilus_shell|filled_map|empty_map|map|map_[a-z_]+|[a-z_]*sparkler[a-z_]*)$/;
   function canHold(key,id){
+    if(isIn(key)){ const c=curCtn(); return !!c&&!ctnWhy(c,{id,count:1},inIdx(key)) }
     switch(key){
       case 'head':  return /_helmet$/.test(id)||HEAD_OK.test(id);
       case 'chest': return /_chestplate$/.test(id)||id==='elytra';
@@ -923,16 +1059,18 @@
   const SLOT_NEEDS={head:'a helmet, mob head or carved pumpkin',chest:'a chestplate or elytra',legs:'leggings',feet:'boots',offhand:'a shield, totem, arrow, firework rocket, map or nautilus shell'};
   // Why can't item `it` go into slot `dst`? Returns '' when it fits.
   function whyNot(dst,it){
+    if(isIn(dst)){ const c=curCtn(); return c?ctnWhy(c,it,inIdx(dst)):'Open a container first.' }
     if(!canHold(dst,it.id)) return slotInfo(dst).label+' only takes '+(SLOT_NEEDS[dst]||'matching items')+'.';
     if(it.count>maxStack(it.id,dst)) return slotInfo(dst).label+' holds only '+maxStack(it.id,dst)+' of this item.';
     return '';
   }
 
   // ----- move -----
-  function startMove(){ if(kb.sel&&kb.items[kb.sel]){ kb.moving=kb.sel; renderControls() } }
+  function startMove(){ if(kb.sel&&getItem(kb.sel)){ kb.moving=kb.sel; renderControls() } }
   function stopMove(){ kb.moving=null; renderControls() }
   function moveCheck(src,dst){
-    const a=kb.items[src], b=kb.items[dst];
+    const a=getItem(src), b=getItem(dst);
+    if(isIn(src)&&isIn(dst)) return '';                 // both inside the open container: just swapping places
     return whyNot(dst,a)||(b?whyNot(src,b):'');
   }
   function markSlots(){
@@ -943,10 +1081,11 @@
     }
   }
   function tryMove(dst){
-    const src=kb.moving, a=kb.items[src], b=kb.items[dst];
+    const src=kb.moving, a=getItem(src), b=getItem(dst);
     const why=moveCheck(src,dst);
     if(why){ kb.note=why; renderControls(); return }
-    kb.items[dst]=a; if(b) kb.items[src]=b; else delete kb.items[src];
+    setItem(dst,a); if(b) setItem(src,b); else delItem(src);
+    if(!isIn(src)&&!isIn(dst)&&kb.path.length){ if(kb.path[0]===src) kb.path[0]=dst; else if(kb.path[0]===dst) kb.path[0]=src }   // the open container moved with its item
     paintSlot(src); paintSlot(dst);
     kb.moving=null; selectSlot(dst);
   }
@@ -1155,7 +1294,7 @@
   function closePicker(){ $('picker').classList.remove('on'); document.body.classList.remove('lock') }
   function chooseItem(id,aux){
     const key=kb.sel; if(!key) return;
-    kb.items[key]=aux!=null?{id,aux,count:1}:{id,count:1};
+    setItem(key,aux!=null?{id,aux,count:1}:{id,count:1});
     paintSlot(key); closePicker(); renderItemPanel(); renderControls();
   }
   $('pickClose').addEventListener('click',closePicker);
@@ -1194,8 +1333,8 @@
   }
   let amtWhat='this item';
   function openAmount(){
-    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
-    const max=maxStack(it.id,key); if(max<=1) return;
+    const key=kb.sel, it=key&&getItem(key); if(!it) return;
+    const max=slotMax(key,it.id); if(max<=1) return;
     openNum({title:'Set amount',name:itemLabel(it)+' · '+slotInfo(key).label,id:it,max,value:it.count,what:'this item',
       onSet:n=>{ it.count=n; paintSlot(key); renderItemPanel() }});
   }
@@ -1291,7 +1430,7 @@
     return ids.every(k=>ok.includes(k)&&ench[k]<=ENCH[k][1])&&!ids.some(a=>ids.some(b=>conflicts(a,b)));
   }
   function setVanilla(on){
-    const it=kb.items[enchFor]; if(!it) return;
+    const it=getItem(enchFor); if(!it) return;
     let dropped=0;
     if(on){                                   // back to the rules: drop what they don't allow, cap the levels
       const ok=enchantsFor(it.id), keep={};
@@ -1312,7 +1451,7 @@
   }
   function renderEnch(){
     const list=$('enchList'), top=list.scrollTop; list.innerHTML='';
-    const it=kb.items[enchFor]; if(!it) return;
+    const it=getItem(enchFor); if(!it) return;
     const sel=Object.keys(enchDraft), legal=enchantsFor(it.id);
     const pool=enchVanilla?legal:[...legal,...ALLENCH.filter(k=>!legal.includes(k))];   // off: this item's own first, then the rest
     if(!pool.length){
@@ -1350,7 +1489,7 @@
     list.scrollTop=top;
   }
   function openEnchant(){
-    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    const key=kb.sel, it=key&&getItem(key); if(!it) return;
     enchFor=key; enchDraft=Object.assign({},it.ench||{});
     enchVanilla=vanillaOk(it,enchDraft);       // on by default; off if the item already carries non-vanilla enchantments
     $('enchName').textContent=itemLabel(it)+' · '+slotInfo(key).label;
@@ -1361,7 +1500,7 @@
   $('enchVanilla').addEventListener('click',()=>setVanilla(!enchVanilla));
   function closeEnchant(){ $('enchDlg').classList.remove('on'); enchFor=null; updateLock() }
   function applyEnchant(){
-    const it=kb.items[enchFor];
+    const it=getItem(enchFor);
     if(it){ if(Object.keys(enchDraft).length) it.ench=Object.assign({},enchDraft); else delete it.ench; renderItemPanel() }
     closeEnchant();
   }
@@ -1391,7 +1530,7 @@
     return (it.dur==null?mx:it.dur)+' / '+mx;
   }
   function openDurability(){
-    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    const key=kb.sel, it=key&&getItem(key); if(!it) return;
     const mx=maxDur(it.id); if(!mx) return;
     openNum({title:'Set durability',name:itemLabel(it)+' · '+slotInfo(key).label,id:it,max:mx,value:it.dur==null?mx:it.dur,what:'this item',
       onSet:n=>{ if(n>=mx) delete it.dur; else it.dur=n; renderItemPanel() }});
@@ -1401,7 +1540,7 @@
   let nameFor=null;
   const nameOpen=()=>$('nameDlg').classList.contains('on');
   function openRename(){
-    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
+    const key=kb.sel, it=key&&getItem(key); if(!it) return;
     nameFor=key;
     $('nameItem').textContent=itemLabel(it)+' · '+slotInfo(key).label;
     const ic=$('nameIcon'); ic.innerHTML=''; ic.append(mkIcon(it));
@@ -1411,7 +1550,7 @@
   }
   function closeRename(){ $('nameDlg').classList.remove('on'); nameFor=null; updateLock() }
   function applyRename(){
-    const it=kb.items[nameFor];
+    const it=getItem(nameFor);
     if(it){
       const v=$('nameInput').value.trim().slice(0,50);
       if(v) it.name=v; else delete it.name;
@@ -1463,14 +1602,20 @@
     function writeItem(it,slot){
       if(!it){ tByte('Count',0); tShort('Damage',0); tStr('Name',''); tByte('Slot',slot); tByte('WasPickedUp',0); u8(END); return }
       if(BLOCKS.has(it.id)){ comp('Block'); tStr('name','minecraft:'+it.id); comp('states'); u8(END); tInt('version',BLOCK_VERSION); u8(END) }
-      tByte('Count',it.count); tShort('Damage',it.aux||0); tStr('Name','minecraft:'+it.id); tByte('Slot',slot); tByte('WasPickedUp',0);
+      tByte('Count',it.count); tShort('Damage',it.aux||0); tStr('Name','minecraft:'+it.id); if(slot!==null) tByte('Slot',slot); tByte('WasPickedUp',0);
       const mx=maxDur(it.id), used=(mx&&it.dur!=null&&it.dur<mx)?mx-it.dur:0;
       const ench=Object.keys(it.ench||{}).filter(k=>k in ENCH_ID);
-      if(used||it.name||ench.length){
+      // container contents: shulker box = tag.Items (with Slot), bundle = tag.storage_item_component_content (list order)
+      const inner=isContainer(it.id)?Object.keys(it.contents||{}).map(Number).filter(i=>it.contents[i]).sort((a,b)=>a-b):[];
+      if(used||it.name||ench.length||inner.length){
         comp('tag');
           if(used) tInt('Damage',used);
           if(it.name){ comp('display'); tStr('Name',it.name); u8(END) }
           if(ench.length){ listOf('ench',COMP,ench.length); for(const k of ench){ tShort('id',ENCH_ID[k]); tShort('lvl',it.ench[k]); u8(END) } }
+          if(inner.length){
+            if(isShulker(it.id)){ listOf('Items',COMP,inner.length); for(const i of inner) writeItem(it.contents[i],i) }
+            else { listOf('storage_item_component_content',COMP,inner.length); for(const i of inner) writeItem(it.contents[i],null) }
+          }
         u8(END);
       }
       u8(END);
@@ -1518,13 +1663,15 @@
   $('xpName').addEventListener('input',()=>xpSay(''));
   $('xpBtn').addEventListener('click',()=>{
     const count=Object.keys(kb.items).length;
+    const nested=its=>Object.values(its).reduce((n,it)=>n+(it&&it.contents?Object.keys(it.contents).length+nested(it.contents):0),0);
+    const inside=nested(kb.items);
     if(!count){ xpSay('Add at least one item before exporting.','err'); return }
     const id=cleanKit($('xpName').value)||'kit';
     try{
       const bytes=nbtKit(kb.items), blob=new Blob([bytes],{type:'application/octet-stream'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.mcstructure';
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-      xpSay('Exported '+id+'.mcstructure ('+count+' item'+(count===1?'':'s')+', '+fmt(bytes.length)+').','ok');
+      xpSay('Exported '+id+'.mcstructure ('+count+' item'+(count===1?'':'s')+(inside?', '+inside+' inside containers':'')+', '+fmt(bytes.length)+').','ok');
     }catch(err){ xpSay('Export failed: '+err.message,'err') }
   });
 
