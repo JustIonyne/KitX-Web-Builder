@@ -601,9 +601,12 @@
   // Layout copied from the v1.1.0 template's _index.mcstructure: a 1x1x1 structure holding one
   // chest minecart. Slot 0 is a paper item named "=<pack title>", slots 1.. are paper items named after kit files.
   const MAX_KITS = 26;                  // per index file: chest minecart = 27 slots, slot 0 is the title. More kits spill into the next index file.
-  // Every build names its own index file: _index_<8 hex>  (bigger packs: _index_<8 hex>_2, _3 ...). Two preset packs can
-  // therefore never overwrite each other's index. KitX finds them by listing the pack structures that start with "_index".
-  const newIndexBase = () => '_index_' + uuid().replace(/-/g,'').slice(0,8);
+  // Every build picks its own index file name: _index_<3 hex>  (000..fff; bigger packs use one random name per part).
+  // KitX PROBES these 4096 names (it cannot rely on the game listing pack structures), so the name space is small on
+  // purpose. Two packs only clash if they draw the same 3 digits (about 0.02% per pair).
+  const pickIndexNames = n => { const s=new Set(); while(s.size<n) s.add('_index_'+Math.floor(Math.random()*4096).toString(16).padStart(3,'0')); return [...s]; };
+  // File names in the pack never contain spaces (a space in a structure id is asking for trouble)
+  const fileId = k => k.id.replace(/\s+/g,'_');
   function nbtIndex(title, kitIds){
     const o=[];
     const u8=v=>o.push(v&255);
@@ -754,15 +757,15 @@
       const out=[{name:R+'manifest.json',data:enc.encode(JSON.stringify(manifest,null,2))}];
       const icon=iconBytes||defaultIcon;
       if(icon) out.push({name:R+'pack_icon.png',data:icon});
-      const parts=partsNeeded(), ibase=newIndexBase();
+      const parts=partsNeeded(), inames=pickIndexNames(parts);
       const idxFiles=[];
       for(let p=0;p<parts;p++){
-        const f=(p===0?ibase:ibase+'_'+(p+1))+'.mcstructure'; idxFiles.push(f);
+        const f=inames[p]+'.mcstructure'; idxFiles.push(f);
         const title=p===0?name:`${name} (${p+1})`;
-        out.push({name:`${R}structures/kitx_preset/${f}`,data:nbtIndex(title,kits.slice(p*MAX_KITS,(p+1)*MAX_KITS).map(k=>k.id))});
+        out.push({name:`${R}structures/kitx_preset/${f}`,data:nbtIndex(title,kits.slice(p*MAX_KITS,(p+1)*MAX_KITS).map(fileId))});
       }
       const idxFile=idxFiles.length>1?`${idxFiles[0]} to ${idxFiles[idxFiles.length-1]}`:idxFiles[0];
-      for(const k of kits) out.push({name:`${R}structures/kitx_preset/${k.id}.mcstructure`,data:k.bytes});
+      for(const k of kits) out.push({name:`${R}structures/kitx_preset/${fileId(k)}.mcstructure`,data:k.bytes});
       const blob=makeZip(out);
       const fileName=(clean(name)||'kitx_preset')+'.mcaddon';
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fileName;
