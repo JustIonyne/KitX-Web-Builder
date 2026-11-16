@@ -215,7 +215,26 @@ def entity_box(a, u, v, w, h, d, f, t, tint=None, flipped=False):
     return out
 
 
+FIT = 60             # 3D icons are scaled so their longest side is this many px (flat sprites already fill CELL - 2)
+
+
 def render_quads(quads, gui, tints=None, flat_light=False):
+    """Render, then re-render scaled and centred so every 3D icon (cube, fence, wall, stairs, chest...) fills the cell the
+    same way sprites do. Java draws these at their natural size, which made fences/walls look tiny next to cubes."""
+    img = _render_quads(quads, gui, tints, flat_light)
+    ys, xs = np.nonzero(img[..., 3] > 0)
+    if len(xs) < 40:
+        return img
+    x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
+    m = max(0.5, min(3.0, FIT / max(x1 - x0, y1 - y0)))
+    if abs(m - 1) < 0.02:
+        return img
+    c = CELL / 2
+    shift = (c - (c + ((x0 + x1) / 2 - c) * m), c - (c + ((y0 + y1) / 2 - c) * m))
+    return _render_quads(quads, gui, tints, flat_light, m, shift)
+
+
+def _render_quads(quads, gui, tints=None, flat_light=False, zoom=1.0, shift=(0.0, 0.0)):
     gui = gui or {}
     R = rotmat(*(gui.get('rotation') or [30, 225, 0]))
     sc = K * (gui.get('scale') or [0.625])[0]
@@ -226,7 +245,8 @@ def render_quads(quads, gui, tints=None, flat_light=False):
 
     def proj(p):
         v = R @ (p - cen)
-        return np.array([CELL / 2 - v[0] * sc - tx * K, CELL / 2 - v[1] * sc - ty * K]), v[2] * sc
+        xy = np.array([CELL / 2 - v[0] * sc - tx * K, CELL / 2 - v[1] * sc - ty * K])
+        return (CELL / 2 + (xy - CELL / 2) * zoom + np.array(shift)), v[2] * sc * zoom
 
     for q in quads:
         n = R @ q['n']
@@ -742,7 +762,7 @@ def main():
         # numeric check: cube renders vs the addon's baked cubes
         diffs = []
         for i, e in items.items():
-            if e['render'] == 'cube' and imgs[i] is not None and baked(i) is not None:
+            if e['render'] == 'cube' and imgs.get(i) is not None and baked(i) is not None:
                 A_, B_ = imgs[i].astype(float), baked(i).astype(float)
                 m = (A_[..., 3] > 200) & (B_[..., 3] > 200)
                 if m.sum() > 400:
