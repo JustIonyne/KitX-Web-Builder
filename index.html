@@ -146,8 +146,8 @@
   .dlg-item span.n{min-width:0;font-weight:600;overflow-wrap:anywhere}
   .amt-row{display:flex;align-items:center;gap:12px}
   .amt-row input[type=range]{flex:1;min-width:0;height:32px;accent-color:var(--accent);cursor:pointer}
-  .amt-row input[type=text]{width:76px;flex:none;text-align:center;font-weight:700}
-  .amt-scale{display:flex;justify-content:space-between;color:var(--mute);font-size:10px;margin:2px 88px 0 2px}
+  .amt-row input[type=text]{width:88px;flex:none;text-align:center;font-weight:700}
+  .amt-scale{display:flex;justify-content:space-between;color:var(--mute);font-size:10px;margin:2px 100px 0 2px}
   .amt-err{color:var(--bad);font-size:10px;min-height:19px;margin:8px 0 0}
   .dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
   #amtDlg{z-index:80}
@@ -255,6 +255,19 @@
   .pk-tab{border-radius:3px 3px 0 0}
   .pk-grid .slot.pick,.pk-sub .slot.pick{outline:2px solid #fff;outline-offset:-2px;box-shadow:0 0 0 2px #000;z-index:2}
   .row.pick{border-color:#3f8f2f;background:rgba(63,143,47,.22)}
+  /* vanilla-enchantments switch */
+  .ench-tools{display:flex;align-items:center;gap:6px}
+  .vsw{appearance:none;background:none;border:0;padding:6px 4px;display:flex;align-items:center;gap:9px;color:var(--mute);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .vsw-l{transition:none}
+  .vsw[aria-checked=true] .vsw-l{color:var(--text)}
+  .vsw[aria-checked=false] .vsw-l{color:#d98a00}
+  .vsw-t{position:relative;flex:none;width:46px;height:24px;background:#2a2f3a;box-shadow:inset 2px 2px 0 rgba(0,0,0,.5),inset -2px -2px 0 rgba(255,255,255,.1);border-radius:2px}
+  .vsw[aria-checked=true] .vsw-t{background:#3f8f2f}
+  .vsw[aria-checked=false] .vsw-t{background:#4a3a1c}
+  .vsw-k{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#d8dae0;box-shadow:inset 2px 2px 0 #fff,inset -2px -2px 0 #8b8e98;border-radius:1px}
+  .vsw[aria-checked=true] .vsw-k{left:25px}
+  .vsw:focus-visible .vsw-t{outline:2px solid var(--accent);outline-offset:2px}
+  #enchHint.custom{color:#d98a00}
 </style>
 </head>
 <body>
@@ -440,7 +453,12 @@
 
 <div class="dlg" id="enchDlg" role="dialog" aria-modal="true" aria-labelledby="enchTitle">
   <div class="dlg-card ench-card">
-    <div class="dlg-head"><b id="enchTitle">Enchant</b><button class="x" id="enchClose" type="button" aria-label="Close">×</button></div>
+    <div class="dlg-head"><b id="enchTitle">Enchant</b>
+      <div class="ench-tools">
+        <button class="vsw" id="enchVanilla" type="button" role="switch" aria-checked="true" aria-label="Vanilla enchantments"><span class="vsw-l">Vanilla</span><span class="vsw-t"><span class="vsw-k"></span></span></button>
+        <button class="x" id="enchClose" type="button" aria-label="Close">×</button>
+      </div>
+    </div>
     <div class="dlg-item"><span class="ri" id="enchIcon"></span><span class="n" id="enchName"></span></div>
     <p class="hint" id="enchHint" style="margin:0 0 8px"></p>
     <div class="ench-list" id="enchList"></div>
@@ -458,7 +476,7 @@
     <div class="dlg-item"><span class="ri" id="amtIcon"></span><span class="n" id="amtName"></span></div>
     <div class="amt-row">
       <input id="amtRange" type="range" min="1" max="64" step="1" value="1" aria-label="Amount slider">
-      <input id="amtNum" type="text" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="Amount">
+      <input id="amtNum" type="text" inputmode="numeric" autocomplete="off" maxlength="5" aria-label="Amount">
     </div>
     <div class="amt-scale"><span id="amtMin">1</span><span id="amtMax">64</span></div>
     <p class="amt-err" id="amtErr" role="alert"></p>
@@ -854,8 +872,7 @@
       const max=maxStack(it.id,key), sa=actBtn('Set Amount',max>1?()=>openAmount():null);
       if(max<=1) sa.title='This item does not stack';
       box.append(sa);
-      const en=actBtn('Enchant',enchantsFor(it.id).length?openEnchant:null);
-      if(!enchantsFor(it.id).length) en.title='This item can not be enchanted';
+      const en=actBtn('Enchant',openEnchant);
       box.append(en);
       const du=actBtn('Durability',maxDur(it.id)?openDurability:null);
       if(!maxDur(it.id)) du.title='This item has no durability';
@@ -1261,18 +1278,49 @@
   function enchText(it){
     const e=it&&it.ench; if(!e) return '—';
     const ids=Object.keys(e); if(!ids.length) return '—';
-    return ids.map(k=>ENCH[k][0]+(ENCH[k][1]>1?' '+roman(e[k]):'')).join(', ');
+    return ids.map(k=>ENCH[k][0]+((ENCH[k][1]>1||e[k]>1)?' '+roman(e[k]):'')).join(', ');
   }
 
-  let enchDraft={}, enchFor=null;
+  // Vanilla ON  = the normal rules: only enchantments the item can get, no clashing pairs, levels up to the vanilla max.
+  // Vanilla OFF = any enchantment on any item in any combination, level 1 to 32767 (the largest value the NBT short can hold).
+  const ALLENCH=Object.keys(ENCH), MAXLVL=32767;
+  let enchDraft={}, enchFor=null, enchVanilla=true;
   const enchOpen=()=>$('enchDlg').classList.contains('on');
+  function vanillaOk(it,ench){
+    const ids=Object.keys(ench), ok=enchantsFor(it.id);
+    return ids.every(k=>ok.includes(k)&&ench[k]<=ENCH[k][1])&&!ids.some(a=>ids.some(b=>conflicts(a,b)));
+  }
+  function setVanilla(on){
+    const it=kb.items[enchFor]; if(!it) return;
+    let dropped=0;
+    if(on){                                   // back to the rules: drop what they don't allow, cap the levels
+      const ok=enchantsFor(it.id), keep={};
+      for(const k of Object.keys(enchDraft)){
+        if(!ok.includes(k)||Object.keys(keep).some(o=>conflicts(k,o))){ dropped++; continue }
+        keep[k]=Math.min(enchDraft[k],ENCH[k][1]);
+      }
+      enchDraft=keep;
+    }
+    enchVanilla=on; renderEnchHead(dropped); renderEnch();
+  }
+  function renderEnchHead(dropped){
+    const sw=$('enchVanilla'); sw.setAttribute('aria-checked',String(enchVanilla));
+    const h=$('enchHint'); h.classList.toggle('custom',!enchVanilla);
+    h.textContent=enchVanilla
+      ? 'Tap to pick enchantments. New ones start at their max level; use Level to change it.'+(dropped?' Removed '+dropped+' that the vanilla rules don\'t allow.':'')
+      : 'Vanilla rules are off: any enchantment, any combination, any item. Levels go up to '+MAXLVL+'. Some won\'t do anything in game.';
+  }
   function renderEnch(){
     const list=$('enchList'), top=list.scrollTop; list.innerHTML='';
     const it=kb.items[enchFor]; if(!it) return;
-    const sel=Object.keys(enchDraft);
-    for(const id of enchantsFor(it.id)){
+    const sel=Object.keys(enchDraft), legal=enchantsFor(it.id);
+    const pool=enchVanilla?legal:[...legal,...ALLENCH.filter(k=>!legal.includes(k))];   // off: this item's own first, then the rest
+    if(!pool.length){
+      const n=document.createElement('div'); n.className='none'; n.textContent='Nothing can be enchanted onto this item with vanilla rules. Switch Vanilla off to add any enchantment.'; list.append(n);
+    }
+    for(const id of pool){
       const [name,max]=ENCH[id], on=id in enchDraft;
-      const clash=on?null:sel.find(k=>conflicts(id,k));
+      const clash=(enchVanilla&&!on)?sel.find(k=>conflicts(id,k)):null;
       const row=document.createElement('div'); row.className='er'+(on?' on':'')+(clash?' off':'');
       const pick=document.createElement('button'); pick.type='button'; pick.className='pick';
       pick.setAttribute('role','checkbox'); pick.setAttribute('aria-checked',String(on)); if(clash) pick.setAttribute('aria-disabled','true');
@@ -1280,7 +1328,9 @@
       const en=document.createElement('span'); en.className='en';
       const b=document.createElement('b'); b.textContent=name;
       const sm=document.createElement('span');
-      sm.textContent=clash?('Can not combine with '+ENCH[clash][0]):(max>1?('Levels I to '+roman(max)):'Single level');
+      const odd=!enchVanilla&&!legal.includes(id);
+      sm.textContent=clash?('Can not combine with '+ENCH[clash][0]):odd?'Not vanilla for this item':(max>1?('Levels I to '+roman(max)):'Single level');
+      if(odd) sm.className='odd';
       en.append(b,sm); pick.append(box,en);
       pick.addEventListener('click',()=>{
         if(clash) return;
@@ -1288,9 +1338,10 @@
         renderEnch();
       });
       row.append(pick);
-      if(on&&max>1){
+      if(on&&(max>1||!enchVanilla)){
+        const cap=enchVanilla?max:MAXLVL;
         const lv=document.createElement('button'); lv.type='button'; lv.className='btn ghost lv'; lv.textContent='Level '+roman(enchDraft[id]);
-        lv.addEventListener('click',()=>openNum({title:'Set level',name:name+' · '+itemLabel(it),id:it,max,value:enchDraft[id],what:name,
+        lv.addEventListener('click',()=>openNum({title:'Set level',name:name+' · '+itemLabel(it),id:it,max:cap,value:Math.min(enchDraft[id],cap),what:name,
           onSet:n=>{ enchDraft[id]=n; renderEnch() }}));
         row.append(lv);
       }
@@ -1299,13 +1350,15 @@
     list.scrollTop=top;
   }
   function openEnchant(){
-    const key=kb.sel, it=key&&kb.items[key]; if(!it||!enchantsFor(it.id).length) return;
+    const key=kb.sel, it=key&&kb.items[key]; if(!it) return;
     enchFor=key; enchDraft=Object.assign({},it.ench||{});
+    enchVanilla=vanillaOk(it,enchDraft);       // on by default; off if the item already carries non-vanilla enchantments
     $('enchName').textContent=itemLabel(it)+' · '+slotInfo(key).label;
     const ic=$('enchIcon'); ic.innerHTML=''; ic.append(mkIcon(it));
-    $('enchHint').textContent='Tap to pick enchantments. New ones start at their max level; use Level to change it.';
+    renderEnchHead(0);
     $('enchDlg').classList.add('on'); updateLock(); renderEnch(); $('enchList').scrollTop=0;
   }
+  $('enchVanilla').addEventListener('click',()=>setVanilla(!enchVanilla));
   function closeEnchant(){ $('enchDlg').classList.remove('on'); enchFor=null; updateLock() }
   function applyEnchant(){
     const it=kb.items[enchFor];
