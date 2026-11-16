@@ -227,12 +227,41 @@
   button,input,select,option,optgroup,textarea{font-family:'KitX Pixel',system-ui,sans-serif;font-size:10px}
   select,option{font-weight:400}
   input[type=text]::placeholder,textarea::placeholder{font-family:inherit}
+
+  /* ===== light Minecraft touches: pixel-bevel buttons, small radii, item icons ===== */
+  .card,.panel,.tile,.dlg-card,.kit,.drop{border-radius:4px}
+  input[type=text],textarea,select{border-radius:3px}
+  .row,.er,.pk-open{border-radius:3px}
+  .sheet-body{flex:1;min-height:0;display:flex;flex-direction:column}
+  .bar-ic{flex:none;width:26px;height:26px;position:relative}
+  .dr-ic{flex:none;width:22px;height:22px;position:relative}
+  button.btn,a.btn{border-radius:2px;border:0;background:#4b4f5a;color:#fff;font-weight:400;padding:10px 16px 12px;line-height:1.2;text-align:center;
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,.22),inset -2px -4px 0 rgba(0,0,0,.38);transition:none}
+  button.btn:hover,a.btn:hover{background:#5d626f}
+  button.btn:active,a.btn:active{padding:12px 16px 10px;box-shadow:inset 2px 2px 0 rgba(0,0,0,.38),inset -2px -2px 0 rgba(255,255,255,.14)}
+  button.btn:focus-visible,a.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .btn.go{background:#3f8f2f}
+  .btn.go:hover{background:#4ca23a}
+  .btn.dc{background:#5865f2}
+  .btn.dc:hover{background:#6b77ff}
+  .btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 2px var(--line)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn.ghost:active{box-shadow:inset 0 0 0 2px var(--line);padding:11px 16px}
+  .btn[aria-disabled=true],.btn:disabled{opacity:.45;box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),inset -2px -4px 0 rgba(0,0,0,.3)}
+  .cp-actions .btn{padding:9px 12px 11px}
+  .pkd-add{padding:7px 18px 9px}
+  input[type=checkbox]{accent-color:#3f8f2f}
+  input[type=range]{accent-color:#3f8f2f}
+  .pk-tab{border-radius:3px 3px 0 0}
+  .pk-grid .slot.pick,.pk-sub .slot.pick{outline:2px solid #fff;outline-offset:-2px;box-shadow:0 0 0 2px #000;z-index:2}
+  .row.pick{border-color:#3f8f2f;background:rgba(63,143,47,.22)}
 </style>
 </head>
 <body>
 
 <header class="bar">
   <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span></button>
+  <span class="bar-ic" id="barIc" aria-hidden="true"></span>
   <h1 id="barTitle">KitX</h1>
 </header>
 
@@ -254,7 +283,7 @@
       <h2>KitX</h2>
       <p>A kit management addon for Minecraft Bedrock. Save kits, equip them in one command, and control who can use them.</p>
       <div class="cta">
-        <a class="btn" id="cfBtn" target="_blank" rel="noopener">Get KitX on CurseForge</a>
+        <a class="btn go" id="cfBtn" target="_blank" rel="noopener">Get KitX on CurseForge</a>
         <a class="btn dc" data-discord target="_blank" rel="noopener">Join the Discord</a>
         <a class="btn ghost" href="#preset-builder">Open the Preset Builder</a>
       </div>
@@ -324,7 +353,7 @@
         <p class="cp-msg" id="xpMsg">Save this kit as a .mcstructure file. Add it to a preset in the Preset Builder, or place it in your kit structures.</p>
         <label for="xpName">Kit name</label>
         <input type="text" id="xpName" class="xp-in" maxlength="40" placeholder="My Kit" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <div class="cp-actions"><button type="button" class="btn" id="xpBtn">Export kit</button></div>
+        <div class="cp-actions"><button type="button" class="btn go" id="xpBtn">Export kit</button></div>
         <div class="xp-status" id="xpStatus" role="status"></div>
       </div>
 
@@ -372,7 +401,7 @@
     <div class="card">
       <h3>3 · Build</h3>
       <div class="actions">
-        <button class="btn" id="build" disabled>Build preset</button>
+        <button class="btn go" id="build" disabled>Build preset</button>
         <button class="btn ghost" id="clear">Reset</button>
       </div>
       <div id="status" role="status"></div>
@@ -387,9 +416,11 @@
     <input id="pickQ" type="text" placeholder="Search items (e.g. diamond sword)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
   </div>
   <div class="pk-tabs" id="pkTabs" role="tablist" aria-label="Creative inventory"></div>
-  <div class="sheet-title" id="pickTitle">Add item</div>
-  <div class="sheet-count" id="pickCount"></div>
-  <div class="sheet-list" id="pickList"><div class="sheet-inner" id="pickInner"></div></div>
+  <div class="sheet-body">
+    <div class="sheet-title" id="pickTitle">Add item</div>
+    <div class="sheet-count" id="pickCount"></div>
+    <div class="sheet-list" id="pickList"><div class="sheet-inner" id="pickInner"></div></div>
+  </div>
   <div class="pk-detail" id="pkDetail" aria-live="polite"></div>
 </div>
 
@@ -402,7 +433,7 @@
     <div class="dlg-actions">
       <button class="btn ghost" id="nameReset" type="button" style="margin-right:auto">Reset</button>
       <button class="btn ghost" id="nameCancel" type="button">Cancel</button>
-      <button class="btn" id="nameOk" type="button">Set</button>
+      <button class="btn go" id="nameOk" type="button">Set</button>
     </div>
   </div>
 </div>
@@ -416,7 +447,7 @@
     <div class="dlg-actions">
       <button class="btn ghost" id="enchClear" type="button" style="margin-right:auto">Clear</button>
       <button class="btn ghost" id="enchCancel" type="button">Cancel</button>
-      <button class="btn" id="enchOk" type="button">Apply</button>
+      <button class="btn go" id="enchOk" type="button">Apply</button>
     </div>
   </div>
 </div>
@@ -433,7 +464,7 @@
     <p class="amt-err" id="amtErr" role="alert"></p>
     <div class="dlg-actions">
       <button class="btn ghost" id="amtCancel" type="button">Cancel</button>
-      <button class="btn" id="amtOk" type="button">Set</button>
+      <button class="btn go" id="amtOk" type="button">Set</button>
     </div>
   </div>
 </div>
@@ -794,7 +825,7 @@
     $('ipCount').textContent=it?String(it.count):'—';
     $('ipDur').textContent=durText(it); $('ipEnch').textContent=enchText(it);
   }
-  function actBtn(label,fn){const b=document.createElement('button');b.className='btn';b.textContent=label;if(fn)b.addEventListener('click',fn);else b.disabled=true;return b}
+  function actBtn(label,fn){const b=document.createElement('button');b.className=label==='Add item'?'btn go':'btn';b.textContent=label;if(fn)b.addEventListener('click',fn);else b.disabled=true;return b}
   function renderControls(){
     const key=kb.sel, box=$('cpActions'); box.innerHTML='';
     const note=kb.note; kb.note='';
@@ -968,7 +999,7 @@
     const it=pkSel, top=document.createElement('div'); top.className='pkd-top';
     const ic=document.createElement('span'); ic.className='pkd-icon'; ic.append(mkIcon(it));
     const nm=document.createElement('div'); nm.className='pkd-name'; nm.textContent=itemLabel(it);
-    const add=document.createElement('button'); add.type='button'; add.className='btn pkd-add'; add.textContent='Add';
+    const add=document.createElement('button'); add.type='button'; add.className='btn go pkd-add'; add.textContent='Add';
     add.addEventListener('click',()=>chooseItem(it.id,it.aux));
     top.append(ic,nm,add);
     const dl=document.createElement('div'); dl.className='pkd-stats';
@@ -1099,6 +1130,11 @@
     showTab(SLOT_NEEDS[kb.sel]?1:Math.min(pkTab,SEARCH_TAB));
     if(matchMedia('(pointer:fine)').matches) $('pickQ').focus();
   }
+  // pixel icons in the top bar and menu
+  $('barIc').append(mkIcon({id:'grass_block'}));
+  {const DR={home:'grass_block','kit-builder':'chest','preset-builder':'crafting_table'};
+   document.querySelectorAll('#drawer a[data-route]').forEach(a=>{const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:DR[a.dataset.route]||'chest'})); a.prepend(ic)});
+   const off=document.querySelector('#drawer .item.off'); if(off){const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:'command_block'})); off.prepend(ic)}}
   function closePicker(){ $('picker').classList.remove('on'); document.body.classList.remove('lock') }
   function chooseItem(id,aux){
     const key=kb.sel; if(!key) return;
