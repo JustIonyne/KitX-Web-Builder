@@ -597,6 +597,11 @@ def resolve(id_, e):
     r = e['render']
     ji = e.get('java_item')
 
+    if id_.endswith('_spear') and e.get('variants'):         # the 16x16 inventory icon (tip top-right), not the 32x32 in-hand art
+        a = render_layers([e['variants'][0]], tints)
+        if a is not None:
+            return a, 'sprite'
+
     if r == 'sprite':
         paths = model.get('layers') or ([model['textures']['layer0']] if 'layer0' in model.get('textures', {}) else [])
         a = render_layers(paths, tints)
