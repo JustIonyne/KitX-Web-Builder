@@ -203,16 +203,17 @@
   .row.pick{border-color:var(--accent);background:rgba(91,140,255,.14)}
   .pk-grid .slot.pick,.pk-sub .slot.pick{outline:2px solid #fff;outline-offset:-2px;z-index:1}
   /* fixed details panel under the scrolling list */
-  .pk-detail{flex:none;border-top:1px solid var(--line);background:var(--bar);padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
-  .pkd{max-width:720px;margin:0 auto;height:182px;display:flex;flex-direction:column;gap:8px}
+  .pk-detail{flex:none;position:relative;z-index:2;border-top:2px solid var(--accent);background:var(--card);box-shadow:0 -8px 18px rgba(0,0,0,.35);padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
+  .pkd{max-width:720px;margin:0 auto;height:92px;display:flex;flex-direction:column;gap:5px}
   .pkd-top{flex:none;display:flex;align-items:center;gap:10px}
-  .pkd-icon{flex:none;width:52px;height:52px;position:relative;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
+  .pkd-icon{flex:none;width:40px;height:40px;position:relative;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
   .pkd-icon .ico{position:absolute;inset:9%;width:auto;height:auto}
-  .pkd-name{flex:1;min-width:0;font-weight:700;line-height:1.2;overflow-wrap:anywhere}
-  .pkd-add{flex:none;padding:8px 16px}
-  .pkd-stats{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-content:start;font-size:12px;line-height:1.3}
-  .pkd-stats dt{color:var(--mute)}
-  .pkd-stats dd{margin:0;overflow-wrap:anywhere}
+  .pkd-name{flex:1;min-width:0;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+  .pkd-add{flex:none;padding:6px 18px}
+  .pkd-stats{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;font-size:11px;line-height:1.35;color:var(--mute)}
+  .pkd-stats div{overflow-wrap:anywhere}
+  .pkd-stats b{font-weight:400;color:var(--text)}
+  .pkd-fx{color:var(--text)}
   .pkd-hint{color:var(--mute);font-size:12px;margin:auto 0;text-align:center}
   .row .ri{flex:none;width:40px;height:40px;position:relative}
   .row .rn{min-width:0}
@@ -962,7 +963,7 @@
     const w=document.createElement('div'); w.className='pkd'; box.append(w);
     if(!pkSel){
       const h=document.createElement('div'); h.className='pkd-hint';
-      h.textContent='Tap an item to see its details. Tap it again, or press Add, to put it in the slot.'; w.append(h); return;
+      h.textContent='Tap an item for details · tap it again or press Add to add it'; w.append(h); return;
     }
     const it=pkSel, top=document.createElement('div'); top.className='pkd-top';
     const ic=document.createElement('span'); ic.className='pkd-icon'; ic.append(mkIcon(it));
@@ -970,14 +971,14 @@
     const add=document.createElement('button'); add.type='button'; add.className='btn pkd-add'; add.textContent='Add';
     add.addEventListener('click',()=>chooseItem(it.id,it.aux));
     top.append(ic,nm,add);
-    const dl=document.createElement('dl'); dl.className='pkd-stats';
-    const row=(k,v)=>{const dt=document.createElement('dt'); dt.textContent=k; const dd=document.createElement('dd'); dd.textContent=v; dl.append(dt,dd)};
-    row('Item ID','minecraft:'+it.id);
-    row('Aux value',String(it.aux!=null?it.aux:0));
-    const md=maxDur(it.id); row('Max durability',md?String(md):'None');
-    row('Max stack',String(maxStack(it.id,kb.sel)));
+    const dl=document.createElement('div'); dl.className='pkd-stats';
+    const line=(parts,cls)=>{const d=document.createElement('div'); if(cls) d.className=cls;
+      parts.forEach(([k,v],n)=>{ if(n) d.append(' · '); if(k) d.append(k+' '); const e=document.createElement('b'); e.textContent=v; d.append(e) }); dl.append(d)};
+    const md=maxDur(it.id);
+    line([['','minecraft:'+it.id]]);
+    line([['Aux',String(it.aux!=null?it.aux:0)],['Max stack',String(maxStack(it.id,kb.sel))],['Durability',md?String(md):'None']]);
     const fx=effectLines(it);
-    if(fx){ const dt=document.createElement('dt'); dt.textContent='Effects'; const dd=document.createElement('dd'); dd.innerHTML=''; fx.forEach((l,i)=>{if(i)dd.append(document.createElement('br')); dd.append(l)}); dl.append(dt,dd) }
+    if(fx) line([['Effects',fx.join(', ')]],'pkd-fx');
     w.append(top,dl);
   }
   function pickItem(it){
@@ -1026,7 +1027,7 @@
       if(pend&&i===pend.end){ grid.append(pend.panel); panelEl=pend.panel; pend=null }
     });
     if(!cells.length){const n=document.createElement('div'); n.className='none'; n.textContent='Nothing in this tab fits this slot.'; inner.append(n)}
-    $('pickCount').textContent=TABS[pkTab].n+' · tap a + to open a group · tap an item for details, tap again to add';
+    $('pickCount').textContent=TABS[pkTab].n+' · tap a + to open a group';
     markPick();
     if(reveal&&panelEl) panelEl.scrollIntoView({block:'nearest'});
   }
@@ -1085,7 +1086,7 @@
       const m=document.createElement('button'); m.type='button'; m.className='btn ghost more'; m.style.cssText='width:100%;margin:6px 0 10px';
       m.textContent='Show more ('+(results.length-shown)+' left)'; m.addEventListener('click',()=>renderResults(true)); inner.append(m);
     }
-    $('pickCount').textContent=results.length+(results.length===1?' item':' items')+' · tap for details, tap again to add';
+    $('pickCount').textContent=results.length+(results.length===1?' item':' items')+'';
     markPick();
   }
   function doSearch(){ results=runSearch($('pickQ').value); shown=0; renderResults(false); $('pickList').scrollTop=0 }
