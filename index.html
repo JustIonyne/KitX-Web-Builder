@@ -1272,11 +1272,13 @@
         const b=await f.data(); let cv;
         if(ext==='.tga') cv=decodeTga(b);
         else{const bm=await createImageBitmap(new Blob([b]));cv=document.createElement('canvas');cv.width=bm.width;cv.height=bm.height;cv.getContext('2d').drawImage(bm,0,0)}
-        if(cv){const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height); out={w:d.width,h:d.height,data:d.data}; if(out.h>out.w&&out.h%out.w===0) out.h=out.w; break}   // animated strip: first frame
+        if(cv){const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height); out={w:d.width,h:d.height,data:d.data}; break}
       }catch(e){}
     }
     return cache[key]=out;
   }
+  // animated flipbook (frames stacked vertically): use the first frame, unless the model's own texture height spans all frames
+  const fitTex=(tx,geo)=>tx&&tx.h>tx.w&&tx.h%tx.w===0&&!(geo&&geo.th===tx.h)?{w:tx.w,h:tx.w,data:tx.data}:tx;
   // geometry id -> {tw, th, bones} from every models/**/*.json in the addon (new "minecraft:geometry" format and the old "geometry.x" one)
   async function geoIndex(files){
     const m={};
@@ -1294,22 +1296,37 @@
     const T={};
     for(const k of keys){ const v=mi[k], s=typeof v==='string'?v:v&&v.texture; if(s) T[k]=await texPixels(texPathOf(ttex,s)||s,files,cache) }
     const first=keys.map(k=>T[k]).find(Boolean); if(!first) return null;
-    const pick=n=>T[n]||(/^(north|south|east|west)$/.test(n)&&T.side)||T['*']||first;
+    const pick0=n=>T[n]||(/^(north|south|east|west)$/.test(n)&&T.side)||T['*']||first;
     const g=b.geo; let geo;
     if(!g||b.unit||g==='minecraft:geometry.full_block') geo=cubeGeo();
     else if(g.startsWith('minecraft:')) return null;          // cross, etc.: flat icon
     else geo=(await getGi())[g];
     if(!geo) return null;
+    const pick=n=>fitTex(pick0(n),geo);
     const px=renderFaces(buildFaces(geo,pick)); if(!px) return null;
     const cv=document.createElement('canvas'); cv.width=cv.height=64; cv.getContext('2d').putImageData(new ImageData(px,64,64),0,0);
     return cv.toDataURL();
   }
   // an item's 3D icon from its attachable (geometry.default + textures.default), as a data URL, or null (then the flat icon is used)
-  async function attach3d(a,files,cache,getGi){
+  // plain 16-unit cube whose texture strip (side|top, front|side|top ...) is wider than the model's texture space: the model would squeeze the whole strip onto every face
+  const isPlainCube=geo=>{const cs=[]; for(const b of geo.bones||[]) for(const c of b.cubes||[]) cs.push(c); return cs.length===1&&cs[0].size&&cs[0].size.every(v=>v===16)};
+  function stripGeo(n){   // panels left to right: 2 = side|top, 3 = front|side|top, 4+ = side|side|top|bottom ...; the camera sees north (left), west (right) and up
+    const pw=16/n, P=i=>[i*pw,0], face=i=>({uv:P(i),uv_size:[pw,16]}), top=i=>({uv:[(i+1)*pw,16],uv_size:[-pw,-16]});
+    const u=n===2?{north:face(0),south:face(0),east:face(0),west:face(0),up:top(1),down:top(1)}
+           :n===3?{north:face(0),south:face(1),east:face(1),west:face(1),up:top(2),down:top(2)}
+           :{north:face(0),south:face(0),east:face(1),west:face(1),up:top(2),down:top(n>3?3:2)};
+    return {tw:16,th:16,bones:[{name:'b',cubes:[{origin:[-8,-8,-8],size:[16,16,16],uv:u}]}]};
+  }
+  // an item's 3D icon from its attachable (geometry.default + textures.default), as a data URL, or null (then the flat/vanilla icon is used)
+  async function attach3d(a,files,cache,getGi,skipStrips){
     if(!a||!a.geo||!a.tex) return null;
-    const tx=await texPixels(a.tex,files,cache); if(!tx) return null;
-    const geo=(await getGi())[a.geo.split(':')[0]]; if(!geo) return null;
+    let tx=await texPixels(a.tex,files,cache); if(!tx) return null;
+    let geo=(await getGi())[a.geo.split(':')[0]]; if(!geo) return null;
+    if(geo.tw&&tx.w>geo.tw&&tx.w%tx.h===0&&isPlainCube(geo)){ if(skipStrips) return null; geo=stripGeo(tx.w/tx.h) }
+    tx=fitTex(tx,geo);
     const px=renderFaces(buildFaces(geo,()=>tx)); if(!px) return null;
+    let n=0; for(let k=3;k<px.length;k+=4) if(px[k]>40) n++;
+    if(n<80) return null;                                   // (almost) nothing drawn, e.g. the texture is empty where the model samples it
     const cv=document.createElement('canvas'); cv.width=cv.height=64; cv.getContext('2d').putImageData(new ImageData(px,64,64),0,0);
     return cv.toDataURL();
   }
@@ -1322,6 +1339,14 @@
   function vanillaTex(n){
     n=TEX_ALIAS[n]||n.replace(/^gold_(?=sword|spear|axe|pickaxe|shovel|hoe|helmet|chestplate|leggings|boots|horse_armor)/,'golden_').replace(/^wood_(?=sword|spear|axe|pickaxe|shovel|hoe)/,'wooden_');
     return ITEM_PATH[n]!==undefined?n:null;
+  }
+  const BED_COLORS=['white','orange','magenta','light_blue','yellow','lime','pink','gray','light_gray','cyan','purple','blue','brown','green','red','black'];
+  // block-style proxy items (nf:oak_door_offhand ...) -> the vanilla item they stand for: {like} or {likeVar:'bed:N'} or null
+  function vanillaGuess(id){
+    const bare=id.split(':')[1].replace(/_offhand$/,''), bm=/^(.+)_bed$/.exec(bare), bi=bm?BED_COLORS.indexOf(bm[1]):-1;
+    if(bi>=0) return {likeVar:'bed:'+bi};
+    const like=vanillaTex(bare)||vanillaTex(bare.replace(/^oak_door$/,'wooden_door').replace(/^chain$/,'iron_chain'));
+    return like?{like}:null;
   }
   async function importAddon(file){
     const files=new Map(); await collectZip(await file.arrayBuffer(),files,0);
@@ -1358,22 +1383,28 @@
     const old=ADDONS.findIndex(a=>a.name===title); if(old>=0) dropAddon(old);
     let gi=null; const getGi=async()=>gi||(gi=await geoIndex(files));
     for(const x of found){
-      let icon=await loadTexture(x.rel,files,cache);
+      let icon=await loadTexture(x.rel,files,cache), like=null, likeVar=null;
       if(x.blk){ try{ icon=await block3d(x.blk,files,cache,ttex,getGi)||icon }catch(e){} }
       else if(ATT[x.id]){
         // block-style items (icon is a block / entity texture or a texture strip, not a normal item sprite): draw the attachable's 3D model
-        const rl=(x.rel||'').toLowerCase();
-        if(!x.rel||/^textures\/(blocks|item\/blocks|nf_left|entity)\//.test(rl)){ try{ icon=await attach3d(ATT[x.id],files,cache,getGi)||icon }catch(e){} }
+        const rl=(x.rel||'').toLowerCase(), vg=vanillaGuess(x.id);
+        if(!x.rel||/^textures\/(blocks|item\/blocks|nf_left|entity)\//.test(rl)){
+          // biome-tinted leaves (Java textures are grey) and strips the model can't lay out: the vanilla icon is the better picture when there is one
+          const tinted=/^(oak|spruce|birch|jungle|acacia|dark_oak|mangrove)_leaves$/.test(x.id.split(':')[1].replace(/_offhand$/,''));
+          let i3=null; if(!(tinted&&vg)){ try{ i3=await attach3d(ATT[x.id],files,cache,getGi,!!vg) }catch(e){} }
+          if(i3) icon=i3;
+          else if(vg) icon=null;                              // flat strip / empty texture is no use: fall through to the vanilla icon
+        }
       }
-      // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
-      let tn=!icon&&x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null, like=tn?vanillaTex(tn):null, likeVar=null;
-      if(!icon&&!like){   // still nothing: a block-style item whose textures are vanilla ones (nf:oak_door_offhand -> the vanilla oak door icon)
-        const bare=x.id.split(':')[1].replace(/_offhand$/,''), BED=['white','orange','magenta','light_blue','yellow','lime','pink','gray','light_gray','cyan','purple','blue','brown','green','red','black'];
-        const bm=/^(.+)_bed$/.exec(bare), bi=bm?BED.indexOf(bm[1]):-1;
-        if(bi>=0) likeVar='bed:'+bi;
-        else like=vanillaTex(bare)||(ATT[x.id]&&vanillaTex(ATT[x.id].tex.split('/').pop().replace(/_uncast$/,'')))||vanillaTex(bare.replace(/^oak_door$/,'wooden_door').replace(/^(waxed_)?((?:exposed_|weathered_|oxidized_)?copper)_chain$/,'$1$2_chain').replace(/^chain$/,'iron_chain'))||null;
+      if(!icon){
+        // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
+        const tn=x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null; like=tn?vanillaTex(tn):null;
+        if(!like){   // a block-style item whose textures are vanilla ones (nf:oak_door_offhand -> the vanilla oak door icon)
+          const vg=vanillaGuess(x.id); if(vg){ like=vg.like||'bed'; likeVar=vg.likeVar||null }
+          else if(ATT[x.id]) like=vanillaTex(ATT[x.id].tex.split('/').pop().replace(/_uncast$/,''))||null;
+        }
       }
-      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:like||(likeVar?'bed':null),likeVar};
+      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like,likeVar};
       const nm=CUSTOM[x.id].name.toLowerCase(); ALL.push({id:x.id,name:nm,hay:mkHay(nm,x.id)});
     }
     if(found.length) ADDONS.push({name:title,ids:found.map(x=>x.id)});
