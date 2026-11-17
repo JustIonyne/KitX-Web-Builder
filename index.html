@@ -1173,6 +1173,134 @@
     }
     return cache[base]=url;
   }
+  // ----- 3D block icons: a small software rasterizer (same camera and shading as the vanilla block icons) -----
+  const ICON_FIT=60, ICON_SS=4;
+  function rotP(p,r,pv){
+    if(!r||(!r[0]&&!r[1]&&!r[2])) return p;
+    pv=pv||[0,0,0]; let x=p[0]-pv[0],y=p[1]-pv[1],z=p[2]-pv[2],a,c,s,t;
+    a=r[0]*Math.PI/180;c=Math.cos(a);s=Math.sin(a);t=y*c-z*s;z=y*s+z*c;y=t;
+    a=r[1]*Math.PI/180;c=Math.cos(a);s=Math.sin(a);t=x*c+z*s;z=-x*s+z*c;x=t;
+    a=r[2]*Math.PI/180;c=Math.cos(a);s=Math.sin(a);t=x*c-y*s;y=x*s+y*c;x=t;
+    return [x+pv[0],y+pv[1],z+pv[2]];
+  }
+  const FACES={
+    north:{n:[0,0,-1],c:(a,b,c,d,e,f)=>[[d,e,c],[a,e,c],[a,b,c],[d,b,c]]},
+    south:{n:[0,0,1],c:(a,b,c,d,e,f)=>[[a,e,f],[d,e,f],[d,b,f],[a,b,f]]},
+    east:{n:[1,0,0],c:(a,b,c,d,e,f)=>[[d,e,f],[d,e,c],[d,b,c],[d,b,f]]},
+    west:{n:[-1,0,0],c:(a,b,c,d,e,f)=>[[a,e,c],[a,e,f],[a,b,f],[a,b,c]]},
+    up:{n:[0,1,0],c:(a,b,c,d,e,f)=>[[a,e,c],[d,e,c],[d,e,f],[a,e,f]]},
+    down:{n:[0,-1,0],c:(a,b,c,d,e,f)=>[[a,b,f],[d,b,f],[d,b,c],[a,b,c]]}};
+  const boxUv=(k,u,v,w,h,d)=>({north:[u+d,v+d,w,h],east:[u,v+d,d,h],south:[u+2*d+w,v+d,w,h],west:[u+d+w,v+d,d,h],up:[u+d,v,w,d],down:[u+d+w,v,w,d]})[k];
+  // geo = {tw, th, bones:[{name,parent,pivot,rotation,cubes:[{origin,size,uv,inflate,pivot,rotation}]}]}; pick(instanceName) -> {w,h,data} | null
+  function buildFaces(geo,pick){
+    const bones=geo.bones||[], byName={}, faces=[]; bones.forEach(b=>{byName[b.name]=b});
+    for(const b of bones) for(const cu of b.cubes||[]){
+      const o=cu.origin, s=cu.size, inf=cu.inflate||0; if(!o||!s) continue;
+      const x0=o[0]-inf,y0=o[1]-inf,z0=o[2]-inf,x1=o[0]+s[0]+inf,y1=o[1]+s[1]+inf,z1=o[2]+s[2]+inf;
+      const chain=p=>{p=rotP(p,cu.rotation,cu.pivot); for(let bb=b,i=0;bb&&i<16;bb=byName[bb.parent],i++) p=rotP(p,bb.rotation,bb.pivot); return p};
+      const dflt={north:[s[0],s[1]],south:[s[0],s[1]],east:[s[2],s[1]],west:[s[2],s[1]],up:[s[0],s[2]],down:[s[0],s[2]]};
+      for(const k in FACES){
+        let r, mn=cu.material_instance||b.material_instance||'*';
+        if(Array.isArray(cu.uv)) r=boxUv(k,cu.uv[0],cu.uv[1],s[0],s[1],s[2]);
+        else if(cu.uv&&cu.uv[k]&&cu.uv[k].uv){ const f=cu.uv[k], z=f.uv_size||dflt[k]; r=[f.uv[0],f.uv[1],z[0],z[1]]; if(f.material_instance) mn=f.material_instance }
+        else continue;
+        const tex=pick(mn); if(!tex) continue;
+        const tw=geo.tw||tex.w, th=geo.th||tex.h, F=FACES[k];
+        const pts=F.c(x0,y0,z0,x1,y1,z1).map(chain), c0=[(x0+x1)/2,(y0+y1)/2,(z0+z1)/2];
+        const a=chain(c0), e=chain([c0[0]+F.n[0],c0[1]+F.n[1],c0[2]+F.n[2]]);
+        faces.push({pts,tex,n:[e[0]-a[0],e[1]-a[1],e[2]-a[2]],
+          uv:[[r[0],r[1]],[r[0]+r[2],r[1]],[r[0]+r[2],r[1]+r[3]],[r[0],r[1]+r[3]]].map(q=>[q[0]/tw,q[1]/th])});
+      }
+    }
+    return faces;
+  }
+  // -> Uint8ClampedArray 64*64*4 (RGBA) or null. Camera: pitch 30deg, yaw 135deg (north face on the left, west on the right).
+  function renderFaces(faces){
+    const P30=Math.PI/6, yw=Math.PI*0.75, cy=Math.cos(yw), sy=Math.sin(yw), cp=Math.cos(P30), sp=Math.sin(P30);
+    const view=p=>{const x=p[0],y=p[1]-8,z=p[2],z1=-x*sy+z*cy; return [x*cy+z*sy, y*cp-z1*sp, y*sp+z1*cp]};
+    const vz=n=>(-n[0]*sy+n[2]*cy)*cp+n[1]*sp;
+    let mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9; const T=[];
+    for(const f of faces){
+      if(vz(f.n)<=0.001) continue;
+      const q=f.pts.map(view); q.forEach(p=>{mnx=Math.min(mnx,p[0]);mxx=Math.max(mxx,p[0]);mny=Math.min(mny,p[1]);mxy=Math.max(mxy,p[1])});
+      T.push({q,f});
+    }
+    if(!T.length) return null;
+    const N=64*ICON_SS, sc=ICON_FIT*ICON_SS/Math.max(mxx-mnx,mxy-mny,1e-6);
+    const ox=(N-(mxx-mnx)*sc)/2-mnx*sc, oy=(N-(mxy-mny)*sc)/2+mxy*sc;
+    const buf=new Uint8ClampedArray(N*N*4), zb=new Float32Array(N*N).fill(-1e9);
+    for(const {q,f} of T){
+      const P=q.map(p=>[p[0]*sc+ox,oy-p[1]*sc,p[2]]), tx=f.tex;
+      const sh=Math.min(1,.57+.19*Math.max(-f.n[2],0)+.43*Math.max(f.n[1],0));
+      for(const tri of [[0,1,2],[0,2,3]]){
+        const [a,b,c]=tri.map(i=>P[i]), [ua,ub,uc]=tri.map(i=>f.uv[i]);
+        const den=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1]); if(Math.abs(den)<1e-9) continue;
+        const xa=Math.max(0,Math.floor(Math.min(a[0],b[0],c[0]))), xb=Math.min(N-1,Math.ceil(Math.max(a[0],b[0],c[0])));
+        const ya=Math.max(0,Math.floor(Math.min(a[1],b[1],c[1]))), yb=Math.min(N-1,Math.ceil(Math.max(a[1],b[1],c[1])));
+        for(let y=ya;y<=yb;y++) for(let x=xa;x<=xb;x++){
+          const px=x+.5, py=y+.5;
+          const l1=((b[1]-c[1])*(px-c[0])+(c[0]-b[0])*(py-c[1]))/den, l2=((c[1]-a[1])*(px-c[0])+(a[0]-c[0])*(py-c[1]))/den, l3=1-l1-l2;
+          if(l1<-1e-6||l2<-1e-6||l3<-1e-6) continue;
+          const z=l1*a[2]+l2*b[2]+l3*c[2], i=y*N+x; if(z<=zb[i]) continue;
+          const u=l1*ua[0]+l2*ub[0]+l3*uc[0], v=l1*ua[1]+l2*ub[1]+l3*uc[1];
+          const ti=(Math.min(tx.h-1,Math.max(0,Math.floor(v*tx.h)))*tx.w+Math.min(tx.w-1,Math.max(0,Math.floor(u*tx.w))))*4;
+          if(tx.data[ti+3]<128) continue;
+          zb[i]=z; buf[i*4]=tx.data[ti]*sh; buf[i*4+1]=tx.data[ti+1]*sh; buf[i*4+2]=tx.data[ti+2]*sh; buf[i*4+3]=255;
+        }
+      }
+    }
+    const out=new Uint8ClampedArray(64*64*4), S=ICON_SS;
+    for(let y=0;y<64;y++) for(let x=0;x<64;x++){
+      let r=0,g=0,b=0,a=0;
+      for(let j=0;j<S;j++) for(let i=0;i<S;i++){const k=((y*S+j)*N+x*S+i)*4; if(buf[k+3]){r+=buf[k];g+=buf[k+1];b+=buf[k+2];a++}}
+      const o=(y*64+x)*4; if(a){out[o]=r/a;out[o+1]=g/a;out[o+2]=b/a;out[o+3]=255*a/(S*S)}
+    }
+    return out;
+  }
+  const cubeGeo=()=>({tw:16,th:16,bones:[{name:'b',cubes:[{origin:[-8,0,-8],size:[16,16,16],uv:Object.fromEntries(['north','south','east','west','up','down'].map(k=>[k,{uv:[0,0],uv_size:[16,16],material_instance:k}]))}]}]});
+  const texPathOf=(d,s)=>{let t=d&&d.texture_data&&d.texture_data[s]&&d.texture_data[s].textures; if(Array.isArray(t)) t=t[0]; if(t&&typeof t==='object') t=t.path; return typeof t==='string'?t:null};
+  async function texPixels(rel,files,cache){
+    if(!rel) return null; const base=rel.replace(/\.(png|tga|jpe?g)$/i,'').toLowerCase(), key='px:'+base;
+    if(key in cache) return cache[key];
+    let out=null;
+    for(const ext of ['.png','.tga','.jpg','.jpeg']){
+      const f=files.get(base+ext); if(!f) continue;
+      try{
+        const b=await f.data(); let cv;
+        if(ext==='.tga') cv=decodeTga(b);
+        else{const bm=await createImageBitmap(new Blob([b]));cv=document.createElement('canvas');cv.width=bm.width;cv.height=bm.height;cv.getContext('2d').drawImage(bm,0,0)}
+        if(cv){const d=cv.getContext('2d').getImageData(0,0,cv.width,cv.height); out={w:d.width,h:d.height,data:d.data}; if(out.h>out.w&&out.h%out.w===0) out.h=out.w; break}   // animated strip: first frame
+      }catch(e){}
+    }
+    return cache[key]=out;
+  }
+  // geometry id -> {tw, th, bones} from every models/**/*.json in the addon (new "minecraft:geometry" format and the old "geometry.x" one)
+  async function geoIndex(files){
+    const m={};
+    for(const [k,f] of files){
+      if(!/^models\/.*\.json$/.test(k)) continue;
+      let j; try{j=jsonc(new TextDecoder().decode(await f.data()))}catch(e){continue}
+      if(Array.isArray(j['minecraft:geometry'])){ for(const g of j['minecraft:geometry']){ const d=g.description||{}; if(d.identifier) m[d.identifier]={tw:d.texture_width,th:d.texture_height,bones:g.bones||[]} } }
+      else for(const key in j) if(key.startsWith('geometry.')&&j[key]&&typeof j[key]==='object') m[key.split(':')[0]]={tw:j[key].texturewidth,th:j[key].textureheight,bones:j[key].bones||[]};
+    }
+    return m;
+  }
+  // a custom block's 3D icon as a data URL, or null (then the flat icon is used)
+  async function block3d(b,files,cache,ttex,getGi){
+    const mi=b.mi||{}, keys=Object.keys(mi); if(!keys.length) return null;
+    const T={};
+    for(const k of keys){ const v=mi[k], s=typeof v==='string'?v:v&&v.texture; if(s) T[k]=await texPixels(texPathOf(ttex,s)||s,files,cache) }
+    const first=keys.map(k=>T[k]).find(Boolean); if(!first) return null;
+    const pick=n=>T[n]||(/^(north|south|east|west)$/.test(n)&&T.side)||T['*']||first;
+    const g=b.geo; let geo;
+    if(!g||b.unit||g==='minecraft:geometry.full_block') geo=cubeGeo();
+    else if(g.startsWith('minecraft:')) return null;          // cross, etc.: flat icon
+    else geo=(await getGi())[g];
+    if(!geo) return null;
+    const px=renderFaces(buildFaces(geo,pick)); if(!px) return null;
+    const cv=document.createElement('canvas'); cv.width=cv.height=64; cv.getContext('2d').putImageData(new ImageData(px,64,64),0,0);
+    return cv.toDataURL();
+  }
   // Bedrock's own texture short names that differ from the item id (an addon icon can point at these)
   const TEX_ALIAS={potato_baked:'baked_potato',potato_poisonous:'poisonous_potato',beef_raw:'beef',beef_cooked:'cooked_beef',chicken_raw:'chicken',chicken_cooked:'cooked_chicken',
     mutton_raw:'mutton',mutton_cooked:'cooked_mutton',porkchop_raw:'porkchop',porkchop_cooked:'cooked_porkchop',rabbit_raw:'rabbit',rabbit_cooked:'cooked_rabbit',
@@ -1197,17 +1325,19 @@
       let j; try{j=jsonc(await text(f))}catch(e){continue}
       const def=j['minecraft:item']||j['minecraft:block'], id=def&&def.description&&def.description.identifier;
       if(!id||!id.includes(':')||id.startsWith('minecraft:')||found.some(x=>x.id===id)) continue;
-      const c=def.components||{}; let rel=null;
+      const c=def.components||{}; let rel=null, blk=null;
       if(m[1]==='items'){ let ic=c['minecraft:icon']; if(ic&&typeof ic==='object') ic=ic.texture||(ic.textures&&ic.textures.default); if(typeof ic==='string') rel=texRel(itex,ic)||ic }
-      else{ const mi=c['minecraft:material_instances'], inst=mi&&(mi['*']||Object.values(mi)[0]), s=inst&&(typeof inst==='string'?inst:inst.texture); if(s) rel=texRel(ttex,s)||s }
+      else{ const mi=c['minecraft:material_instances'], inst=mi&&(mi['*']||Object.values(mi)[0]), s=inst&&(typeof inst==='string'?inst:inst.texture); if(s) rel=texRel(ttex,s)||s; const gc=c['minecraft:geometry']; blk={mi:mi||{},geo:typeof gc==='string'?gc:gc&&gc.identifier,unit:!!c['minecraft:unit_cube']} }
       let name=lang['item.'+id+'.name']||lang['item.'+id]||lang['tile.'+id+'.name']||lang['tile.'+id]||lang['block.'+id+'.name'];
       const dn=c['minecraft:display_name']&&c['minecraft:display_name'].value; if(!name&&dn) name=lang[dn]||(/^[a-z_.:]+$/.test(dn)?null:dn);
-      found.push({id,name,rel});
+      found.push({id,name,rel,blk});
     }
     const title=file.name.replace(/\.(mcaddon|mcpack|zip)$/i,'');
     const old=ADDONS.findIndex(a=>a.name===title); if(old>=0) dropAddon(old);
+    let gi=null; const getGi=async()=>gi||(gi=await geoIndex(files));
     for(const x of found){
-      const icon=await loadTexture(x.rel,files,cache);
+      let icon=await loadTexture(x.rel,files,cache);
+      if(x.blk){ try{ icon=await block3d(x.blk,files,cache,ttex,getGi)||icon }catch(e){} }
       // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
       const tn=!icon&&x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null;
       CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:tn?vanillaTex(tn):null};
