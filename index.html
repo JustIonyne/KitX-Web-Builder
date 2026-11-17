@@ -1173,6 +1173,16 @@
     }
     return cache[base]=url;
   }
+  // Bedrock's own texture short names that differ from the item id (an addon icon can point at these)
+  const TEX_ALIAS={potato_baked:'baked_potato',potato_poisonous:'poisonous_potato',beef_raw:'beef',beef_cooked:'cooked_beef',chicken_raw:'chicken',chicken_cooked:'cooked_chicken',
+    mutton_raw:'mutton',mutton_cooked:'cooked_mutton',porkchop_raw:'porkchop',porkchop_cooked:'cooked_porkchop',rabbit_raw:'rabbit',rabbit_cooked:'cooked_rabbit',
+    fish:'cod',cooked_fish:'cooked_cod',clownfish:'tropical_fish',melon:'melon_slice',apple_golden:'golden_apple',carrot_golden:'golden_carrot',
+    minecart_tnt:'tnt_minecart',minecart_chest:'chest_minecart',minecart_furnace:'furnace_minecart',minecart_hopper:'hopper_minecart',minecart_command_block:'command_block_minecart',minecart_normal:'minecart',
+    redstone_dust:'redstone',bucket_water:'water_bucket',bucket_lava:'lava_bucket',bucket_milk:'milk_bucket',bucket_empty:'bucket'};
+  function vanillaTex(n){
+    n=TEX_ALIAS[n]||n.replace(/^gold_(?=sword|spear|axe|pickaxe|shovel|hoe|helmet|chestplate|leggings|boots|horse_armor)/,'golden_').replace(/^wood_(?=sword|spear|axe|pickaxe|shovel|hoe)/,'wooden_');
+    return ITEM_PATH[n]!==undefined?n:null;
+  }
   async function importAddon(file){
     const files=new Map(); await collectZip(await file.arrayBuffer(),files,0);
     const text=async f=>new TextDecoder().decode(await f.data());
@@ -1200,7 +1210,7 @@
       const icon=await loadTexture(x.rel,files,cache);
       // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
       const tn=!icon&&x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null;
-      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:tn&&ITEM_PATH[tn]!==undefined?tn:null};
+      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:tn?vanillaTex(tn):null};
       const nm=CUSTOM[x.id].name.toLowerCase(); ALL.push({id:x.id,name:nm,hay:mkHay(nm,x.id)});
     }
     if(found.length) ADDONS.push({name:title,ids:found.map(x=>x.id)});
