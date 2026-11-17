@@ -796,17 +796,25 @@
   const kb={sel:null, items:{}, moving:null, dup:null, note:'', path:[]};   // path: [top-level slot key, 'in:N', ...] of the open container(s)            // items: slotKey -> {id, count}
   const slotEls={};
   const ITEM_PATH={}; DATA.items.forEach(([id,pi])=>{ITEM_PATH[id]=pi});
+  const CUSTOM={}, ADDONS=[];                       // custom items from loaded addons: 'ns:id' -> {name, icon}
+  const fullId=id=>id.includes(':')?id:'minecraft:'+id;
   // Bedrock potions are one item id; the potion type is the data value (aux / Damage). DATA.vars = [id, aux, title, icon].
   const VAR_PATH={}, VAR_NAME={}; (DATA.vars||[]).forEach(([id,aux,title,pi])=>{VAR_PATH[id+':'+aux]=pi; VAR_NAME[id+':'+aux]=title});
   const itemLabel=it=>(it.aux!=null&&VAR_NAME[it.id+':'+it.aux])||prettyId(it.id);
-  const idText=it=>'minecraft:'+it.id+(it.aux!=null?' · data '+it.aux:'');
+  const idText=it=>fullId(it.id)+(it.aux!=null?' · data '+it.aux:'');
   const NM=DATA.nm||{};      // official display names (en_US.lang) where they differ from the generated one
-  const prettyId=id=>NM[id]||id.replace(/^minecraft:/,'').split('_').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
+  const prettyId=id=>(CUSTOM[id]&&CUSTOM[id].name)||NM[id]||id.replace(/^minecraft:/,'').split('_').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
   const hue=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%360;return h};
   const mono=id=>{const w=id.split('_');return (w.length>1?w.map(x=>x[0]).join(''):id.slice(0,3)).slice(0,3).toUpperCase()};
   function mkIcon(x,aux){
     if(x&&typeof x==='object'){ aux=x.aux; x=x.id }
     const id=x, d=document.createElement('span'); d.className='ico';
+    const cu=CUSTOM[id];
+    if(cu){
+      if(cu.icon){ d.style.cssText+=`background-image:url(${cu.icon});background-size:contain;background-repeat:no-repeat;background-position:center;image-rendering:pixelated` }
+      else{ const s=id.split(':')[1]; d.classList.add('mono'); d.textContent=mono(s); d.style.setProperty('--h',hue(id)) }
+      return d;
+    }
     const vk=aux!=null?VAR_PATH[id+':'+aux]:undefined;
     const pos=DATA.pos[vk!==undefined?vk:ITEM_PATH[id]];
     if(pos){
@@ -1105,8 +1113,134 @@
   const ALL=[...DATA.items.filter(([id])=>!VARBASE.has(id)).map(([id])=>{const name=prettyId(id).toLowerCase();return {id,name,hay:mkHay(name,id)}}),
              ...(DATA.vars||[]).map(([id,aux,title])=>{const name=title.toLowerCase();return {id,aux,name,hay:mkHay(name,id)}})]
     .sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:(a.aux||0)-(b.aux||0));
+  // ----- Addons tab: custom items from .mcaddon / .mcpack / .zip files, read in the browser (2D icons) -----
+  let addonMsg='';
+  const inflateRaw=async u8=>{const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(ds.readable).arrayBuffer())};
+  async function readZip(buf){
+    const u8=new Uint8Array(buf), dv=new DataView(buf), td=new TextDecoder(); let e=u8.length-22;
+    while(e>=0&&dv.getUint32(e,true)!==0x06054b50) e--;
+    if(e<0) throw new Error('not a zip file');
+    const n=dv.getUint16(e+10,true); let p=dv.getUint32(e+16,true); const out=[];
+    for(let i=0;i<n&&dv.getUint32(p,true)===0x02014b50;i++){
+      const method=dv.getUint16(p+10,true), cs=dv.getUint32(p+20,true), nl=dv.getUint16(p+28,true), xl=dv.getUint16(p+30,true), cl=dv.getUint16(p+32,true), off=dv.getUint32(p+42,true);
+      const path=td.decode(u8.subarray(p+46,p+46+nl)).replace(/\\/g,'/'); p+=46+nl+xl+cl;
+      if(path.endsWith('/')) continue;
+      out.push({path,data:async()=>{const s=off+30+dv.getUint16(off+26,true)+dv.getUint16(off+28,true),c=u8.subarray(s,s+cs);return method===0?c:inflateRaw(c)}});
+    }
+    return out;
+  }
+  // flattens a zip (and any packs nested inside it) into files: lowercase pack-relative path -> {data()}
+  async function collectZip(buf,files,depth){
+    const list=await readZip(buf), dir=p=>p.slice(0,p.lastIndexOf('/')+1);
+    const roots=list.filter(f=>/(^|\/)manifest\.json$/i.test(f.path)).map(f=>dir(f.path)).sort((a,b)=>b.length-a.length);
+    for(const f of list){
+      if(/\.(mcpack|mcaddon|zip)$/i.test(f.path)&&depth<3){ try{ await collectZip((await f.data()).slice().buffer,files,depth+1); continue }catch(e){} }
+      const root=roots.find(r=>f.path.startsWith(r))||'';
+      files.set(f.path.slice(root.length).toLowerCase(),f);
+    }
+  }
+  function jsonc(s){
+    let o='',i=0,q=false; s=s.replace(/^\uFEFF/,'');
+    while(i<s.length){const c=s[i];
+      if(q){o+=c; if(c==='\\') o+=s[++i]||''; else if(c==='"') q=false; i++; continue}
+      if(c==='"'){q=true;o+=c;i++;continue}
+      if(c==='/'&&s[i+1]==='/'){while(i<s.length&&s[i]!=='\n')i++;continue}
+      if(c==='/'&&s[i+1]==='*'){i=s.indexOf('*/',i+2);i=i<0?s.length:i+2;continue}
+      o+=c;i++}
+    return JSON.parse(o.replace(/,\s*([}\]])/g,'$1'));
+  }
+  function decodeTga(b){
+    const t=b[2],w=b[12]|b[13]<<8,h=b[14]|b[15]<<8,bpp=b[16],by=bpp>>3; if((t!==2&&t!==10)||(bpp!==24&&bpp!==32)||!w||!h) return null;
+    let p=18+b[0],n=0; const px=new Uint8ClampedArray(w*h*4);
+    const put=q=>{px[n++]=b[q+2];px[n++]=b[q+1];px[n++]=b[q];px[n++]=by===4?b[q+3]:255};
+    if(t===2){for(let i=0;i<w*h;i++){put(p);p+=by}}
+    else while(n<px.length&&p<b.length){const r=b[p++],c=(r&127)+1; if(r&128){const q=p;p+=by;for(let k=0;k<c;k++)put(q)}else for(let k=0;k<c;k++){put(p);p+=by}}
+    if(!(b[17]&32)){const row=w*4,tmp=new Uint8ClampedArray(row);for(let y=0;y<h>>1;y++){const a=y*row,c=(h-1-y)*row;tmp.set(px.subarray(a,a+row));px.copyWithin(a,c,c+row);px.set(tmp,c)}}
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').putImageData(new ImageData(px,w,h),0,0);return cv;
+  }
+  async function loadTexture(rel,files,cache){
+    if(!rel) return null; const base=rel.replace(/\.(png|tga|jpe?g)$/i,'').toLowerCase();
+    if(base in cache) return cache[base];
+    let url=null;
+    for(const ext of ['.png','.tga','.jpg','.jpeg']){
+      const f=files.get(base+ext); if(!f) continue;
+      try{
+        const b=await f.data(); let cv;
+        if(ext==='.tga') cv=decodeTga(b);
+        else{const bm=await createImageBitmap(new Blob([b]));cv=document.createElement('canvas');cv.width=bm.width;cv.height=bm.height;cv.getContext('2d').drawImage(bm,0,0)}
+        if(cv){url=cv.toDataURL();break}
+      }catch(e){}
+    }
+    return cache[base]=url;
+  }
+  async function importAddon(file){
+    const files=new Map(); await collectZip(await file.arrayBuffer(),files,0);
+    const text=async f=>new TextDecoder().decode(await f.data());
+    const lang={};
+    for(const [k,f] of files) if(k==='texts/en_us.lang') for(const ln of (await text(f)).split(/\r?\n/)){const m=/^([^=#]+)=(.*?)(\t#.*)?$/.exec(ln); if(m) lang[m[1].trim()]=m[2].trim()}
+    const rj=async p=>{const f=files.get(p); if(!f) return null; try{return jsonc(await text(f))}catch(e){return null}};
+    const itex=await rj('textures/item_texture.json'), ttex=await rj('textures/terrain_texture.json');
+    const texRel=(d,s)=>{let t=d&&d.texture_data&&d.texture_data[s]&&d.texture_data[s].textures; if(Array.isArray(t)) t=t[0]; if(t&&typeof t==='object') t=t.path; return typeof t==='string'?t:null};
+    const cache={}, found=[];
+    for(const [k,f] of files){
+      const m=/^(items|blocks)\/.+\.json$/.exec(k); if(!m) continue;
+      let j; try{j=jsonc(await text(f))}catch(e){continue}
+      const def=j['minecraft:item']||j['minecraft:block'], id=def&&def.description&&def.description.identifier;
+      if(!id||!id.includes(':')||id.startsWith('minecraft:')||found.some(x=>x.id===id)) continue;
+      const c=def.components||{}; let rel=null;
+      if(m[1]==='items'){ let ic=c['minecraft:icon']; if(ic&&typeof ic==='object') ic=ic.texture||(ic.textures&&ic.textures.default); if(typeof ic==='string') rel=texRel(itex,ic)||ic }
+      else{ const mi=c['minecraft:material_instances'], inst=mi&&(mi['*']||Object.values(mi)[0]), s=inst&&(typeof inst==='string'?inst:inst.texture); if(s) rel=texRel(ttex,s)||s }
+      let name=lang['item.'+id+'.name']||lang['item.'+id]||lang['tile.'+id+'.name']||lang['tile.'+id]||lang['block.'+id+'.name'];
+      const dn=c['minecraft:display_name']&&c['minecraft:display_name'].value; if(!name&&dn) name=lang[dn]||(/^[a-z_.:]+$/.test(dn)?null:dn);
+      found.push({id,name,rel});
+    }
+    const title=file.name.replace(/\.(mcaddon|mcpack|zip)$/i,'');
+    const old=ADDONS.findIndex(a=>a.name===title); if(old>=0) dropAddon(old);
+    for(const x of found){
+      const icon=await loadTexture(x.rel,files,cache);
+      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon};
+      const nm=CUSTOM[x.id].name.toLowerCase(); ALL.push({id:x.id,name:nm,hay:mkHay(nm,x.id)});
+    }
+    if(found.length) ADDONS.push({name:title,ids:found.map(x=>x.id)});
+    return found.length;
+  }
+  function dropAddon(i){
+    const gone=new Set(ADDONS[i].ids); ADDONS.splice(i,1);
+    for(let k=ALL.length-1;k>=0;k--) if(gone.has(ALL[k].id)) ALL.splice(k,1);   // icons stay registered so kit slots keep theirs
+  }
+  function renderAddons(){
+    const inner=$('pickInner'); inner.innerHTML='';
+    const bar=document.createElement('div'); bar.style.cssText='padding:8px 2px 10px';
+    const btn=document.createElement('button'); btn.type='button'; btn.className='btn'; btn.textContent='+ Add addon (.mcaddon, .mcpack, .zip)';
+    const inp=document.createElement('input'); inp.type='file'; inp.multiple=true; inp.accept='.mcaddon,.mcpack,.zip'; inp.hidden=true;
+    const msg=document.createElement('div'); msg.className='hint'; msg.style.marginTop='6px';
+    msg.textContent=addonMsg||'Pick an addon to list its custom items here. Kits that use them only load in worlds where that addon is enabled.';
+    btn.addEventListener('click',()=>inp.click());
+    inp.addEventListener('change',async()=>{
+      const fl=[...inp.files]; inp.value='';
+      for(const f of fl){ msg.textContent='Reading '+f.name+'…';
+        try{const n=await importAddon(f); addonMsg=n?`Found ${n} item${n===1?'':'s'} in ${f.name}.`:`No custom items found in ${f.name} (only items and blocks defined in JSON are detected).`}
+        catch(e){addonMsg='Could not read '+f.name+': '+e.message} }
+      renderAddons();
+    });
+    bar.append(btn,inp,msg); inner.append(bar);
+    let total=0;
+    ADDONS.forEach((a,ai)=>{
+      const items=a.ids.map(id=>({id})).filter(it=>canHold(kb.sel,it.id)); total+=items.length;
+      const h=document.createElement('div'); h.style.cssText='display:flex;align-items:center;gap:8px;font-weight:700;margin:6px 2px';
+      const t=document.createElement('span'); t.style.flex='1'; t.textContent=a.name+' ('+items.length+')';
+      const rm=document.createElement('button'); rm.type='button'; rm.className='btn ghost'; rm.style.padding='4px 10px'; rm.textContent='Remove'; rm.setAttribute('aria-label','Remove '+a.name);
+      rm.addEventListener('click',()=>{dropAddon(ai);renderAddons()});
+      h.append(t,rm); inner.append(h);
+      const grid=document.createElement('div'); grid.className='pk-grid'; inner.append(grid); grid.style.setProperty('--cols',pkColumns(grid));
+      for(const it of items){const b=pkCell(it,itemLabel(it)); b.addEventListener('click',()=>pickItem(it)); grid.append(b)}
+    });
+    $('pickCount').textContent=ADDONS.length?total+' addon item'+(total===1?'':'s'):'No addons loaded';
+    markPick();
+  }
+
   // ----- Bedrock-style creative inventory: tabs -> groups (collapsed with a +) -> items -----
-  const TABS=DATA.tabs||[], SEARCH_TAB=TABS.length;
+  const TABS=DATA.tabs||[], ADDON_TAB=TABS.length, SEARCH_TAB=TABS.length+1;
   const TAB_ICON=[{id:'brick_block'},{id:'diamond_sword'},{id:'bed',aux:14},{id:'grass_block'}];
   let pkTab=0, pkOpen=null;
   const parseKey=m=>{const p=m.split(':');return p[1]!==undefined?{id:p[0],aux:+p[1]}:{id:p[0]}};
@@ -1165,7 +1299,7 @@
     const line=(parts,cls)=>{const d=document.createElement('div'); if(cls) d.className=cls;
       parts.forEach(([k,v],n)=>{ if(n) d.append(' · '); if(k) d.append(k+' '); const e=document.createElement('b'); e.textContent=v; d.append(e) }); dl.append(d)};
     const md=maxDur(it.id);
-    line([['','minecraft:'+it.id]]);
+    line([['',fullId(it.id)]]);
     line([['Aux',String(it.aux!=null?it.aux:0)],['Max stack',String(maxStack(it.id,kb.sel))],['Durability',md?String(md):'None']]);
     const fx=effectLines(it);
     if(fx) line([['Effects',fx.join(', ')]],'pkd-fx');
@@ -1222,7 +1356,7 @@
     if(reveal&&panelEl) panelEl.scrollIntoView({block:'nearest'});
   }
   window.addEventListener('resize',()=>{
-    if(!$('picker').classList.contains('on')||pkTab===SEARCH_TAB) return;
+    if(!$('picker').classList.contains('on')||pkTab>=TABS.length) return;
     const g=document.querySelector('#pickInner .pk-grid'); if(g&&pkColumns(g)!==pkCols) renderTab();
   });
   function buildTabBar(){
@@ -1232,13 +1366,15 @@
       const ic=document.createElement('span'); ic.className='ic'; ic.append(mkIcon(TAB_ICON[i]||{id:'stick'})); b.append(ic,document.createTextNode(t.n));
       b.addEventListener('click',()=>{ $('pickQ').value=''; showTab(i) }); bar.append(b);
     });
+    const ad=document.createElement('button'); ad.type='button'; ad.className='pk-tab'; ad.setAttribute('role','tab'); ad.textContent='🧩 Addons';
+    ad.addEventListener('click',()=>{ $('pickQ').value=''; showTab(ADDON_TAB) }); bar.append(ad);
     const s=document.createElement('button'); s.type='button'; s.className='pk-tab'; s.setAttribute('role','tab'); s.textContent='🔍 Search';
     s.addEventListener('click',()=>showTab(SEARCH_TAB)); bar.append(s);
   }
   function showTab(i){
     pkTab=i; pkOpen=null; pkSel=null; renderPkDetail();
     [...$('pkTabs').children].forEach((b,k)=>{b.classList.toggle('on',k===i); b.setAttribute('aria-selected',k===i)});
-    if(i===SEARCH_TAB) doSearch(); else renderTab();
+    if(i===SEARCH_TAB) doSearch(); else if(i===ADDON_TAB) renderAddons(); else renderTab();
     $('pickList').scrollTop=0;
   }
   const PAGE=60; let results=[], shown=0, pickTimer=0;
@@ -1605,7 +1741,7 @@
     function writeItem(it,slot){
       if(!it){ tByte('Count',0); tShort('Damage',0); tStr('Name',''); tByte('Slot',slot); tByte('WasPickedUp',0); u8(END); return }
       if(BLOCKS.has(it.id)){ comp('Block'); tStr('name','minecraft:'+it.id); comp('states'); u8(END); tInt('version',BLOCK_VERSION); u8(END) }
-      tByte('Count',it.count); tShort('Damage',it.aux||0); tStr('Name','minecraft:'+it.id); if(slot!==null) tByte('Slot',slot); tByte('WasPickedUp',0);
+      tByte('Count',it.count); tShort('Damage',it.aux||0); tStr('Name',fullId(it.id)); if(slot!==null) tByte('Slot',slot); tByte('WasPickedUp',0);
       const mx=maxDur(it.id), used=(mx&&it.dur!=null&&it.dur<mx)?mx-it.dur:0;
       const ench=Object.keys(it.ench||{}).filter(k=>k in ENCH_ID);
       // container contents: shulker box = tag.Items (with Slot), bundle = tag.storage_item_component_content (list order)
