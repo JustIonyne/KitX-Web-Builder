@@ -810,13 +810,13 @@
     if(x&&typeof x==='object'){ aux=x.aux; x=x.id }
     const id=x, d=document.createElement('span'); d.className='ico';
     const cu=CUSTOM[id];
-    if(cu){
+    if(cu&&!cu.like){
       if(cu.icon){ d.style.cssText+=`background-image:url(${cu.icon});background-size:contain;background-repeat:no-repeat;background-position:center;image-rendering:pixelated` }
       else{ const s=id.split(':')[1]; d.classList.add('mono'); d.textContent=mono(s); d.style.setProperty('--h',hue(id)) }
       return d;
     }
     const vk=aux!=null?VAR_PATH[id+':'+aux]:undefined;
-    const pos=DATA.pos[vk!==undefined?vk:ITEM_PATH[id]];
+    const pos=DATA.pos[vk!==undefined?vk:ITEM_PATH[(cu&&cu.like)||id]];
     if(pos){
       d.style.backgroundImage=`url(${ATLAS_URL})`;
       d.style.backgroundSize=`${DATA.cols*100}% ${DATA.rows*100}%`;
@@ -1198,7 +1198,9 @@
     const old=ADDONS.findIndex(a=>a.name===title); if(old>=0) dropAddon(old);
     for(const x of found){
       const icon=await loadTexture(x.rel,files,cache);
-      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon};
+      // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
+      const tn=!icon&&x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null;
+      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:tn&&ITEM_PATH[tn]!==undefined?tn:null};
       const nm=CUSTOM[x.id].name.toLowerCase(); ALL.push({id:x.id,name:nm,hay:mkHay(nm,x.id)});
     }
     if(found.length) ADDONS.push({name:title,ids:found.map(x=>x.id)});
