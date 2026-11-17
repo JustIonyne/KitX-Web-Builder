@@ -143,10 +143,34 @@
   .ctn-cap i{display:block;height:100%;width:0;background:#3f8f2f}
   .ctn-cap.full i{background:var(--bad)}
   /* control panel */
-  .cp{position:sticky;bottom:10px;z-index:10;box-shadow:0 6px 24px rgba(0,0,0,.35)}
   .cp-msg{color:var(--mute);font-size:10px;margin:0 0 10px}
   .cp-actions{display:flex;flex-wrap:wrap;gap:8px}
   .cp-actions .btn{padding:10px 14px}
+  /* floating control strip: a small fixed toggle; opens to a slim strip of pixel-icon buttons */
+  .ctl{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:25;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
+  .ctl>*{pointer-events:auto}
+  .ctl-msg{display:none;margin:0;max-width:min(230px,calc(100vw - 70px));padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:4px;color:var(--mute);font-size:10px;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  .ctl.open .ctl-msg,.ctl.flash .ctl-msg{display:block}
+  .ctl.idle .ctl-msg{display:none}
+  .ctl-row{display:flex;align-items:flex-end;gap:6px}
+  .ctl-strip{display:flex;flex-flow:row wrap-reverse;justify-content:flex-end;gap:4px;padding:4px;max-width:calc(100vw - 72px);background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  .ctl-strip:empty,.ctl:not(.open) .ctl-strip{display:none}
+  .ctl-b{appearance:none;position:relative;flex:none;width:36px;height:36px;padding:0;border:0;border-radius:2px;background:#4b4f5a;color:#fff;display:grid;place-items:center;cursor:pointer;
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,.22),inset -2px -3px 0 rgba(0,0,0,.38);-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none}
+  .ctl-b:hover{background:#5d626f}
+  .ctl-b:active{box-shadow:inset 2px 2px 0 rgba(0,0,0,.38),inset -2px -2px 0 rgba(255,255,255,.14)}
+  .ctl-b:active .ico,.ctl-b:active>svg{transform:translateY(1px)}
+  .ctl-b:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .ctl-b[aria-disabled=true]{opacity:.45;cursor:not-allowed}
+  .ctl-b svg{display:block;width:24px;height:24px;image-rendering:pixelated;pointer-events:none}
+  .ctl-t .ico{display:grid;place-items:center}
+  .ctl-t.alert::after{content:"";position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#ffd166;box-shadow:0 0 0 2px #000}
+  /* tooltip: sits above the button (nudged back on screen by script when near an edge) */
+  .ctl-b .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(calc(-50% + var(--sx,0px)));z-index:3;white-space:nowrap;pointer-events:none;text-align:left;
+    padding:4px 8px 5px;background:#100010;color:#fff;border:2px solid #2a0a6a;line-height:1.3;font-size:10px}
+  .ctl-b .tip i{display:block;font-style:normal;color:#ff9a9a;margin-top:2px}
+  .ctl-b:focus-visible .tip,.ctl-b.tip-on .tip{display:block}
+  @media (hover:hover){.ctl-b:hover .tip{display:block}}
   /* set amount dialog */
   .dlg{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55)}
   .dlg.on{display:flex}
@@ -382,10 +406,12 @@
         </div>
       </div>
 
-      <div class="panel cp" aria-label="Control Panel">
-        <h3>Controls</h3>
-        <p class="cp-msg" id="cpMsg">Select a slot to see what you can do with it.</p>
-        <div class="cp-actions" id="cpActions"></div>
+      <div class="ctl open" id="ctl" role="region" aria-label="Control Panel">
+        <p class="ctl-msg" id="cpMsg" role="status" aria-live="polite">Select a slot to see what you can do with it.</p>
+        <div class="ctl-row">
+          <div class="ctl-strip" id="cpActions" role="toolbar" aria-label="Slot actions"></div>
+          <button type="button" class="ctl-b ctl-t" id="ctlT" aria-expanded="true" aria-controls="cpActions"><span class="ico"></span><span class="tip">Hide controls</span></button>
+        </div>
       </div>
 
       <div class="panel xp" aria-label="Export Panel">
@@ -981,8 +1007,133 @@
     $('ipDur').textContent=durText(it); $('ipEnch').textContent=enchText(it);
     const ct=ctnText(it); $('ipCntT').hidden=$('ipCnt').hidden=!ct; $('ipCnt').textContent=ct||'—';
   }
-  function actBtn(label,fn){const b=document.createElement('button');b.className=label==='Add item'?'btn go':'btn';b.textContent=label;if(fn)b.addEventListener('click',fn);else b.disabled=true;return b}
-  function renderControls(){
+  // ===== control strip: tiny pixel icons (11x11 text grids, 2-3 colours + auto drop shadow, drawn as inline SVG) =====
+  // a = main colour, c = second colour, d = third colour, . = empty
+  const CTL_PIX={
+    add:{p:{a:'#4ade80',c:'#eafff1'},g:[
+      "....aaa....","....aaa....","....aaa....",
+      ".aaacccaaa.",".aaacccaaa.",".aaacccaaa.",
+      "....aaa....","....aaa....","....aaa...."]},
+    remove:{p:{a:'#ff6b6b',c:'#ffd6d6'},g:[
+      "....ccc....",".ccccccccc.",
+      "..aaaaaaa..","..aacacaa..","..aacacaa..","..aacacaa..","..aacacaa..","..aaaaaaa.."]},
+    open:{p:{a:'#c58a3d',c:'#ffd166',d:'#7a4b1c'},g:[
+      "..ddddddd..","..daaaaad..","..ddddddd..","...........",
+      ".ddddddddd.",".dcccccccd.",".aaaacaaaa.",".aaaaaaaaa.",".ddddddddd."]},
+    close:{p:{a:'#c58a3d',c:'#ffd166',d:'#7a4b1c'},g:[
+      ".ddddddddd.",".aaaaaaaaa.",".aaaaaaaaa.",".ddddcdddd.",
+      ".aaaacaaaa.",".aaaaaaaaa.",".aaaaaaaaa.",".ddddddddd."]},
+    amount:{p:{a:'#6ea0ff',c:'#d6e4ff'},g:[
+      "...a...a...","...a...a...",".ccccccccc.","...a...a...","...a...a...",
+      ".ccccccccc.","...a...a...","...a...a..."]},
+    enchant:{p:{a:'#b072ff',c:'#f1e0ff'},g:[
+      ".....a.....",".....a.....","....aaa....","..aaacaaa..","aaaacccaaaa",
+      "..aaacaaa..","....aaa....",".....a.....",".....a....."]},
+    durability:{p:{a:'#2dd4bf',c:'#c8fff6'},g:[
+      ".aaaaaaaaa.",".acccaaaaa.",".acccaaaaa.",".acccaaaaa.",".acccaaaaa.",
+      "..aaaaaaa..","...aaaaa...","....aaa....",".....a....."]},
+    rename:{p:{a:'#ffd166',c:'#ff8fa3',d:'#6b7385'},g:[
+      ".........cc","........ccc",".......aaa.","......aaa..",".....aaa...","....aaa....",
+      "...aaa.....","..aaa......",".aaa.......","ddd........","dd........."]},
+    move:{p:{a:'#4cc9f0',c:'#ffffff'},g:[
+      ".....a.....","....aaa....",".....a.....",".....a.....",".a...a...a.",
+      "aaaaacaaaaa",".a...a...a.",".....a.....",".....a.....","....aaa....",".....a....."]},
+    dup:{p:{a:'#ffd166',c:'#c98f12'},g:[
+      "ccccccc....","ccccccc....","ccccccc....","ccc........",
+      "ccc.aaaaaaa","ccc.aaaaaaa","ccc.aaaaaaa","....aaaaaaa","....aaaaaaa","....aaaaaaa","....aaaaaaa"]},
+    cancel:{p:{a:'#ff6b6b'},g:[
+      "aa.......aa",".aa.....aa.","..aa...aa..","...aa.aa...","....aaa....",
+      "....aaa....","...aa.aa...","..aa...aa..",".aa.....aa."]},
+    tools:{p:{a:'#8791a5',c:'#e8eaf0'},g:[
+      "..ccc......","aacccaaaaaa","..ccc......","...........",
+      "......ccc..","aaaaaacccaa","......ccc..","...........",
+      "...ccc.....","aaacccaaaaa","...ccc....."]},
+    chevron:{p:{a:'#e8eaf0'},g:[
+      "..aa.......","...aa......","....aa.....",".....aa....","......aa...",
+      ".....aa....","....aa.....","...aa......","..aa......."]}
+  };
+  const _pixCache={};
+  function pixIcon(name){
+    if(_pixCache[name]) return _pixCache[name];
+    const d=CTL_PIX[name]; if(!d) return '';
+    const g=d.g, N=11, top=Math.floor((N-g.length)/2);
+    const at=(x,y)=>{const r=g[y-top]; return r&&r[x]&&r[x]!=='.'?r[x]:''};
+    const runs={}, add=(k,x,y,w)=>{(runs[k]=runs[k]||[]).push('M'+x+' '+y+'h'+w+'v1h-'+w+'z')};
+    for(let y=0;y<N+1;y++){ // drop shadow: one pixel down-right of every filled pixel, only where nothing is drawn
+      let x=0; while(x<N+1){
+        if(!at(x,y)&&at(x-1,y-1)){ let w=1; while(x+w<N+1&&!at(x+w,y)&&at(x+w-1,y-1)) w++; add('s',x,y,w); x+=w } else x++;
+      }
+    }
+    for(let y=0;y<N;y++){
+      let x=0; while(x<N){
+        const k=at(x,y); if(!k){x++;continue}
+        let w=1; while(x+w<N&&at(x+w,y)===k) w++; add(k,x,y,w); x+=w;
+      }
+    }
+    let s='<svg viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true" focusable="false">';
+    if(runs.s) s+='<path fill="#000" fill-opacity=".5" d="'+runs.s.join('')+'"/>';
+    for(const k in runs) if(k!=='s') s+='<path fill="'+d.p[k]+'" d="'+runs[k].join('')+'"/>';
+    return _pixCache[name]=s+'</svg>';
+  }
+
+  // label -> [icon, tooltip text]
+  const CTL_MAP={'Add item':['add','Add item'],'Remove item':['remove','Remove item'],'Open':['open','Open container'],'Close':['close','Close container'],
+    'Set Amount':['amount','Set amount'],'Enchant':['enchant','Enchant'],'Durability':['durability','Set durability'],'Rename':['rename','Rename'],
+    'Move':['move','Move'],'Duplicate':['dup','Duplicate'],'Cancel duplicate':['cancel','Cancel duplicate'],'Cancel move':['cancel','Cancel move']};
+  function actBtn(label,fn){
+    const m=CTL_MAP[label]||['tools',label], b=document.createElement('button'), tip=document.createElement('span');
+    b.type='button'; b.className='ctl-b'; b.setAttribute('aria-label',m[1]);
+    tip.className='tip'; tip.setAttribute('role','tooltip'); tip.textContent=m[1];
+    b.innerHTML=pixIcon(m[0]); b.append(tip);
+    if(fn) b.addEventListener('click',fn); else b.setAttribute('aria-disabled','true');
+    return b;
+  }
+  // collapsible strip: open/closed state is remembered per browser (falls back silently if storage is blocked)
+  const ctlBox=$('ctl'), ctlTgl=$('ctlT'); let ctlFlashT=0;
+  function ctlSetOpen(open,save){
+    ctlBox.classList.toggle('open',open); ctlBox.classList.remove('flash');
+    ctlTgl.setAttribute('aria-expanded',open?'true':'false');
+    ctlTgl.querySelector('.ico').innerHTML=pixIcon(open?'chevron':'tools');
+    ctlTgl.querySelector('.tip').textContent=open?'Hide controls':'Show controls';
+    ctlTgl.setAttribute('aria-label',open?'Hide controls':'Show controls');
+    if(open) ctlTgl.classList.remove('alert');
+    if(save){ try{localStorage.setItem('kitx.controls',open?'1':'0')}catch(e){} }
+  }
+  ctlTgl.addEventListener('click',()=>{ ctlSetOpen(!ctlBox.classList.contains('open'),true); ctlSync(false) });
+  { let st=null; try{st=localStorage.getItem('kitx.controls')}catch(e){} ctlSetOpen(st!=='0',false) }
+  // keep a tooltip fully on screen: measure it when it appears and slide it back in from the edge
+  function ctlFit(b){
+    const tip=b.querySelector('.tip'); if(!tip) return;
+    tip.style.setProperty('--sx','0px'); const r=tip.getBoundingClientRect(), W=document.documentElement.clientWidth, m=8;
+    if(r.width) tip.style.setProperty('--sx',(r.left<m?m-r.left:r.right>W-m?(W-m)-r.right:0)+'px');
+  }
+  ctlBox.addEventListener('pointerover',e=>{ const b=e.target.closest('.ctl-b'); if(b) ctlFit(b) });
+  ctlBox.addEventListener('focusin',e=>{ const b=e.target.closest('.ctl-b'); if(b) ctlFit(b) });
+  // touch has no hover: press and hold a button to read what it does (the tap that follows is swallowed)
+  { let t=0, swallow=false;
+    ctlBox.addEventListener('pointerdown',e=>{
+      clearTimeout(t); const b=e.target.closest('.ctl-b'); if(!b||e.pointerType!=='touch') return;
+      t=setTimeout(()=>{ ctlBox.querySelectorAll('.tip-on').forEach(x=>x.classList.remove('tip-on')); b.classList.add('tip-on'); ctlFit(b); swallow=true; setTimeout(()=>b.classList.remove('tip-on'),2200) },380);
+    });
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>ctlBox.addEventListener(ev,()=>{ clearTimeout(t); if(swallow) setTimeout(()=>{swallow=false},300) }));
+    ctlBox.addEventListener('click',e=>{ if(swallow){ e.preventDefault(); e.stopPropagation(); swallow=false } },true);
+    ctlBox.addEventListener('contextmenu',e=>{ if(e.target.closest('.ctl-b')) e.preventDefault() });
+  }
+  function ctlSync(hadNote){
+    $('cpActions').querySelectorAll('.ctl-b').forEach(b=>{ // a reason set as title (e.g. "This item does not stack") becomes a second tooltip line
+      if(!b.title) return;
+      const i=document.createElement('i'); i.textContent=b.title; b.querySelector('.tip').append(i);
+      b.setAttribute('aria-label',b.getAttribute('aria-label')+'. '+b.title); b.removeAttribute('title');
+    });
+    const open=ctlBox.classList.contains('open'), busy=kb.dup!==null||kb.moving!==null;
+    ctlBox.classList.toggle('idle',!$('cpActions').childElementCount&&!hadNote); // nothing selected: no bubble, the item panel already says what to do
+    ctlTgl.classList.toggle('alert',!open&&busy);
+    if(!open&&hadNote){ // collapsed: still show a message the user needs to see, briefly
+      ctlBox.classList.add('flash'); clearTimeout(ctlFlashT); ctlFlashT=setTimeout(()=>ctlBox.classList.remove('flash'),4500);
+    }
+  }
+  function renderControls(){ const hadNote=!!kb.note; renderControlsInner(); ctlSync(hadNote) }
+  function renderControlsInner(){
     const key=kb.sel, box=$('cpActions'); box.innerHTML='';
     const note=kb.note; kb.note='';
     if(kb.dup!==null){
