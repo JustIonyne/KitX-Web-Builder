@@ -1162,6 +1162,7 @@
     ctlBox.addEventListener('contextmenu',e=>{ if(e.target.closest('.ctl-b')) e.preventDefault() });
   }
   function ctlSync(hadNote){
+    $('cpActions').querySelectorAll('.ctl-b[aria-disabled=true]').forEach(b=>b.remove()); // only offer actions that work on this item
     $('cpActions').querySelectorAll('.ctl-b').forEach(b=>{ // a reason set as title (e.g. "This item does not stack") becomes a second tooltip line
       if(!b.title) return;
       const i=document.createElement('i'); i.textContent=b.title; b.querySelector('.tip').append(i);
