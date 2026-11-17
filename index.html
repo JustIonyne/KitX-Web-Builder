@@ -815,7 +815,7 @@
       else{ const s=id.split(':')[1]; d.classList.add('mono'); d.textContent=mono(s); d.style.setProperty('--h',hue(id)) }
       return d;
     }
-    const vk=aux!=null?VAR_PATH[id+':'+aux]:undefined;
+    const vk=(cu&&cu.likeVar)?VAR_PATH[cu.likeVar]:aux!=null?VAR_PATH[id+':'+aux]:undefined;
     const pos=DATA.pos[vk!==undefined?vk:ITEM_PATH[(cu&&cu.like)||id]];
     if(pos){
       d.style.backgroundImage=`url(${ATLAS_URL})`;
@@ -1168,7 +1168,10 @@
         const b=await f.data(); let cv;
         if(ext==='.tga') cv=decodeTga(b);
         else{const bm=await createImageBitmap(new Blob([b]));cv=document.createElement('canvas');cv.width=bm.width;cv.height=bm.height;cv.getContext('2d').drawImage(bm,0,0)}
-        if(cv){url=cv.toDataURL();break}
+        if(cv){
+          if(cv.height>cv.width&&cv.height%cv.width===0){   // animated flipbook strip (frames stacked vertically): keep the first frame
+            const c2=document.createElement('canvas'); c2.width=c2.height=cv.width; c2.getContext('2d').drawImage(cv,0,0); cv=c2 }
+          url=cv.toDataURL();break }
       }catch(e){}
     }
     return cache[base]=url;
@@ -1301,6 +1304,15 @@
     const cv=document.createElement('canvas'); cv.width=cv.height=64; cv.getContext('2d').putImageData(new ImageData(px,64,64),0,0);
     return cv.toDataURL();
   }
+  // an item's 3D icon from its attachable (geometry.default + textures.default), as a data URL, or null (then the flat icon is used)
+  async function attach3d(a,files,cache,getGi){
+    if(!a||!a.geo||!a.tex) return null;
+    const tx=await texPixels(a.tex,files,cache); if(!tx) return null;
+    const geo=(await getGi())[a.geo.split(':')[0]]; if(!geo) return null;
+    const px=renderFaces(buildFaces(geo,()=>tx)); if(!px) return null;
+    const cv=document.createElement('canvas'); cv.width=cv.height=64; cv.getContext('2d').putImageData(new ImageData(px,64,64),0,0);
+    return cv.toDataURL();
+  }
   // Bedrock's own texture short names that differ from the item id (an addon icon can point at these)
   const TEX_ALIAS={potato_baked:'baked_potato',potato_poisonous:'poisonous_potato',beef_raw:'beef',beef_cooked:'cooked_beef',chicken_raw:'chicken',chicken_cooked:'cooked_chicken',
     mutton_raw:'mutton',mutton_cooked:'cooked_mutton',porkchop_raw:'porkchop',porkchop_cooked:'cooked_porkchop',rabbit_raw:'rabbit',rabbit_cooked:'cooked_rabbit',
@@ -1332,15 +1344,36 @@
       const dn=c['minecraft:display_name']&&c['minecraft:display_name'].value; if(!name&&dn) name=lang[dn]||(/^[a-z_.:]+$/.test(dn)?null:dn);
       found.push({id,name,rel,blk});
     }
+    // attachables: item id -> {geo, tex} (what the game draws for the item in the hand: block items are drawn from these)
+    const ATT={};
+    for(const [k,f] of files){
+      if(!/^attachables\/.+\.json$/.test(k)) continue;
+      let j; try{j=jsonc(await text(f))}catch(e){continue}
+      const d=j['minecraft:attachable']&&j['minecraft:attachable'].description; if(!d||!d.identifier) continue;
+      const first=o=>o&&(o.default||Object.values(o)[0]);
+      const g=first(d.geometry), t=first(d.textures);
+      if(typeof g==='string'&&typeof t==='string'&&!ATT[d.identifier]) ATT[d.identifier]={geo:g,tex:t};
+    }
     const title=file.name.replace(/\.(mcaddon|mcpack|zip)$/i,'');
     const old=ADDONS.findIndex(a=>a.name===title); if(old>=0) dropAddon(old);
     let gi=null; const getGi=async()=>gi||(gi=await geoIndex(files));
     for(const x of found){
       let icon=await loadTexture(x.rel,files,cache);
       if(x.blk){ try{ icon=await block3d(x.blk,files,cache,ttex,getGi)||icon }catch(e){} }
+      else if(ATT[x.id]){
+        // block-style items (icon is a block / entity texture or a texture strip, not a normal item sprite): draw the attachable's 3D model
+        const rl=(x.rel||'').toLowerCase();
+        if(!x.rel||/^textures\/(blocks|item\/blocks|nf_left|entity)\//.test(rl)){ try{ icon=await attach3d(ATT[x.id],files,cache,getGi)||icon }catch(e){} }
+      }
       // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
-      const tn=!icon&&x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null;
-      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:tn?vanillaTex(tn):null};
+      let tn=!icon&&x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null, like=tn?vanillaTex(tn):null, likeVar=null;
+      if(!icon&&!like){   // still nothing: a block-style item whose textures are vanilla ones (nf:oak_door_offhand -> the vanilla oak door icon)
+        const bare=x.id.split(':')[1].replace(/_offhand$/,''), BED=['white','orange','magenta','light_blue','yellow','lime','pink','gray','light_gray','cyan','purple','blue','brown','green','red','black'];
+        const bm=/^(.+)_bed$/.exec(bare), bi=bm?BED.indexOf(bm[1]):-1;
+        if(bi>=0) likeVar='bed:'+bi;
+        else like=vanillaTex(bare)||(ATT[x.id]&&vanillaTex(ATT[x.id].tex.split('/').pop().replace(/_uncast$/,'')))||vanillaTex(bare.replace(/^oak_door$/,'wooden_door').replace(/^(waxed_)?((?:exposed_|weathered_|oxidized_)?copper)_chain$/,'$1$2_chain').replace(/^chain$/,'iron_chain'))||null;
+      }
+      CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like:like||(likeVar?'bed':null),likeVar};
       const nm=CUSTOM[x.id].name.toLowerCase(); ALL.push({id:x.id,name:nm,hay:mkHay(nm,x.id)});
     }
     if(found.length) ADDONS.push({name:title,ids:found.map(x=>x.id)});
