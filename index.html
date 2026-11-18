@@ -426,11 +426,16 @@
       </div>
 
       <div class="panel xp" aria-label="Export Panel">
-        <h3>Export</h3>
-        <p class="cp-msg" id="xpMsg">Save this kit as a .mcstructure file. Add it to a preset in the Preset Builder, or place it in your kit structures.</p>
+        <h3>Import / Export</h3>
+        <p class="cp-msg" id="xpMsg">Save this kit as a .mcstructure file, or import an existing kit file to keep editing it. Add the file to a preset in the Preset Builder, or place it in your kit structures.</p>
         <label for="xpName">Kit name</label>
         <input type="text" id="xpName" class="xp-in" maxlength="40" placeholder="My Kit" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <div class="cp-actions"><button type="button" class="btn go" id="xpBtn">Export kit</button></div>
+        <div class="cp-actions">
+          <button type="button" class="btn" id="xpImport">Import kit</button>
+          <button type="button" class="btn go" id="xpBtn">Export kit</button>
+          <button type="button" class="btn ghost" id="xpUndo" hidden>Undo import</button>
+        </div>
+        <input type="file" id="xpFile" accept=".mcstructure" hidden>
         <div class="xp-status" id="xpStatus" role="status"></div>
       </div>
 
@@ -2199,6 +2204,104 @@
   }
   const xpStatus=$('xpStatus');
   function xpSay(msg,cls){ xpStatus.textContent=msg; xpStatus.className='xp-status'+(cls?' '+cls:'') }
+  // ----- import: .mcstructure -> kit -----
+  // Reads a kit file made by this tool or by KitX (two chest minecarts, see the export layout above) back into the editor.
+  const ENCH_NAME={}; Object.keys(ENCH_ID).forEach(k=>{ENCH_NAME[ENCH_ID[k]]=k});
+  // Minimal Bedrock (little-endian) NBT reader. Compounds become plain objects, lists become arrays; the big block/array data is skipped, not stored.
+  function readNbt(buf){
+    const dv=new DataView(buf.buffer,buf.byteOffset,buf.byteLength), td=new TextDecoder(); let p=0;
+    const need=n=>{ if(n<0||p+n>buf.length) throw new Error('The file ends unexpectedly. It may be damaged or not a structure file.') };
+    const rb=()=>{need(1);return dv.getInt8(p++)};
+    const rs=()=>{need(2);const v=dv.getInt16(p,true);p+=2;return v};
+    const ri=()=>{need(4);const v=dv.getInt32(p,true);p+=4;return v};
+    const rl=()=>{need(8);const v=Number(dv.getBigInt64(p,true));p+=8;return v};
+    const rf=()=>{need(4);const v=dv.getFloat32(p,true);p+=4;return v};
+    const rd=()=>{need(8);const v=dv.getFloat64(p,true);p+=8;return v};
+    const rstr=()=>{need(2);const n=dv.getUint16(p,true);p+=2;need(n);const t=td.decode(buf.subarray(p,p+n));p+=n;return t};
+    function val(t,d){
+      if(d>48) throw new Error('The file is nested too deeply to be a kit.');
+      switch(t){
+        case 1: return rb(); case 2: return rs(); case 3: return ri(); case 4: return rl(); case 5: return rf(); case 6: return rd();
+        case 7:{ const n=ri(); need(n); p+=n; return null }
+        case 8: return rstr();
+        case 9:{ const et=rb(), n=ri(); if(n<0||(n>0&&et===0)) throw new Error('Invalid list in the file.');
+          const a=[]; for(let i=0;i<n;i++) a.push(val(et,d+1)); return a }
+        case 10:{ const o=Object.create(null); for(;;){ const t2=rb(); if(t2===0) break; const k=rstr(); o[k]=val(t2,d+1) } return o }
+        case 11:{ const n=ri(); need(n*4); p+=n*4; return null }
+        case 12:{ const n=ri(); need(n*8); p+=n*8; return null }
+        default: throw new Error('Unknown data type in the file.');
+      }
+    }
+    if(rb()!==10) throw new Error('This does not look like a valid .mcstructure file.');
+    rstr(); return val(10,0);
+  }
+  function kitFromStructure(root){
+    const w={items:0,inside:0,unknown:new Set(),ench:0,skipped:0,guessed:false};
+    const toItem=(c,nested)=>{
+      if(!c||typeof c.Name!=='string'||!c.Name||!(c.Count>0)) return null;
+      const id=c.Name.replace(/^minecraft:/,''), tag=c.tag||{}, mx=maxDur(id), dmg=c.Damage|0;
+      const it={id,count:Math.max(1,Math.min(c.Count,maxStack(id,null)))};
+      w.items++; if(nested) w.inside++;
+      if(ITEM_PATH[id]===undefined&&!CUSTOM[id]) w.unknown.add(id);
+      if(mx){ const used=tag.Damage!=null?tag.Damage:dmg; if(used>0) it.dur=Math.max(1,mx-used) }
+      else if(dmg>0||VAR_NAME[id+':0']!==undefined) it.aux=dmg;
+      if(tag.display&&typeof tag.display.Name==='string'&&tag.display.Name) it.name=tag.display.Name;
+      if(Array.isArray(tag.ench)){
+        const e={}; for(const x of tag.ench){ const k=x&&ENCH_NAME[x.id]; if(k&&ENCH[k]&&x.lvl>0) e[k]=Math.min(x.lvl,MAXLVL); else w.ench++ }
+        if(Object.keys(e).length) it.ench=e;
+      }
+      if(isContainer(id)){
+        const co={};
+        if(isShulker(id)&&Array.isArray(tag.Items)){ for(const x of tag.Items){ const n=toItem(x,true); if(n&&x.Slot>=0&&x.Slot<SHULKER_SLOTS) co[x.Slot]=n; else if(n) w.skipped++ } }
+        else if(isBundle(id)&&Array.isArray(tag.storage_item_component_content)){ let i=0; for(const x of tag.storage_item_component_content){ const n=toItem(x,true); if(n) co[i++]=n } }
+        if(Object.keys(co).length) it.contents=co;
+      }
+      return it;
+    };
+    const ents=(root.structure&&Array.isArray(root.structure.entities)?root.structure.entities:[]).filter(e=>e&&Array.isArray(e.ChestItems));
+    const has=(e,t)=>Array.isArray(e.Tags)&&e.Tags.includes(t);
+    let main=ents.find(e=>has(e,'ionyne_cart_main')), equip=ents.find(e=>has(e,'ionyne_cart_equip'));
+    if(!main&&!equip){
+      if(!ents.length) throw new Error('No kit found in this structure. Kit files hold their items in two chest minecarts.');
+      main=ents[0]; equip=ents[1]; w.guessed=true;
+    }
+    const items={}, EQ=['head','chest','legs','feet','offhand'];
+    if(main) for(const c of main.ChestItems){ const it=toItem(c,false); if(!it) continue; if(c.Slot>=0&&c.Slot<27) items[String(c.Slot)]=it; else w.skipped++ }
+    if(equip) for(const c of equip.ChestItems){ const it=toItem(c,false); if(!it) continue; const s=c.Slot;
+      if(s>=0&&s<9) items[String(27+s)]=it; else if(s>=9&&s<14) items[EQ[s-9]]=it; else w.skipped++ }
+    return {items,w};
+  }
+  let xpPrev=null;
+  function repaintKit(){
+    kb.sel=null; kb.path=[]; kb.moving=null; kb.dup=null; kb.note='';
+    for(const k of Object.keys(slotEls)) if(!isIn(k)) paintSlot(k);
+    ctnSync(); selectSlot(null);
+  }
+  $('xpImport').addEventListener('click',()=>$('xpFile').click());
+  $('xpFile').addEventListener('change',async e=>{
+    const f=e.target.files[0]; e.target.value=''; if(!f) return;
+    try{
+      if(f.size>32*1024*1024) throw new Error('This file is too large to be a kit.');
+      const { items, w }=kitFromStructure(readNbt(new Uint8Array(await f.arrayBuffer())));
+      xpPrev={items:kb.items,name:$('xpName').value};
+      kb.items=items; repaintKit();
+      const name=cleanKit(f.name)||'kit'; $('xpName').value=name;
+      $('xpUndo').hidden=false;
+      const top=w.items-w.inside; let msg='Imported '+f.name+': '+top+' item'+(top===1?'':'s')+(w.inside?' ('+w.inside+' inside containers)':'')+'. Tap a slot to edit it.';
+      if(!w.items) msg='Imported '+f.name+', but it has no items in it.';
+      const extra=[];
+      if(w.guessed) extra.push('this file has no kit tags, so its first two chest minecarts were used');
+      if(w.unknown.size) extra.push(w.unknown.size+' item id'+(w.unknown.size===1?' is':'s are')+' not in the item list (custom addon items?) and kept as they are');
+      if(w.ench) extra.push(w.ench+' enchantment'+(w.ench===1?'':'s')+' could not be read and '+(w.ench===1?'was':'were')+' left out');
+      if(w.skipped) extra.push(w.skipped+' item'+(w.skipped===1?'':'s')+' in unsupported slots '+(w.skipped===1?'was':'were')+' left out');
+      xpSay(msg+(extra.length?' Note: '+extra.join('; ')+'.':''),extra.length?'':'ok');
+    }catch(err){ xpSay('Could not import '+f.name+': '+err.message,'err') }
+  });
+  $('xpUndo').addEventListener('click',()=>{
+    if(!xpPrev) return;
+    kb.items=xpPrev.items; $('xpName').value=xpPrev.name; xpPrev=null; $('xpUndo').hidden=true; repaintKit();
+    xpSay('Import undone. Your previous kit is back.','ok');
+  });
   $('xpName').addEventListener('input',()=>xpSay(''));
   $('xpBtn').addEventListener('click',()=>{
     const count=Object.keys(kb.items).length;
@@ -2210,6 +2313,7 @@
       const bytes=nbtKit(kb.items), blob=new Blob([bytes],{type:'application/octet-stream'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=id+'.mcstructure';
       document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+      xpPrev=null; $('xpUndo').hidden=true;
       xpSay('Exported '+id+'.mcstructure ('+count+' item'+(count===1?'':'s')+(inside?', '+inside+' inside containers':'')+', '+fmt(bytes.length)+').','ok');
     }catch(err){ xpSay('Export failed: '+err.message,'err') }
   });
