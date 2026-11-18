@@ -162,6 +162,28 @@
   .cp-msg{color:var(--mute);font-size:10px;margin:0 0 10px}
   .cp-actions{display:flex;flex-wrap:wrap;gap:8px}
   .cp-actions .btn{padding:10px 14px}
+  /* smithing table (armor trims) */
+  .sm-card{max-width:440px;display:flex;flex-direction:column;max-height:92vh}
+  .sm-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+  .sm-table{display:flex;align-items:flex-start;justify-content:center;gap:6px;margin:2px 0 8px}
+  .sm-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .sm-lab{font-size:9px;color:var(--mute)}
+  .sm-op{width:14px;height:48px;display:grid;place-items:center;color:var(--mute);font-size:14px}
+  .sm-slot,.sm-opt{appearance:none;position:relative;display:block;padding:0;margin:0;border:0;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated}
+  .sm-slot{width:48px;height:48px}
+  button.sm-slot,.sm-opt{cursor:pointer}
+  .sm-slot .ico,.sm-opt .ico{position:absolute;inset:9%;width:auto;height:auto;pointer-events:none}
+  .sm-slot.out{outline:2px solid var(--accent);outline-offset:-1px}
+  .sm-sec{margin:12px 0 6px;color:var(--mute);font-size:10px;text-transform:uppercase}
+  .sm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:4px}
+  .sm-opt{aspect-ratio:1;width:100%}
+  .sm-opt.on{outline:2px solid var(--accent);outline-offset:1px;z-index:1}
+  .sm-opt:focus-visible,.sm-slot:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .sm-pick{min-height:15px;margin:0 0 4px;text-align:center;color:var(--text);font-size:10px;overflow-wrap:anywhere}
+  .sm-pick.dim{color:var(--mute)}
+  .trimdot{position:absolute;top:3px;right:3px;width:8px;height:8px;border:1px solid #000;pointer-events:none;z-index:1}
+  .ip-slot .trimdot{top:6px;right:6px;width:10px;height:10px}
+  .ip-tip .t-pat{color:#a8a8a8;font-size:10px;white-space:pre}
   /* floating control strip: a small fixed toggle; opens to a slim strip of pixel-icon buttons */
   .ctl{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:25;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
   .ctl>*{pointer-events:auto}
@@ -556,6 +578,33 @@
   </div>
 </div>
 
+<div class="dlg" id="smDlg" role="dialog" aria-modal="true" aria-labelledby="smTitle">
+  <div class="dlg-card sm-card">
+    <div class="dlg-head"><b id="smTitle">Smithing table</b><button class="x" id="smClose" type="button" aria-label="Close">×</button></div>
+    <div class="sm-body">
+      <div class="sm-table">
+        <div class="sm-col"><button class="sm-slot" id="smTpl" type="button" aria-label="Template slot. Tap to clear"></button><span class="sm-lab">Template</span></div>
+        <span class="sm-op">+</span>
+        <div class="sm-col"><div class="sm-slot" id="smBase"></div><span class="sm-lab">Armor</span></div>
+        <span class="sm-op">+</span>
+        <div class="sm-col"><button class="sm-slot" id="smMat" type="button" aria-label="Material slot. Tap to clear"></button><span class="sm-lab">Material</span></div>
+        <span class="sm-op">→</span>
+        <div class="sm-col"><div class="sm-slot out" id="smOut"></div><span class="sm-lab">Result</span></div>
+      </div>
+      <p class="sm-pick" id="smPick" role="status"></p>
+      <div class="sm-sec">Armor trim templates</div>
+      <div class="sm-grid" id="smPats" role="group" aria-label="Armor trim templates"></div>
+      <div class="sm-sec">Materials</div>
+      <div class="sm-grid" id="smMats" role="group" aria-label="Trim materials"></div>
+    </div>
+    <div class="dlg-actions">
+      <button class="btn ghost" id="smClear" type="button" style="margin-right:auto">Remove trim</button>
+      <button class="btn ghost" id="smCancel" type="button">Cancel</button>
+      <button class="btn go" id="smOk" type="button">Apply</button>
+    </div>
+  </div>
+</div>
+
 <footer>KitX · made by ionyne · <a data-discord target="_blank" rel="noopener" style="color:inherit">Discord</a></footer>
 
 <script>
@@ -923,12 +972,13 @@
   }
   function paintSlot(key){
     const b=slotEls[key]; if(!b) return;
-    b.querySelectorAll('.ico,.cnt').forEach(n=>n.remove());
+    b.querySelectorAll('.ico,.cnt,.trimdot').forEach(n=>n.remove());
     const it=getItem(key), ph=b.querySelector('.ph');
     if(ph) ph.style.display=it?'none':'';
     if(it){
       b.append(mkIcon(it));
       if(it.count>1){const c=document.createElement('span');c.className='cnt';c.textContent=it.count;b.append(c)}
+      if(trimOk(it.trim)) b.append(trimDot(it.trim));
     }
     b.setAttribute('aria-label',slotInfo(key).label+' ('+(it?stripFmt(it.name||itemLabel(it)):'empty')+')');
     ctnSync();
@@ -1038,6 +1088,8 @@
     ic.innerHTML=''; if(it) ic.append(mkIcon(it));
     $('ipWhere').textContent=key?slotInfo(key).label:'No slot selected';
     $('ipN').textContent=it&&it.count>1?String(it.count):'';
+    document.querySelectorAll('.ip-slot .trimdot').forEach(n=>n.remove());
+    if(it&&trimOk(it.trim)) document.querySelector('.ip-slot').append(trimDot(it.trim));
     tip.innerHTML='';
     const line=(cls,txt)=>{ const d=document.createElement('div'); d.className=cls; d.textContent=txt; tip.append(d); return d };
     const bar=$('ipBar'), mx=it?maxDur(it.id):0;
@@ -1046,6 +1098,7 @@
     if(!it){ line('t-name dim','Empty slot'); line('t-hint','Use Add item in the controls'); return }
     const nm=document.createElement('div'); nm.className='t-name'; nm.append(mcFmt(it.name||(CUSTOM[it.id]&&CUSTOM[it.id].name)||itemLabel(it))); tip.append(nm);
     const e=it.ench||{}; Object.keys(e).forEach(k=>{ if(ENCH[k]) line('t-ench',ENCH[k][0]+((ENCH[k][1]>1||e[k]>1)?' '+roman(e[k]):'')) });
+    if(trimOk(it.trim)){ line('t-hint','Upgrade:'); line('t-pat','  '+TRIM_PAT[it.trim.pattern]+' Armor Trim'); line('t-pat','  '+TRIM_MAT[it.trim.material][0]+' Material').style.color=TRIM_MAT[it.trim.material][2] }
     tip.append(Object.assign(document.createElement('div'),{className:'t-gap'}));
     tip.append(tipRow('Count',String(it.count)));
     if(mx){ const cur=it.dur==null?mx:it.dur; tip.append(tipRow('Durability',cur+' / '+mx), tipBar(cur/mx,'hsl('+Math.round(cur/mx*120)+',100%,50%)')) }
@@ -1091,6 +1144,9 @@
     cancel:{p:{a:'#ff6b6b'},g:[
       "aa.......aa",".aa.....aa.","..aa...aa..","...aa.aa...","....aaa....",
       "....aaa....","...aa.aa...","..aa...aa..",".aa.....aa."]},
+    trim:{p:{a:'#9fb3c8',c:'#ffd166'},g:[
+      "..aa...aa..",".aaaa.aaaa.","aaaaaaaaaaa","aacccccccaa","aaaaaaaaaaa",
+      ".aaaaaaaaa.",".aaaaaaaaa.",".aaaaaaaaa.","..aaaaaaa.."]},
     tools:{p:{a:'#8791a5',c:'#e8eaf0'},g:[
       "..ccc......","aacccaaaaaa","..ccc......","...........",
       "......ccc..","aaaaaacccaa","......ccc..","...........",
@@ -1126,7 +1182,7 @@
   // label -> [icon, tooltip text]
   const CTL_MAP={'Add item':['add','Add item'],'Remove item':['remove','Remove item'],'Open':['open','Open container'],'Close':['close','Close container'],
     'Set Amount':['amount','Set amount'],'Enchant':['enchant','Enchant'],'Durability':['durability','Set durability'],'Rename':['rename','Rename'],
-    'Move':['move','Move'],'Duplicate':['dup','Duplicate'],'Cancel duplicate':['cancel','Cancel duplicate'],'Cancel move':['cancel','Cancel move']};
+    'Trim':['trim','Armor trim'],'Move':['move','Move'],'Duplicate':['dup','Duplicate'],'Cancel duplicate':['cancel','Cancel duplicate'],'Cancel move':['cancel','Cancel move']};
   function actBtn(label,fn){
     const m=CTL_MAP[label]||['tools',label], b=document.createElement('button'), tip=document.createElement('span');
     b.type='button'; b.className='ctl-b'; b.setAttribute('aria-label',m[1]);
@@ -1219,6 +1275,7 @@
       box.append(sa);
       const en=actBtn('Enchant',openEnchant);
       box.append(en);
+      if(isTrimmable(it.id)) box.append(actBtn('Trim',openSmith));
       const du=actBtn('Durability',maxDur(it.id)?openDurability:null);
       if(!maxDur(it.id)) du.title='This item has no durability';
       box.append(du);
@@ -2110,6 +2167,70 @@
   $('nameDlg').addEventListener('click',e=>{ if(e.target===$('nameDlg')) closeRename() });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&nameOpen()) closeRename() });
 
+  // ----- smithing table: armor trims -----
+  // Stored on the item as it.trim = {pattern, material}; written to the file as tag.Trim {Pattern, Material} (strings).
+  const TRIM_PAT={sentry:'Sentry',dune:'Dune',coast:'Coast',wild:'Wild',ward:'Ward',eye:'Eye',vex:'Vex',tide:'Tide',snout:'Snout',rib:'Rib',spire:'Spire',
+    wayfinder:'Wayfinder',shaper:'Shaper',silence:'Silence',raiser:'Raiser',host:'Host',flow:'Flow',bolt:'Bolt'};
+  // material -> [name, item shown in the material slot, colour]
+  const TRIM_MAT={amethyst:['Amethyst','amethyst_shard','#9a5cc6'],copper:['Copper','copper_ingot','#b4684d'],diamond:['Diamond','diamond','#6eecd2'],
+    emerald:['Emerald','emerald','#47a036'],gold:['Gold','gold_ingot','#deb12d'],iron:['Iron','iron_ingot','#ececec'],lapis:['Lapis','lapis_lazuli','#416e97'],
+    netherite:['Netherite','netherite_ingot','#8b7d7e'],quartz:['Quartz','quartz','#e3d4c4'],redstone:['Redstone','redstone','#c4301a'],resin:['Resin','resin_brick','#fc7812']};
+  const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
+  const trimOk=t=>!!(t&&typeof t==='object'&&own(TRIM_PAT,t.pattern)&&own(TRIM_MAT,t.material));
+  const isTrimmable=id=>/^(leather|chainmail|iron|golden|diamond|netherite|copper)_(helmet|chestplate|leggings|boots)$|^turtle_helmet$/.test(id);
+  const tplId=p=>p+'_armor_trim_smithing_template';
+  function trimDot(t){ const d=document.createElement('span'); d.className='trimdot'; d.style.background=TRIM_MAT[t.material][2]; return d }
+  let smFor=null, smDraft={pattern:null,material:null};
+  function smPut(el,id){ el.innerHTML=''; if(id) el.append(mkIcon(id)) }
+  function renderSmith(){
+    const it=getItem(smFor); if(!it){ closeSmith(); return }
+    const d=smDraft, both=!!(d.pattern&&d.material);
+    smPut($('smTpl'),d.pattern&&tplId(d.pattern)); smPut($('smMat'),d.material&&TRIM_MAT[d.material][1]);
+    smPut($('smBase'),it); smPut($('smOut'),it);
+    $('smOut').querySelectorAll('.trimdot').forEach(n=>n.remove());
+    if(both) $('smOut').append(trimDot(d));
+    const pick=$('smPick');
+    pick.className='sm-pick'+(both?'':' dim');
+    pick.textContent=both?TRIM_PAT[d.pattern]+' Armor Trim · '+TRIM_MAT[d.material][0]+' Material'
+      :(d.pattern?'Now pick a material.':d.material?'Now pick a template.':'Pick a template and a material.');
+    const ok=$('smOk'); ok.setAttribute('aria-disabled',(both||(!d.pattern&&!d.material))?'false':'true');
+    ok.textContent=(!d.pattern&&!d.material&&trimOk(it.trim))?'Remove trim':'Apply';
+    $('smClear').hidden=!trimOk(it.trim);
+    const grid=(el,keys,idOf,labelOf,field)=>{
+      el.innerHTML='';
+      for(const k of keys){
+        const b=document.createElement('button'); b.type='button'; b.className='sm-opt'+(d[field]===k?' on':'');
+        b.setAttribute('aria-label',labelOf(k)); b.setAttribute('aria-pressed',String(d[field]===k)); b.title=labelOf(k);
+        b.append(mkIcon(idOf(k)));
+        b.addEventListener('click',()=>{ d[field]=d[field]===k?null:k; renderSmith() });
+        el.append(b);
+      }
+    };
+    grid($('smPats'),Object.keys(TRIM_PAT),tplId,k=>TRIM_PAT[k]+' Armor Trim','pattern');
+    grid($('smMats'),Object.keys(TRIM_MAT),k=>TRIM_MAT[k][1],k=>TRIM_MAT[k][0]+' Material','material');
+  }
+  function openSmith(){
+    const key=kb.sel, it=key&&getItem(key); if(!it||!isTrimmable(it.id)) return;
+    smFor=key; smDraft=trimOk(it.trim)?{pattern:it.trim.pattern,material:it.trim.material}:{pattern:null,material:null};
+    $('smDlg').classList.add('on'); updateLock(); renderSmith(); document.querySelector('#smDlg .sm-body').scrollTop=0;
+  }
+  function closeSmith(){ $('smDlg').classList.remove('on'); smFor=null; updateLock() }
+  function applySmith(){
+    const it=getItem(smFor), d=smDraft; if(!it){ closeSmith(); return }
+    if(d.pattern&&d.material) it.trim={pattern:d.pattern,material:d.material};
+    else if(!d.pattern&&!d.material) delete it.trim;
+    else return;                                   // only one half picked: nothing to apply yet
+    const key=smFor; closeSmith(); paintSlot(key); renderItemPanel(); renderControls();
+  }
+  $('smTpl').addEventListener('click',()=>{ smDraft.pattern=null; renderSmith() });
+  $('smMat').addEventListener('click',()=>{ smDraft.material=null; renderSmith() });
+  $('smOk').addEventListener('click',applySmith);
+  $('smCancel').addEventListener('click',closeSmith);
+  $('smClose').addEventListener('click',closeSmith);
+  $('smClear').addEventListener('click',()=>{ smDraft={pattern:null,material:null}; applySmith() });
+  $('smDlg').addEventListener('click',e=>{ if(e.target===$('smDlg')) closeSmith() });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&$('smDlg').classList.contains('on')) closeSmith() });
+
   // ----- export: .mcstructure -----
   // Layout copied from KitX's own kit files (see the example preset): a 5x3x3 structure holding two chest minecarts.
   //   ionyne_cart_main : slots 0-26 = kit inventory slots 0-26 (0-8 hotbar)
@@ -2151,11 +2272,13 @@
       const ench=Object.keys(it.ench||{}).filter(k=>k in ENCH_ID);
       // container contents: shulker box = tag.Items (with Slot), bundle = tag.storage_item_component_content (list order)
       const inner=isContainer(it.id)?Object.keys(it.contents||{}).map(Number).filter(i=>it.contents[i]).sort((a,b)=>a-b):[];
-      if(used||it.name||ench.length||inner.length){
+      const trim=trimOk(it.trim)?it.trim:null;
+      if(used||it.name||ench.length||inner.length||trim){
         comp('tag');
           if(used) tInt('Damage',used);
           if(it.name){ comp('display'); tStr('Name',it.name); u8(END) }
           if(ench.length){ listOf('ench',COMP,ench.length); for(const k of ench){ tShort('id',ENCH_ID[k]); tShort('lvl',it.ench[k]); u8(END) } }
+          if(trim){ comp('Trim'); tStr('Material',trim.material); tStr('Pattern',trim.pattern); u8(END) }
           if(inner.length){
             if(isShulker(it.id)){ listOf('Items',COMP,inner.length); for(const i of inner) writeItem(it.contents[i],i) }
             else { listOf('storage_item_component_content',COMP,inner.length); for(const i of inner) writeItem(it.contents[i],null) }
@@ -2236,7 +2359,7 @@
     rstr(); return val(10,0);
   }
   function kitFromStructure(root){
-    const w={items:0,inside:0,unknown:new Set(),ench:0,skipped:0,guessed:false};
+    const w={items:0,inside:0,unknown:new Set(),ench:0,trim:0,skipped:0,guessed:false};
     const toItem=(c,nested)=>{
       if(!c||typeof c.Name!=='string'||!c.Name||!(c.Count>0)) return null;
       const id=c.Name.replace(/^minecraft:/,''), tag=c.tag||{}, mx=maxDur(id), dmg=c.Damage|0;
@@ -2249,6 +2372,10 @@
       if(Array.isArray(tag.ench)){
         const e={}; for(const x of tag.ench){ const k=x&&ENCH_NAME[x.id]; if(k&&ENCH[k]&&x.lvl>0) e[k]=Math.min(x.lvl,MAXLVL); else w.ench++ }
         if(Object.keys(e).length) it.ench=e;
+      }
+      if(tag.Trim&&typeof tag.Trim==='object'){
+        const pt=String(tag.Trim.Pattern||'').replace(/^minecraft:/,''), mt=String(tag.Trim.Material||'').replace(/^minecraft:/,'');
+        if(trimOk({pattern:pt,material:mt})) it.trim={pattern:pt,material:mt}; else w.trim++;
       }
       if(isContainer(id)){
         const co={};
@@ -2293,6 +2420,7 @@
       if(w.guessed) extra.push('this file has no kit tags, so its first two chest minecarts were used');
       if(w.unknown.size) extra.push(w.unknown.size+' item id'+(w.unknown.size===1?' is':'s are')+' not in the item list (custom addon items?) and kept as they are');
       if(w.ench) extra.push(w.ench+' enchantment'+(w.ench===1?'':'s')+' could not be read and '+(w.ench===1?'was':'were')+' left out');
+      if(w.trim) extra.push(w.trim+' armor trim'+(w.trim===1?'':'s')+' could not be read and '+(w.trim===1?'was':'were')+' left out');
       if(w.skipped) extra.push(w.skipped+' item'+(w.skipped===1?'':'s')+' in unsupported slots '+(w.skipped===1?'was':'were')+' left out');
       xpSay(msg+(extra.length?' Note: '+extra.join('; ')+'.':''),extra.length?'':'ok');
     }catch(err){ xpSay('Could not import '+f.name+': '+err.message,'err') }
