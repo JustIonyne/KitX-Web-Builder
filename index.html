@@ -394,6 +394,26 @@
 .kxse-pat:hover{border-color:var(--accent)}
 .kxse-pat[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .kxse-pat[aria-pressed="true"] span{color:var(--text)}
+
+  /* addon patcher */
+  .ap-addon{border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:12px;margin-top:12px}
+  .ap-ah{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .ap-ah label{display:flex;gap:10px;align-items:center;margin:0;color:var(--text);min-width:0;overflow-wrap:anywhere}
+  .ap-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .ap-chip{font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+  .ap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin-top:8px}
+  .ap-tile{appearance:none;font:inherit;color:inherit;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;min-width:0}
+  .ap-tile:hover,.ap-tile:focus-visible{border-color:var(--accent);outline:none}
+  .ap-tile.off{opacity:.38}
+  .ap-ic{width:56px;height:56px;display:grid;place-items:center;background:var(--bg);border-radius:3px;font-size:9px;color:var(--mute);overflow:hidden}
+  .ap-ic img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+  .ap-nm{font-size:10px;line-height:1.2;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+  .ap-st{font-size:9px}
+  .ap-own{color:var(--good);font-style:normal}.ap-alias{color:var(--accent);font-style:normal}.ap-path{color:#f2b84b;font-style:normal}.ap-none{color:var(--bad);font-style:normal}
+  .ap-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--mute);margin-top:10px}
+  .ap-res{margin-top:12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:12px}
+  .ap-kit{margin-top:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:12px;overflow-wrap:anywhere}
+  .ap-addon details summary{cursor:pointer;color:var(--mute);font-size:10px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -411,7 +431,8 @@
   <div class="sep"></div>
   <a href="#kit-builder" data-route="kit-builder">1 · Kit Builder</a>
   <a href="#preset-builder" data-route="preset-builder">2 · Preset Builder</a>
-  <div class="item off" aria-disabled="true">3 · More tools <span class="tag">Soon</span></div>
+  <a href="#addon-patcher" data-route="addon-patcher">3 · Addon Patcher</a>
+  <div class="item off" aria-disabled="true">4 · More tools <span class="tag">Soon</span></div>
 </nav>
 
 <main class="wrap">
@@ -437,6 +458,7 @@
     <div class="grid2">
       <a class="tile" href="#kit-builder"><b>Kit Builder</b><span>Lay out a kit slot by slot and export it as a .mcstructure file.</span></a>
       <a class="tile" href="#preset-builder"><b>Preset Builder</b><span>Bundle kit files into a preset addon that you add next to KitX.</span></a>
+      <a class="tile" href="#addon-patcher" style="grid-column:1/-1"><b>Addon Patcher</b><span>Make KitX's item preview show the items and blocks of other addons.</span></a>
     </div>
 
     <div class="card" style="margin-top:16px">
@@ -561,6 +583,41 @@
       </div>
       <div id="status" role="status"></div>
       <p class="hint">Output is a <code>.mcaddon</code> with a fresh pack UUID and module UUID on every build, your kit files, and an index file of its own (unique per build, so it never clashes with another preset pack) that KitX uses to list the pack under the title you chose. Import it on your device, enable it in the world next to the main KitX addon, then use the Presets screen in KitX's Backup menu.</p>
+    </div>
+  </section>
+
+  <!-- ADDON PATCHER -->
+  <section class="page" id="page-addon-patcher" data-title="Addon Patcher">
+    <h2 class="title">Addon Patcher</h2>
+    <p class="sub">Make KitX draw the items and blocks of other addons in its item preview. Pick your KitX build and the addons you use, and download a patched KitX. Everything runs in your browser; nothing is uploaded anywhere.</p>
+
+    <div class="card">
+      <h3>1 · KitX addon</h3>
+      <button class="btn ghost" id="apKitBtn" type="button">Choose KitX (.mcaddon)</button>
+      <input id="apKitIn" type="file" hidden>
+      <div id="apKitInfo" class="hint">Use the newest KitX build.</div>
+    </div>
+
+    <div class="card">
+      <h3>2 · Addons to support</h3>
+      <button class="btn ghost" id="apAddBtn" type="button">+ Add addon (.mcaddon, .mcpack, .zip)</button>
+      <input id="apAddIn" type="file" multiple hidden>
+      <div id="apAddMsg" class="hint">Add as many as you like. Tap an item to leave it out. Items made only by script are not detected.</div>
+      <div class="ap-legend" id="apLegend" hidden>
+        <span><i class="ap-own">●</i> own icon baked in</span><span><i class="ap-alias">●</i> uses a KitX icon</span>
+        <span><i class="ap-path">●</i> game texture path</span><span><i class="ap-none">●</i> no icon found</span>
+      </div>
+      <div id="apAddons"></div>
+    </div>
+
+    <div class="card">
+      <h3>3 · Build</h3>
+      <label for="apTag">Name tag</label>
+      <input id="apTag" type="text" value="Addons" maxlength="24" autocomplete="off">
+      <p class="hint">The pack name becomes <code id="apNamePrev">KitX + Addons</code>. Both packs get new UUIDs. The version number stays the same, so your kit data carries over.</p>
+      <div class="actions"><button class="btn go" id="apBuild" type="button" disabled>Build patched KitX</button></div>
+      <div id="apStatus" role="status"></div>
+      <div id="apResult"></div>
     </div>
   </section>
 
@@ -880,7 +937,7 @@
   const $ = id => document.getElementById(id);
 
   // ---------- router + drawer ----------
-  const routes = ['home','kit-builder','preset-builder'];
+  const routes = ['home','kit-builder','preset-builder','addon-patcher'];
   const drawer=$('drawer'), scrim=$('scrim'), burger=$('burger');
   function setMenu(open){
     drawer.classList.toggle('on',open); scrim.classList.toggle('on',open);
@@ -2188,7 +2245,7 @@
   }
   // pixel icons in the top bar and menu
   $('barIc').append(mkIcon({id:'grass_block'}));
-  {const DR={home:'grass_block','kit-builder':'chest','preset-builder':'crafting_table'};
+  {const DR={home:'grass_block','kit-builder':'chest','preset-builder':'crafting_table','addon-patcher':'piston'};
    document.querySelectorAll('#drawer a[data-route]').forEach(a=>{const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:DR[a.dataset.route]||'chest'})); a.prepend(ic)});
    const off=document.querySelector('#drawer .item.off'); if(off){const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:'command_block'})); off.prepend(ic)}}
   function closePicker(){ $('picker').classList.remove('on'); document.body.classList.remove('lock') }
@@ -2807,6 +2864,230 @@
   });
 
   buildInv(); renderItemPanel(); renderControls();
+
+  // ---------- Addon Patcher ----------
+  // Adds the items / blocks of other addons to KitX's icon table so its item preview can draw them.
+  // Reuses this page's addon reader (collectZip, block3d, attach3d, vanillaGuess) and zip writer (makeZip).
+  (function(){
+    const td=new TextDecoder(), AP={kit:null,addons:[]};
+    const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const safe=s=>s.toLowerCase().replace(/[^a-z0-9_]+/g,'_');
+    const tail=p=>p?p.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null;
+    const dataBytes=u=>Uint8Array.from(atob(u.split(',')[1]),c=>c.charCodeAt(0));
+    const newUuid=()=>crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16)});
+    const LABEL={own:'own icon',alias:'KitX icon',path:'game path',none:'no icon'};
+
+    // a .mcaddon holds folders, or nested .mcpack files: read it into a tree that can be written back
+    async function loadTree(buf,depth=0){
+      const node={files:[]};
+      for(const f of await readZip(buf)){
+        const data=await f.data();
+        if(/\.(mcpack|zip)$/i.test(f.path)&&depth<3){try{node.files.push({path:f.path,sub:await loadTree(data.slice().buffer,depth+1)});continue}catch(e){}}
+        node.files.push({path:f.path,data});
+      }
+      return node;
+    }
+    function walk(node,fn){for(const e of node.files){if(e.sub)walk(e.sub,fn);else fn(node,e)}}
+    async function toFiles(node){
+      const out=[];
+      for(const e of node.files) out.push({name:e.path,data:e.sub?new Uint8Array(await makeZip(await toFiles(e.sub)).arrayBuffer()):e.data});
+      return out;
+    }
+    function findKit(tree){
+      let bp=null,rp=null;
+      walk(tree,(node,e)=>{
+        if(!/(^|\/)manifest\.json$/i.test(e.path))return;
+        let m;try{m=jsonc(td.decode(e.data))}catch(x){return}
+        const types=(m.modules||[]).map(x=>x.type), root=e.path.slice(0,e.path.length-'manifest.json'.length);
+        if(types.includes('resources')&&!rp)rp={node,root,m};
+        else if((types.includes('script')||types.includes('data'))&&!bp)bp={node,root,m};
+      });
+      if(!bp)throw new Error('No behavior pack found. Is this a KitX .mcaddon?');
+      const icons=bp.node.files.find(e=>!e.sub&&e.path.toLowerCase()===(bp.root+'scripts/item_icons.js').toLowerCase());
+      if(!icons)throw new Error('This KitX has no scripts/item_icons.js, so I do not know where its icons are listed.');
+      return {bp,rp,icons};
+    }
+    const MS='// ---- addon icons (added by KitX Addon Patcher) ----', ME='// ---- end addon icons ----';
+    function stripOld(src){const i=src.indexOf(MS);if(i<0)return src;const j=src.indexOf(ME,i);return j<0?src:src.slice(0,i).replace(/\n$/,'')+src.slice(j+ME.length)}
+    function parseIcons(src){
+      const a=src.search(/const ICONS\s*=\s*\{/); if(a<0)throw new Error('item_icons.js has no ICONS table I recognise.');
+      const end=src.indexOf('\n};',a); if(end<0)throw new Error('Could not find the end of the ICONS table.');
+      const map=new Map(), re=/^\s*"([^"]+)"\s*:\s*"([^"]+)"\s*,?\s*$/gm, body=src.slice(a,end); let m;
+      while((m=re.exec(body)))map.set(m[1],m[2]);
+      return map;
+    }
+    function patchIcons(src,entries){
+      src=stripOld(src);
+      const a=src.search(/const ICONS\s*=\s*\{/), end=src.indexOf('\n};',a);
+      const lines=entries.map(([k,v])=>' '+JSON.stringify(k)+': '+JSON.stringify(v)+',').join('\n');
+      return src.slice(0,end)+'\n'+MS+'\n'+lines+'\n'+ME+src.slice(end);
+    }
+    const tagName=(n,tag)=>{const m=/^(.*?)(\s+Resources)?$/.exec(n),base=m[1].replace(/\s*\+\s.*$/,'');return base+' + '+tag+(m[2]||'')};
+
+    // read one addon: every custom item / block with an icon (own texture, 3D render, or a stand-in for a game item)
+    async function scanAddon(file){
+      const files=new Map(); await collectZip(await file.arrayBuffer(),files,0);
+      const text=async f=>td.decode(await f.data());
+      const lang={};
+      for(const [k,f] of files) if(k==='texts/en_us.lang') for(const ln of (await text(f)).split(/\r?\n/)){const m=/^([^=#]+)=(.*?)(\t#.*)?$/.exec(ln); if(m) lang[m[1].trim()]=m[2].trim()}
+      const rj=async p=>{const f=files.get(p); if(!f) return null; try{return jsonc(await text(f))}catch(e){return null}};
+      const itex=await rj('textures/item_texture.json'), ttex=await rj('textures/terrain_texture.json');
+      const texRel=(d,s)=>{let t=d&&d.texture_data&&d.texture_data[s]&&d.texture_data[s].textures; if(Array.isArray(t)) t=t[0]; if(t&&typeof t==='object') t=t.path; return typeof t==='string'?t:null};
+      const cache={}, found=[];
+      for(const [k,f] of files){
+        const m=/^(items|blocks)\/.+\.json$/.exec(k); if(!m) continue;
+        let j; try{j=jsonc(await text(f))}catch(e){continue}
+        const def=j['minecraft:item']||j['minecraft:block'], id=def&&def.description&&def.description.identifier;
+        if(!id||!id.includes(':')||id.startsWith('minecraft:')||found.some(x=>x.id===id)) continue;
+        const c=def.components||{}; let rel=null, blk=null;
+        if(m[1]==='items'){ let ic=c['minecraft:icon']; if(ic&&typeof ic==='object') ic=ic.texture||(ic.textures&&ic.textures.default); if(typeof ic==='string') rel=texRel(itex,ic)||ic }
+        else{ const mi=c['minecraft:material_instances'], inst=mi&&(mi['*']||Object.values(mi)[0]), s=inst&&(typeof inst==='string'?inst:inst.texture); if(s) rel=texRel(ttex,s)||s; const gc=c['minecraft:geometry']; blk={mi:mi||{},geo:typeof gc==='string'?gc:gc&&gc.identifier,unit:!!c['minecraft:unit_cube']} }
+        let name=lang['item.'+id+'.name']||lang['item.'+id]||lang['tile.'+id+'.name']||lang['tile.'+id]||lang['block.'+id+'.name'];
+        const dn=c['minecraft:display_name']&&c['minecraft:display_name'].value; if(!name&&dn) name=lang[dn]||(/^[a-z_.:]+$/.test(dn)?null:dn);
+        found.push({id,name,rel,blk,dk:dn});
+      }
+      const ATT={};
+      for(const [k,f] of files){
+        if(!/^attachables\/.+\.json$/.test(k)) continue;
+        let j; try{j=jsonc(await text(f))}catch(e){continue}
+        const d=j['minecraft:attachable']&&j['minecraft:attachable'].description; if(!d||!d.identifier) continue;
+        const first=o=>o&&(o.default||Object.values(o)[0]);
+        const g=first(d.geometry), t=first(d.textures);
+        if(typeof g==='string'&&typeof t==='string'&&!ATT[d.identifier]) ATT[d.identifier]={geo:g,tex:t};
+      }
+      let gi=null; const getGi=async()=>gi||(gi=await geoIndex(files));
+      const items=[];
+      for(const x of found){
+        let icon=await loadTexture(x.rel,files,cache);
+        if(x.blk){ try{ icon=await block3d(x.blk,files,cache,ttex,getGi)||icon }catch(e){} }
+        else if(ATT[x.id]){
+          const rl=(x.rel||'').toLowerCase(), vg=vanillaGuess(x.id,x.dk,x.name);
+          if(!x.rel||/^textures\/(blocks|item\/blocks|nf_left|entity)\//.test(rl)){
+            if(vg) icon=null;      // stands for a game item: KitX already has its icon
+            else{ let i3=null; try{ i3=await attach3d(ATT[x.id],files,cache,getGi,false) }catch(e){} if(i3) icon=i3 }
+          }
+        }
+        items.push({id:x.id,name:x.name||prettyId(x.id.split(':')[1]),dk:x.dk,icon:icon||null,rel:x.rel,attTex:ATT[x.id]?ATT[x.id].tex:null,on:true});
+      }
+      return items;
+    }
+
+    // what the KitX icon table gets for one item
+    function resolve(it,icons){
+      if(it.icon) return {state:'own'};
+      if(icons){
+        const vg=vanillaGuess(it.id,it.dk,it.name);
+        if(vg){
+          let key=vg.like; if(!key&&vg.likeVar){const [b,n]=vg.likeVar.split(':'); key=BED_COLORS[+n]+'_'+b}
+          if(key&&icons.has(key)) return {state:'alias',path:icons.get(key),via:key};
+        }
+        const local=it.id.split(':')[1], cands=[local,local.replace(/_(offhand|proxy|item|icon|block|left|right)$/,''),tail(it.rel),tail(it.attTex)].filter(Boolean);
+        for(const c of cands) if(icons.has(c)) return {state:'alias',path:icons.get(c),via:c};
+      }
+      if(it.rel&&/^textures\//.test(it.rel)) return {state:'path',path:it.rel.replace(/\.(png|tga|jpe?g)$/i,'')};
+      return {state:'none'};
+    }
+
+    function renderKit(){
+      const k=AP.kit, el=$('apKitInfo');
+      if(!k){el.className='hint';el.textContent='Use the newest KitX build.';return}
+      el.className='ap-kit';
+      el.innerHTML='<b>'+esc(k.name)+'</b><div class="ap-chips"><span class="ap-chip ap-own">icon table found</span><span class="ap-chip">'+k.count+' item icons</span><span class="ap-chip">resource pack found</span>'+(k.patched?'<span class="ap-chip ap-path">already patched: old addon icons are replaced</span>':'')+'</div>';
+    }
+    function renderAddons(){
+      const icons=AP.kit&&AP.kit.icons; $('apLegend').hidden=!AP.addons.length;
+      $('apAddons').innerHTML=AP.addons.map((a,ai)=>{
+        const cnt={own:0,alias:0,path:0,none:0}; a.items.forEach(it=>{if(it.on)cnt[resolve(it,icons).state]++});
+        const tiles=a.items.map((it,ii)=>{
+          const r=resolve(it,icons);
+          return '<button type="button" class="ap-tile'+(it.on?'':' off')+'" data-a="'+ai+'" data-i="'+ii+'" aria-pressed="'+it.on+'" title="'+esc(it.id)+'">'
+            +'<span class="ap-ic">'+(it.icon?'<img alt="" src="'+it.icon+'">':(r.state==='alias'?'<span>'+esc(r.via)+'</span>':r.state==='path'?'<span>game</span>':'<span>?</span>'))+'</span>'
+            +'<span class="ap-nm">'+esc(it.name)+'</span><span class="ap-st ap-'+r.state+'">● '+LABEL[r.state]+'</span></button>';
+        }).join('');
+        return '<div class="ap-addon"><div class="ap-ah"><label><input type="checkbox" data-use="'+ai+'" '+(a.on?'checked':'')+'> '+esc(a.name)+'</label><button type="button" class="btn ghost" data-rm="'+ai+'">Remove</button></div>'
+          +'<div class="ap-chips"><span class="ap-chip">'+a.items.length+' item'+(a.items.length===1?'':'s')+'</span><span class="ap-chip ap-own">'+cnt.own+' own</span><span class="ap-chip">'+cnt.alias+' KitX</span><span class="ap-chip ap-path">'+cnt.path+' game path</span>'+(cnt.none?'<span class="ap-chip ap-none">'+cnt.none+' none</span>':'')+'</div>'
+          +'<details'+(a.items.length<=24?' open':'')+'><summary>Items</summary><div class="ap-grid">'+tiles+'</div></details></div>';
+      }).join('');
+      $('apBuild').disabled=!(AP.kit&&AP.addons.some(a=>a.on&&a.items.some(i=>i.on)));
+      namePrev();
+    }
+    function namePrev(){ $('apNamePrev').textContent=tagName(AP.kit?AP.kit.bpName:'KitX',$('apTag').value.trim()||'Addons') }
+    const say=(t,cls)=>{const s=$('apStatus');s.className=cls||'';s.style.color=cls==='bad'?'var(--bad)':'';s.textContent=t};
+
+    $('apKitBtn').onclick=()=>$('apKitIn').click();
+    $('apAddBtn').onclick=()=>$('apAddIn').click();
+    $('apTag').addEventListener('input',namePrev);
+    $('apKitIn').addEventListener('change',async e=>{
+      const f=e.target.files[0]; e.target.value=''; if(!f)return;
+      const el=$('apKitInfo'); el.className='hint'; el.textContent='Reading '+f.name+'…';
+      try{
+        const buf=await f.arrayBuffer(), kit=findKit(await loadTree(buf));
+        if(!kit.rp)throw new Error('No resource pack found in this file. KitX needs its resource pack to hold the new icons.');
+        const src=td.decode(kit.icons.data), icons=parseIcons(stripOld(src));
+        AP.kit={name:kit.bp.m.header.name+' ('+f.name+')',bpName:kit.bp.m.header.name,buf,icons,count:icons.size,patched:src.includes(MS),file:f.name};
+      }catch(err){AP.kit=null;el.className='warn';el.textContent=String(err.message||err);renderAddons();return}
+      renderKit();renderAddons();
+    });
+    $('apAddIn').addEventListener('change',async e=>{
+      const fl=[...e.target.files]; e.target.value=''; const msg=$('apAddMsg');
+      for(const f of fl){
+        msg.textContent='Reading '+f.name+'…';
+        try{
+          const items=await scanAddon(f), name=f.name.replace(/\.(mcaddon|mcpack|zip)$/i,'');
+          const old=AP.addons.findIndex(a=>a.name===name); if(old>=0)AP.addons.splice(old,1);
+          if(items.length)AP.addons.push({name,items,on:true});
+          msg.textContent=items.length?'Found '+items.length+' item'+(items.length===1?'':'s')+' in '+f.name+'.':'No custom items found in '+f.name+'. Only items and blocks defined in JSON are detected.';
+        }catch(err){msg.textContent='Could not read '+f.name+': '+(err.message||err)}
+      }
+      renderAddons();
+    });
+    $('apAddons').addEventListener('click',e=>{
+      const t=e.target.closest('.ap-tile'); if(t){const it=AP.addons[+t.dataset.a].items[+t.dataset.i];it.on=!it.on;renderAddons();return}
+      const r=e.target.closest('[data-rm]'); if(r){AP.addons.splice(+r.dataset.rm,1);renderAddons()}
+    });
+    $('apAddons').addEventListener('change',e=>{const u=e.target.closest('[data-use]'); if(u){AP.addons[+u.dataset.use].on=u.checked;renderAddons()}});
+
+    $('apBuild').addEventListener('click',async()=>{
+      const btn=$('apBuild'); btn.disabled=true; $('apResult').innerHTML='';
+      try{
+        say('Reading KitX…');
+        const tree=await loadTree(AP.kit.buf), kit=findKit(tree), tag=$('apTag').value.trim()||'Addons';
+        const pick=new Map(), add=[], missing=[], stat={own:0,alias:0,path:0,none:0};
+        for(const a of AP.addons){ if(!a.on)continue; for(const it of a.items){ if(!it.on)continue;
+          const r=resolve(it,AP.kit.icons); stat[r.state]++;
+          if(r.state==='own'){ const [ns,loc]=it.id.split(':'), p='textures/ui/kitx/addons/'+safe(ns)+'/'+safe(loc);
+            add.push({path:kit.rp.root+p+'.png',data:dataBytes(it.icon)}); pick.set(it.id,p) }
+          else if(r.state==='none') missing.push(it.id);
+          else pick.set(it.id,r.path);
+        }}
+        if(!pick.size)throw new Error('Nothing to add: every selected item has no icon.');
+        say('Adding '+pick.size+' icons…');
+        kit.icons.data=new TextEncoder().encode(patchIcons(td.decode(kit.icons.data),[...pick]));
+        for(const f of add){ const i=kit.rp.node.files.findIndex(e=>e.path===f.path); if(i>=0)kit.rp.node.files.splice(i,1); kit.rp.node.files.push({path:f.path,data:f.data}) }
+        say('Giving both packs new UUIDs…');
+        const mans=[]; walk(tree,(node,e)=>{ if(/(^|\/)manifest\.json$/i.test(e.path)){try{mans.push({e,m:jsonc(td.decode(e.data))})}catch(x){}} });
+        const map=new Map();
+        for(const {m} of mans){ if(m.header&&m.header.uuid)map.set(m.header.uuid,newUuid()); for(const mod of m.modules||[])if(mod.uuid)map.set(mod.uuid,newUuid()) }
+        for(const {e,m} of mans){
+          if(m.header){ if(map.has(m.header.uuid))m.header.uuid=map.get(m.header.uuid); if(m.header.name)m.header.name=tagName(m.header.name,tag) }
+          for(const mod of m.modules||[])if(map.has(mod.uuid))mod.uuid=map.get(mod.uuid);
+          for(const d of m.dependencies||[])if(d.uuid&&map.has(d.uuid))d.uuid=map.get(d.uuid);
+          e.data=new TextEncoder().encode(JSON.stringify(m,null,2));
+        }
+        say('Packing…');
+        const blob=makeZip(await toFiles(tree)), fileName=AP.kit.file.replace(/\.(mcaddon|zip)$/i,'')+'_'+safe(tag)+'.mcaddon';
+        const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fileName;
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+        say('Built '+fileName+' with '+pick.size+' icon'+(pick.size===1?'':'s')+'.','ok'); $('apStatus').className='ok';
+        $('apResult').innerHTML='<div class="ap-res"><div class="ap-chips" style="margin:0"><span class="ap-chip ap-own">'+stat.own+' own</span><span class="ap-chip">'+stat.alias+' KitX</span><span class="ap-chip ap-path">'+stat.path+' game path</span>'+(stat.none?'<span class="ap-chip ap-none">'+stat.none+' none</span>':'')+'</div>'
+          +'<p class="hint">Open the downloaded file in Minecraft to import it. The patched KitX has new UUIDs, so remove the old KitX from the world and enable this one.</p>'
+          +(missing.length?'<details><summary>'+missing.length+' item'+(missing.length===1?'':'s')+' without an icon (they show the ? icon)</summary><p class="hint">'+missing.map(m=>'<code>'+esc(m)+'</code>').join(' ')+'</p></details>':'')+'</div>';
+      }catch(err){console.error(err);say('Build failed: '+(err.message||err),'bad')}
+      btn.disabled=false;
+    });
+    renderKit(); renderAddons();
+  })();
+
 })();
 </script>
 </body>
