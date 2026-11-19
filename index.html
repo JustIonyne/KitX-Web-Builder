@@ -345,77 +345,55 @@
   #enchHint.custom{color:#d98a00}
 </style>
 <style id="kitx-shield-editor-css">
-/* ===== KitX shield / banner editor ===== */
-.kxse-back{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);padding:0;overscroll-behavior:contain}
-.kxse{--kx-bg:var(--card,#181b22);--kx-bg2:var(--bg,#0f1115);--kx-line:var(--line,#2a2f3a);--kx-text:var(--text,#e8eaf0);--kx-mute:var(--mute,#9aa3b2);--kx-accent:var(--accent,#5b8cff);
-  --s:6;box-sizing:border-box;display:flex;flex-direction:column;width:min(600px,100vw);height:min(100dvh,880px);max-height:100dvh;background:var(--kx-bg);color:var(--kx-text);
-  border:1px solid var(--kx-line);border-radius:14px;overflow:hidden;font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+/* ===== KitX shield / banner editor =====
+   Built from the page's own dialog pieces so it looks like Enchant / Rename: .dlg overlay, .dlg-card, .dlg-head, .x, the pixel .btn buttons,
+   the Vanilla switch (.vsw), .hint and the bordered rows (like .er). Only the layout of the editor itself is defined here. */
+.kxse-back{overscroll-behavior:contain}
+.kxse{--s:6;display:flex;flex-direction:column;max-width:480px;height:min(92dvh,860px);max-height:92dvh;overflow:hidden}
 .kxse *{box-sizing:border-box}
-@media (max-width:640px){.kxse-back{align-items:stretch}.kxse{width:100vw;height:100dvh;border-radius:0;border:0}}
+@media (max-width:520px){.kxse{--s:4}}
 @media (max-height:700px){.kxse{--s:4}}
-.kxse button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.kxse button:focus-visible,.kxse [tabindex]:focus-visible{outline:2px solid var(--kx-accent);outline-offset:2px}
-.kxse-head{flex:none;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--kx-line)}
-.kxse-head h2{margin:0;font-size:17px;font-weight:700;flex:1;min-width:0}
-.kxse-tog{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--kx-mute);cursor:pointer;user-select:none}
-.kxse-tog b{font-weight:600;color:#f0a53a}
-.kxse-sw{position:relative;width:42px;height:24px;border-radius:999px;border:1px solid var(--kx-line);background:var(--kx-bg2);padding:0;flex:none}
-.kxse-sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--kx-mute);transition:transform .15s,background .15s}
-.kxse-sw[aria-checked="true"]{border-color:var(--kx-accent);background:rgba(91,140,255,.18)}
-.kxse-sw[aria-checked="true"]::after{transform:translateX(18px);background:var(--kx-accent)}
-.kxse-sw:disabled{opacity:.45;cursor:not-allowed}
-.kxse-x{flex:none;width:40px;height:40px;border:0;border-radius:10px;background:transparent;font-size:20px;color:var(--kx-mute)}
-.kxse-x:hover{background:var(--kx-bg2);color:var(--kx-text)}
+.kxse button:focus-visible,.kxse [tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.kxse .dlg-head{flex:none}
+.kxse .vsw:disabled{opacity:.45;cursor:not-allowed}
+.kxse-hint{flex:none;margin:0 0 8px;min-height:30px}
+.kxse-hint.custom{color:#d98a00}
+.kxse .btn{padding:7px 10px 9px}
+.kxse .btn:active,.kxse .btn.ghost:active{padding:9px 10px 7px}
+.kxse .btn.ghost:active{padding:8px 10px}
 
-.kxse-top{flex:none;display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--kx-line)}
-.kxse-pv{flex:none;display:flex;flex-direction:column;align-items:center;gap:8px}
-.kxse-stage{display:grid;place-items:center;width:calc(var(--s)*1px*18);height:calc(var(--s)*1px*28);background:var(--kx-bg2);border:1px solid var(--kx-line);border-radius:10px}
+.kxse-top{flex:none;display:flex;gap:10px;margin-bottom:6px}
+.kxse-stage{flex:none;display:grid;place-items:center;width:calc(var(--s)*1px*18);height:calc(var(--s)*1px*28);background:var(--bg);border:1px solid var(--line);border-radius:3px}
 .kxse-stage canvas{image-rendering:pixelated;display:block}
-.kxse-seg{display:flex;border:1px solid var(--kx-line);border-radius:8px;overflow:hidden}
-.kxse-seg button{border:0;background:transparent;padding:5px 10px;font-size:12px;color:var(--kx-mute)}
-.kxse-seg button[aria-pressed="true"]{background:var(--kx-accent);color:#fff}
-.kxse-lay{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.kxse-lh{display:flex;align-items:center;gap:8px}
-.kxse-count{font-size:12px;color:var(--kx-mute);flex:1;white-space:nowrap}
-.kxse-count.full{color:#f0a53a}
-.kxse-btn{white-space:nowrap;border:1px solid var(--kx-line);background:var(--kx-bg2);border-radius:8px;padding:7px 11px;font-size:13px;font-weight:600}
-.kxse-btn:hover:not(:disabled){border-color:var(--kx-accent)}
-.kxse-btn:disabled{opacity:.45;cursor:not-allowed}
-.kxse-lh .kxse-btn{padding:6px 10px}
-.kxse-btn.ghost{background:transparent;color:var(--kx-mute);font-weight:500}
-.kxse-list{list-style:none;margin:0;padding:0;flex:1;min-height:0;max-height:calc(var(--s)*1px*28 - 38px);overflow:auto;border:1px solid var(--kx-line);border-radius:10px;background:var(--kx-bg2)}
-.kxse-empty{padding:14px;color:var(--kx-mute);font-size:13px}
-.kxse-layer{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 8px;border-bottom:1px solid var(--kx-line);cursor:pointer;min-height:44px}
-.kxse-layer:last-child{border-bottom:0}
-.kxse-layer.sel{background:rgba(91,140,255,.16);box-shadow:inset 3px 0 0 var(--kx-accent)}
+.kxse-lay{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.kxse-lh{display:flex;align-items:center;gap:6px}
+.kxse-count{flex:1;min-width:0;color:var(--mute);white-space:nowrap}
+.kxse-count.full{color:#d98a00}
+.kxse-list{list-style:none;margin:0 -4px;padding:0 4px;flex:1;min-height:0;max-height:calc(var(--s)*1px*28 - 38px);overflow:auto;-webkit-overflow-scrolling:touch}
+.kxse-empty{padding:10px;color:var(--mute);border:1px solid var(--line);border-radius:3px;background:var(--bg)}
+.kxse-layer{display:flex;align-items:center;gap:8px;padding:4px 4px 4px 8px;border:1px solid var(--line);border-radius:3px;margin-bottom:6px;background:var(--bg);cursor:pointer;min-height:44px}
+.kxse-layer.sel{border-color:var(--accent)}
 .kxse-layer canvas{flex:none;width:14px;height:28px;border-radius:2px;background:#2b2f3a}
-.kxse-layer .nm{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kxse-layer .nm small{display:block;color:var(--kx-mute);font-size:11px}
-.kxse-layer .dot{flex:none;width:16px;height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.35)}
-.kxse-ic{flex:none;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--kx-mute);font-size:15px;line-height:1}
-.kxse-ic:hover:not(:disabled){background:var(--kx-bg);color:var(--kx-text)}
+.kxse-layer .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kxse-layer .nm small{display:block;color:var(--mute);font-size:9px}
+.kxse-ic{appearance:none;flex:none;width:30px;height:30px;border:0;border-radius:3px;background:transparent;color:var(--mute);font-family:system-ui,sans-serif;font-size:14px;line-height:1;padding:0;cursor:pointer}
+.kxse-ic:hover:not(:disabled){background:var(--card);color:var(--text)}
 .kxse-ic:disabled{opacity:.25;cursor:default}
-.kxse-msg{min-height:16px;font-size:12px;color:#f0a53a}
+.kxse-msg{min-height:14px;color:#d98a00}
 
-.kxse-body{flex:1;min-height:0;overflow:auto;padding:4px 14px 14px;-webkit-overflow-scrolling:touch}
-.kxse-body h3{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--kx-mute);font-weight:700}
-.kxse-body h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8}
-.kxse-colors{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-.kxse-col{aspect-ratio:1;min-height:36px;border-radius:9px;border:2px solid rgba(0,0,0,.45);padding:0;position:relative}
-.kxse-col[aria-pressed="true"]{outline:3px solid var(--kx-accent);outline-offset:1px}
-.kxse-col[aria-pressed="true"]::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
-.kxse-col.lt[aria-pressed="true"]::after{color:#111;text-shadow:0 0 3px #fff}
-.kxse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px}
-.kxse-pat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 2px 5px;border:1px solid var(--kx-line);border-radius:9px;background:var(--kx-bg2);min-height:108px;position:relative}
+.kxse-body{flex:1;min-height:0;overflow:auto;margin:0 -4px;padding:0 4px 4px;-webkit-overflow-scrolling:touch}
+.kxse-body h3{margin:12px 0 6px;font-size:10px;font-weight:400;text-transform:uppercase;color:var(--mute)}
+.kxse-body h3 em{font-style:normal;text-transform:none}
+.kxse-colors{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.kxse-col{appearance:none;aspect-ratio:1;border-radius:2px;border:2px solid rgba(0,0,0,.45);padding:0;position:relative;cursor:pointer}
+.kxse-col[aria-pressed="true"]{outline:2px solid #fff;outline-offset:-2px;box-shadow:0 0 0 2px #000;z-index:2}
+.kxse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:6px}
+.kxse-pat{appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 2px 5px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--text);min-height:104px;position:relative;cursor:pointer}
 .kxse-pat canvas{width:32px;height:64px;border-radius:2px;display:block}
-.kxse-pat span{font-size:10px;line-height:1.15;color:var(--kx-mute);text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;padding:0 2px;min-height:23px}
-.kxse-pat:hover{border-color:var(--kx-accent)}
-.kxse-pat[aria-pressed="true"]{border-color:var(--kx-accent);background:rgba(91,140,255,.16)}
-.kxse-pat[aria-pressed="true"] span{color:var(--kx-text)}
-.kxse-foot{flex:none;display:flex;gap:10px;justify-content:flex-end;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--kx-line);background:var(--kx-bg)}
-.kxse-foot .kxse-btn{min-width:96px;padding:10px 14px}
-.kxse-foot .go{background:#3f9a38;border-color:#57b94e;color:#fff}
-.kxse-foot .go:hover{background:#49a942;border-color:#7dd374}
+.kxse-pat span{font-size:9px;line-height:1.2;color:var(--mute);text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;padding:0 2px;min-height:22px}
+.kxse-pat:hover{border-color:var(--accent)}
+.kxse-pat[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.kxse-pat[aria-pressed="true"] span{color:var(--text)}
 </style>
 </head>
 <body>
@@ -764,20 +742,21 @@
       sel: -1, color: 'white', loom: !!opts.loomLimit, max: opts.maxLayers || 16, loomMax: opts.loomMax || 6
     };
     var prevOverflow = document.documentElement.style.overflow;
-    var back = el('div', 'kxse-back');
-    var root = el('div', 'kxse'); root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'Banner editor');
+    var back = el('div', 'dlg on kxse-back');
+    var root = el('div', 'dlg-card kxse'); root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'Banner editor');
     root.innerHTML =
-      '<div class="kxse-head"><h2>Banner editor</h2>' +
-      '<label class="kxse-tog"><span>Loom limit <b>' + S.loomMax + '</b></span><button type="button" class="kxse-sw" role="switch" aria-checked="false" data-a="loom"></button></label>' +
-      '<button type="button" class="kxse-x" data-a="cancel" aria-label="Close">✕</button></div>' +
-      '<div class="kxse-top"><div class="kxse-pv"><div class="kxse-stage"><canvas data-r="pv"></canvas></div>' +
-      '</div>' +
+      '<div class="dlg-head"><b>Banner editor</b><div class="ench-tools">' +
+      '<button type="button" class="vsw" role="switch" aria-checked="true" aria-label="Vanilla layer limit" data-a="loom"><span class="vsw-l">Vanilla</span><span class="vsw-t"><span class="vsw-k"></span></span></button>' +
+      '<button type="button" class="x" data-a="cancel" aria-label="Close">×</button></div></div>' +
+      '<p class="hint kxse-hint" data-r="hint"></p>' +
+      '<div class="kxse-top"><div class="kxse-stage"><canvas data-r="pv"></canvas></div>' +
       '<div class="kxse-lay"><div class="kxse-lh"><span class="kxse-count" data-r="count"></span>' +
-      '<button type="button" class="kxse-btn ghost" data-a="clear">Clear</button><button type="button" class="kxse-btn" data-a="add">+ Add layer</button></div>' +
+      '<button type="button" class="btn" data-a="add">+ Add layer</button></div>' +
       '<ul class="kxse-list" data-r="list"></ul><div class="kxse-msg" data-r="msg" aria-live="polite"></div></div></div>' +
       '<div class="kxse-body" data-r="body"><h3>Base color</h3><div class="kxse-colors" data-r="base"></div>' +
       '<h3 data-r="lch">Layer color</h3><div class="kxse-colors" data-r="lcol"></div><div data-r="pats"></div></div>' +
-      '<div class="kxse-foot"><button type="button" class="kxse-btn" data-a="cancel">Cancel</button><button type="button" class="kxse-btn go" data-a="apply">Apply</button></div>';
+      '<div class="dlg-actions"><button type="button" class="btn ghost" data-a="clear" style="margin-right:auto">Clear</button>' +
+      '<button type="button" class="btn ghost" data-a="cancel">Cancel</button><button type="button" class="btn go" data-a="apply">Apply</button></div>';
     back.appendChild(root); document.body.appendChild(back); document.documentElement.style.overflow = 'hidden';
     function $(k) { return root.querySelector('[data-r="' + k + '"]'); }
     var R = { pv: $('pv'), count: $('count'), list: $('list'), msg: $('msg'), base: $('base'), lcol: $('lcol'), lch: $('lch'), pats: $('pats') }, msgT;
@@ -817,8 +796,12 @@
       R.count.textContent = n + ' / ' + lim + ' layers'; R.count.className = 'kxse-count' + (n >= lim ? ' full' : '');
       root.querySelector('[data-a="add"]').disabled = n >= lim;
       root.querySelector('[data-a="clear"]').disabled = n === 0;
-      var sw = root.querySelector('[data-a="loom"]'); sw.setAttribute('aria-checked', String(S.loom)); sw.setAttribute('aria-label', 'Loom limit of ' + S.loomMax + ' layers');
+      var sw = root.querySelector('[data-a="loom"]'); sw.setAttribute('aria-checked', String(S.loom)); sw.setAttribute('aria-label', 'Vanilla layer limit of ' + S.loomMax + ' layers');
       sw.disabled = !S.loom && n > S.loomMax; sw.title = sw.disabled ? 'Remove layers down to ' + S.loomMax + ' first' : '';
+      var hint = root.querySelector('[data-r="hint"]'); hint.className = 'hint kxse-hint' + (S.loom ? '' : ' custom');
+      hint.textContent = S.loom
+        ? 'Tap a pattern to add a layer, then pick its colour. Vanilla keeps the loom limit of ' + S.loomMax + ' layers.'
+        : 'Vanilla is off: up to ' + S.max + ' layers. Layers past ' + S.loomMax + ' can\'t be made in a loom and may not show in game.';
 
       R.list.innerHTML = '';
       if (!n) R.list.appendChild(el('li', 'kxse-empty', 'No layers yet. Tap a pattern below to add one.'));
