@@ -184,6 +184,31 @@
   .trimdot{position:absolute;top:3px;right:3px;width:8px;height:8px;border:1px solid #000;pointer-events:none;z-index:1}
   .ip-slot .trimdot{top:6px;right:6px;width:10px;height:10px}
   .ip-tip .t-pat{color:#a8a8a8;font-size:10px;white-space:pre}
+  /* banner / shield editor */
+  .bn-card{max-width:440px;display:flex;flex-direction:column;max-height:92vh}
+  .bn-top{flex:none;display:flex;gap:12px;align-items:flex-start;margin-bottom:6px}
+  .bn-prev{flex:none;display:grid;place-items:center;padding:8px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:3px}
+  .bn-prev img{display:block;height:auto;image-rendering:pixelated}
+  .bn-side{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  .bn-lh{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--mute)}
+  .bn-lh .btn{padding:6px 10px}
+  .bn-layers{height:158px;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:3px;background:rgba(0,0,0,.25)}
+  .bn-empty{padding:10px;color:var(--mute);font-size:10px}
+  .bn-row{display:flex;align-items:center;gap:4px;padding:3px 4px;border-bottom:1px solid var(--line)}
+  .bn-row.on{outline:2px solid var(--accent);outline-offset:-2px}
+  .bn-pick{appearance:none;flex:1;min-width:0;display:flex;align-items:center;gap:6px;padding:4px 2px;border:0;background:none;color:var(--text);font:inherit;font-size:10px;text-align:left;cursor:pointer}
+  .bn-chip{flex:none;width:12px;height:12px;border:1px solid #000}
+  .bn-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bn-mini{appearance:none;flex:none;width:22px;height:22px;padding:0;border:0;background:#4b4f5a;color:#fff;font:inherit;font-size:11px;line-height:1;cursor:pointer;box-shadow:inset 1px 1px 0 rgba(255,255,255,.22),inset -1px -2px 0 rgba(0,0,0,.38)}
+  .bn-mini[aria-disabled=true]{opacity:.35;cursor:not-allowed}
+  .bn-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+  .bn-sw{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+  .bn-sw button{appearance:none;aspect-ratio:1;padding:0;border:2px solid #000;cursor:pointer}
+  .bn-sw button.on,.bn-tile.on{outline:2px solid var(--accent);outline-offset:1px;z-index:1}
+  .bn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:5px}
+  .bn-tile{appearance:none;position:relative;padding:4px;border:0;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated;cursor:pointer}
+  .bn-tile img{display:block;width:100%;height:auto;image-rendering:pixelated}
+  .bn-sw button:focus-visible,.bn-tile:focus-visible,.bn-pick:focus-visible,.bn-mini:focus-visible{outline:2px solid #fff;outline-offset:1px}
   /* floating control strip: a small fixed toggle; opens to a slim strip of pixel-icon buttons */
   .ctl{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:25;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
   .ctl>*{pointer-events:auto}
@@ -605,6 +630,38 @@
   </div>
 </div>
 
+<div class="dlg" id="bnDlg" role="dialog" aria-modal="true" aria-labelledby="bnTitle">
+  <div class="dlg-card bn-card">
+    <div class="dlg-head"><b id="bnTitle">Banner editor</b>
+      <div class="ench-tools">
+        <button class="vsw" id="bnVanilla" type="button" role="switch" aria-checked="true" aria-label="Limit to 6 layers like the loom"><span class="vsw-l">Max 6</span><span class="vsw-t"><span class="vsw-k"></span></span></button>
+        <button class="x" id="bnClose" type="button" aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="bn-top">
+      <div class="bn-prev"><img id="bnPrev" alt="Preview"></div>
+      <div class="bn-side">
+        <div class="bn-lh"><span id="bnCount"></span><button class="btn" id="bnAdd" type="button">+ Add layer</button></div>
+        <div class="bn-layers" id="bnLayers" role="list" aria-label="Layers, top layer first"></div>
+      </div>
+    </div>
+    <p class="hint" id="bnHint" role="status" style="margin:0 0 4px;min-height:13px"></p>
+    <div class="bn-body">
+      <div class="sm-sec" style="margin-top:6px">Base color</div>
+      <div class="bn-sw" id="bnBase" role="group" aria-label="Base color"></div>
+      <div class="sm-sec">Layer color</div>
+      <div class="bn-sw" id="bnCol" role="group" aria-label="Color of the selected layer"></div>
+      <div class="sm-sec">Pattern</div>
+      <div class="bn-grid" id="bnPats" role="group" aria-label="Pattern of the selected layer"></div>
+    </div>
+    <div class="dlg-actions">
+      <button class="btn ghost" id="bnClear" type="button" style="margin-right:auto">Remove layers</button>
+      <button class="btn ghost" id="bnCancel" type="button">Cancel</button>
+      <button class="btn go" id="bnOk" type="button">Apply</button>
+    </div>
+  </div>
+</div>
+
 <footer>KitX · made by ionyne · <a data-discord target="_blank" rel="noopener" style="color:inherit">Discord</a></footer>
 
 <script>
@@ -898,8 +955,9 @@
   const hue=id=>{let h=0;for(const c of id)h=(h*31+c.charCodeAt(0))%360;return h};
   const mono=id=>{const w=id.split('_');return (w.length>1?w.map(x=>x[0]).join(''):id.slice(0,3)).slice(0,3).toUpperCase()};
   function mkIcon(x,aux){
-    if(x&&typeof x==='object'){ aux=x.aux; x=x.id }
+    let item=null; if(x&&typeof x==='object'){ item=x; aux=x.aux; x=x.id }
     const id=x, d=document.createElement('span'); d.className='ico';
+    if(item&&bnHasArt(item)){ d.style.cssText+=`background-image:url(${bnIcon(item)});background-size:contain;background-repeat:no-repeat;background-position:center;image-rendering:pixelated`; return d }
     const cu=CUSTOM[id];
     if(cu&&!cu.like){
       if(cu.icon){ d.style.cssText+=`background-image:url(${cu.icon});background-size:contain;background-repeat:no-repeat;background-position:center;image-rendering:pixelated` }
@@ -1099,6 +1157,11 @@
     const nm=document.createElement('div'); nm.className='t-name'; nm.append(mcFmt(it.name||(CUSTOM[it.id]&&CUSTOM[it.id].name)||itemLabel(it))); tip.append(nm);
     const e=it.ench||{}; Object.keys(e).forEach(k=>{ if(ENCH[k]) line('t-ench',ENCH[k][0]+((ENCH[k][1]>1||e[k]>1)?' '+roman(e[k]):'')) });
     if(trimOk(it.trim)){ line('t-hint','Upgrade:'); line('t-pat','  '+TRIM_PAT[it.trim.pattern]+' Armor Trim'); line('t-pat','  '+TRIM_MAT[it.trim.material][0]+' Material').style.color=TRIM_MAT[it.trim.material][2] }
+    if(it.id==='banner'||it.id==='shield'){
+      if(it.id==='shield'&&it.base!=null&&BN_COL[it.base]) line('t-pat','  Base: '+BN_COL[it.base][0]);
+      const ls=bnLayersOk(it.layers)?it.layers:[]; ls.slice(0,8).forEach(l=>line('t-pat','  '+BN_COL[l.c][0]+' '+BN_PAT[l.p][0]));
+      if(ls.length>8) line('t-pat','  +'+(ls.length-8)+' more');
+    }
     tip.append(Object.assign(document.createElement('div'),{className:'t-gap'}));
     tip.append(tipRow('Count',String(it.count)));
     if(mx){ const cur=it.dur==null?mx:it.dur; tip.append(tipRow('Durability',cur+' / '+mx), tipBar(cur/mx,'hsl('+Math.round(cur/mx*120)+',100%,50%)')) }
@@ -1147,6 +1210,12 @@
     trim:{p:{a:'#9fb3c8',c:'#ffd166'},g:[
       "..aa...aa..",".aaaa.aaaa.","aaaaaaaaaaa","aacccccccaa","aaaaaaaaaaa",
       ".aaaaaaaaa.",".aaaaaaaaa.",".aaaaaaaaa.","..aaaaaaa.."]},
+    banner:{p:{a:'#e8ecf4',c:'#e5484d',d:'#8a5a2b'},g:[
+      "ddddddddddd",".aaaaaaaaa.",".aaaaaaaaa.",".ccccccccc.",".ccccccccc.",
+      ".aaaaaaaaa.",".aaaaaaaaa.",".aaaaaaaaa.",".aaaaaaaaa.",".aaa...aaa."]},
+    shield:{p:{a:'#5b8cff',c:'#ffd166',d:'#8a5a2b'},g:[
+      ".ddddddddd.",".daaaaaaad.",".daaaaaaad.",".dcccccccd.",".dcccccccd.",
+      ".daaaaaaad.",".daaaaaaad.","..daaaaad..","...daaad...","....ddd...."]},
     tools:{p:{a:'#8791a5',c:'#e8eaf0'},g:[
       "..ccc......","aacccaaaaaa","..ccc......","...........",
       "......ccc..","aaaaaacccaa","......ccc..","...........",
@@ -1182,7 +1251,7 @@
   // label -> [icon, tooltip text]
   const CTL_MAP={'Add item':['add','Add item'],'Remove item':['remove','Remove item'],'Open':['open','Open container'],'Close':['close','Close container'],
     'Set Amount':['amount','Set amount'],'Enchant':['enchant','Enchant'],'Durability':['durability','Set durability'],'Rename':['rename','Rename'],
-    'Trim':['trim','Armor trim'],'Move':['move','Move'],'Duplicate':['dup','Duplicate'],'Cancel duplicate':['cancel','Cancel duplicate'],'Cancel move':['cancel','Cancel move']};
+    'Trim':['trim','Armor trim'],'Banner':['banner','Banner patterns'],'Shield':['shield','Shield patterns'],'Move':['move','Move'],'Duplicate':['dup','Duplicate'],'Cancel duplicate':['cancel','Cancel duplicate'],'Cancel move':['cancel','Cancel move']};
   function actBtn(label,fn){
     const m=CTL_MAP[label]||['tools',label], b=document.createElement('button'), tip=document.createElement('span');
     b.type='button'; b.className='ctl-b'; b.setAttribute('aria-label',m[1]);
@@ -1276,6 +1345,7 @@
       const en=actBtn('Enchant',openEnchant);
       box.append(en);
       if(isTrimmable(it.id)) box.append(actBtn('Trim',openSmith));
+      if(it.id==='banner') box.append(actBtn('Banner',openBanner)); else if(it.id==='shield') box.append(actBtn('Shield',openBanner));
       const du=actBtn('Durability',maxDur(it.id)?openDurability:null);
       if(!maxDur(it.id)) du.title='This item has no durability';
       box.append(du);
@@ -2167,6 +2237,156 @@
   $('nameDlg').addEventListener('click',e=>{ if(e.target===$('nameDlg')) closeRename() });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&nameOpen()) closeRename() });
 
+  // ----- banners and shields: layered patterns -----
+  // Item data: banner  -> it.aux = base colour, it.layers = [{p:'bo', c:14}, ...]        (bottom layer first)
+  //            shield  -> it.base = base colour, it.layers = [...]                       (no it.base = plain shield)
+  // Colours c / base use the game's item colour order: 0 white ... 15 black. In the file the pattern Color and the shield Base
+  // are written as 15 - c (black = 0 ... white = 15); change BN_NBT if the game ever shows swapped colours.
+  const BN_NBT=c=>15-c;
+  const BN_MAX_VANILLA=6, BN_MAX_FREE=16;           // loom limit / how many layers the editor allows with the limit switched off
+  const BN_COL=[['White','#f9fffe'],['Orange','#f9801d'],['Magenta','#c74ebd'],['Light Blue','#3ab3da'],['Yellow','#fed83d'],['Lime','#80c71f'],['Pink','#f38baa'],['Gray','#474f52'],
+    ['Light Gray','#9d9d97'],['Cyan','#169c9c'],['Purple','#8932b8'],['Blue','#3c44aa'],['Brown','#835432'],['Green','#5e7c16'],['Red','#b02e26'],['Black','#1d1d21']];
+  const bnSprite=(x0,y0,rows)=>(x,y)=>{const r=rows[y-y0];return r&&r[x-x0]==='X'?1:0};
+  const bnSpiral=(dir,rad,w)=>(x,y)=>{const dx=x+.5-10,dy=y+.5-20,r=Math.hypot(dx,dy); if(r>rad||r<1) return 0;
+    const t=Math.atan2(dy,dx), s=(((r/2.1-dir*t)%(2*Math.PI))+2*Math.PI)%(2*Math.PI); return s<w?1:0};
+  const bnEdge=(x,y)=>Math.min(x+.5,20-x-.5,y+.5,40-y-.5);
+  const bnChev=(x,y)=>{const a=16+1.8*Math.abs(x+.5-10); return y+.5>=a&&y+.5<a+8?1:0};
+  const bnSaw=(x,y)=>y+.5>=26+2*Math.abs(((x%10)+.5)-5)?1:0;
+  // code -> [name, mask(x, y) -> 0..1] on the 20 x 40 banner face. Shapes are close approximations of the game's pattern textures.
+  const BN_PAT={
+    hh:['Per Fess',(x,y)=>y<20],hhb:['Per Fess Inverted',(x,y)=>y>=20],vh:['Per Pale',(x,y)=>x<10],vhr:['Per Pale Inverted',(x,y)=>x>=10],
+    ts:['Chief',(x,y)=>y<7],bs:['Base',(x,y)=>y>=33],ls:['Pale Dexter',(x,y)=>x<7],rs:['Pale Sinister',(x,y)=>x>=13],cs:['Pale',(x,y)=>x>=7&&x<13],ms:['Fess',(x,y)=>y>=16&&y<24],
+    drs:['Bend',(x,y)=>Math.abs((x+.5)-(y+.5)/2)<3.2],dls:['Bend Sinister',(x,y)=>Math.abs((x+.5)-(20-(y+.5)/2))<3.2],
+    ss:['Paly',(x,y)=>[2,3,7,8,11,12,16,17].includes(x)],
+    cr:['Saltire',(x,y)=>Math.abs((x+.5)-(y+.5)/2)<3.2||Math.abs((x+.5)-(20-(y+.5)/2))<3.2],
+    sc:['Cross',(x,y)=>(x>=7&&x<13)||(y>=16&&y<24)],
+    ld:['Per Bend Sinister',(x,y)=>(x+.5)/20+(y+.5)/40<1],rud:['Per Bend Sinister Inverted',(x,y)=>(x+.5)/20+(y+.5)/40>=1],
+    rd:['Per Bend',(x,y)=>(y+.5)/40<(x+.5)/20],lud:['Per Bend Inverted',(x,y)=>(y+.5)/40>=(x+.5)/20],
+    tl:['Chief Dexter Canton',(x,y)=>x<8&&y<8],tr:['Chief Sinister Canton',(x,y)=>x>=12&&y<8],bl:['Base Dexter Canton',(x,y)=>x<8&&y>=32],br:['Base Sinister Canton',(x,y)=>x>=12&&y>=32],
+    tt:['Inverted Chevron',(x,y)=>bnChev(x,39-y)],bt:['Chevron',bnChev],tts:['Chief Indented',(x,y)=>bnSaw(x,39-y)],bts:['Base Indented',bnSaw],
+    mc:['Roundel',(x,y)=>Math.hypot(x+.5-10,y+.5-20)<5.5?1:0],mr:['Lozenge',(x,y)=>Math.abs(x+.5-10)/7+Math.abs(y+.5-20)/14<=1?1:0],
+    bo:['Bordure',(x,y)=>bnEdge(x,y)<3?1:0],
+    cbo:['Bordure Indented',(x,y)=>{const dx=Math.min(x+.5,20-x-.5),dy=Math.min(y+.5,40-y-.5),t=dx<dy?y+.5:x+.5;return Math.min(dx,dy)<2.5+2*Math.abs((t%8)-4)/4?1:0}],
+    bri:['Field Masoned',(x,y)=>(y%5===0)||((x+(Math.floor(y/5)%2)*5)%10===0)?1:0],
+    gra:['Gradient',(x,y)=>Math.round(Math.max(0,Math.min(1,1-(y+.5)/28))*4)/4],gru:['Base Gradient',(x,y)=>Math.round(Math.max(0,Math.min(1,1-(40-y-.5)/28))*4)/4],
+    flo:['Flower Charge',(x,y)=>{const cx=x+.5,cy=y+.5; if(Math.hypot(cx-10,cy-20)<1.7) return 0;
+      for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5; if(Math.hypot(cx-(10+4.6*Math.cos(a)),cy-(20+4.6*Math.sin(a)))<2.8) return 1} return 0}],
+    cre:['Creeper Charge',bnSprite(4,15,[".XXX....XXX.",".XXX....XXX.",".XXX....XXX.",".....XX.....","....XXXX....","...XXXXXX...","...XXXXXX...","...XX..XX...","...XX..XX..."])],
+    sku:['Skull Charge',bnSprite(4,15,["...XXXXXX...","..XXXXXXXX..",".XXXXXXXXXX.",".XX..XX..XX.",".XX..XX..XX.",".XXXXXXXXXX.","..XXX..XXX..","...XXXXXX...","...X.XX.X...","...XXXXXX..."])],
+    moj:['Thing',bnSprite(4,16,["XX........XX","XXX......XXX","XXXX....XXXX","XXXXX..XXXXX","XX.XXXXXX.XX","XX..XXXX..XX","XX...XX...XX","XX........XX"])],
+    glb:['Globe',(x,y)=>{const dx=x+.5-10,dy=y+.5-20,r=Math.hypot(dx,dy),e=Math.hypot(dx/3.5,dy/7);return (r>=5.5&&r<7.2)||(r<7.2&&Math.abs(dy)<.8)||(r<7.2&&e>.75&&e<1.25)?1:0}],
+    pig:['Snout',bnSprite(4,17,["XXXXXXXXXXXX","XXXXXXXXXXXX","XXX..XX..XXX","XXX..XX..XXX","XXXXXXXXXXXX","XXXXXXXXXXXX"])],
+    flw:['Flow',bnSpiral(-1,9.5,2.2)],gus:['Guster',bnSpiral(1,9.5,1.7)]
+  };
+  const BN_ORDER=['bs','ts','ls','rs','cs','ms','drs','dls','ss','cr','sc','ld','rud','lud','rd','vh','vhr','hh','hhb','bl','br','tl','tr','bt','tt','bts','tts','mc','mr','bo','cbo','bri','gra','gru','cre','sku','flo','moj','glb','pig','flw','gus'];
+  const bnHex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const bnCache={};
+  // kind: 'banner' (cloth on its bar), 'shield', or 'tile' (flat 20x40 face, used for the pattern pickers)
+  function bnRender(kind,base,layers,tile){
+    const key=kind+'|'+base+'|'+layers.map(l=>l.p+l.c).join(',')+(tile?'|'+tile:'');
+    if(bnCache[key]) return bnCache[key];
+    const baseRGB=tile?bnHex('#3a3c44'):bnHex(BN_COL[base][1]);
+    const face=(bx,by)=>{ let c=baseRGB.slice();
+      for(const l of layers){ const m=BN_PAT[l.p][1](bx,by); if(!m) continue; const rgb=tile?bnHex('#f2f3f7'):bnHex(BN_COL[l.c][1]); for(let i=0;i<3;i++) c[i]=c[i]*(1-m)+rgb[i]*m }
+      return c };
+    let W,H; if(kind==='shield'){W=36;H=56}else if(kind==='banner'){W=22;H=43}else{W=20;H=40}
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d'), img=ctx.createImageData(W,H);
+    const put=(x,y,c)=>{const o=(y*W+x)*4; img.data[o]=c[0];img.data[o+1]=c[1];img.data[o+2]=c[2];img.data[o+3]=255};
+    if(kind==='banner'){
+      for(let x=0;x<W;x++) for(let y=0;y<3;y++) put(x,y,y===0?[0x9a,0x72,0x42]:[0x6e,0x4d,0x27]);
+      for(let by=0;by<40;by++) for(let bx=0;bx<20;bx++) put(bx+1,by+3,face(bx,by));
+    }else if(kind==='tile'){
+      for(let by=0;by<40;by++) for(let bx=0;bx<20;bx++) put(bx,by,face(bx,by));
+    }else{ // shield: heater-ish silhouette, wooden rim, pattern on the inside (drawn at 2x so round patterns stay round)
+      const ins=(x,y)=>{ const u=(x+.5)/2,v=(y+.5)/2; if(u<1||u>17||v<1||v>27) return false; if(v>=21){const k=6-Math.sqrt(36-(v-20)*(v-20)); return u>=1+k&&u<=17-k} return true };
+      const er=f=>(x,y)=>f(x,y)&&f(x-2,y)&&f(x+2,y)&&f(x,y-2)&&f(x,y+2);
+      const inner=er(er(ins)); let x0=99,y0=99,x1=0,y1=0;
+      for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(inner(x,y)){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}
+      for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+        if(inner(x,y)) put(x,y,face(Math.min(19,Math.floor((x-x0)/(x1-x0+1)*20)),Math.min(39,Math.floor((y-y0)/(y1-y0+1)*40))));
+        else if(ins(x,y)) put(x,y,(((x>>1)+(y>>1))&1)?[0x8a,0x6a,0x3a]:[0x7c,0x5e,0x33]);
+        else if(ins(x-1,y)||ins(x+1,y)||ins(x,y-1)||ins(x,y+1)) put(x,y,[0x2b,0x1d,0x0e]);
+      }
+    }
+    ctx.putImageData(img,0,0); return bnCache[key]=cv.toDataURL();
+  }
+  function bnHasArt(it){ return !!it&&((it.id==='banner'&&it.layers&&it.layers.length>0)||(it.id==='shield'&&(it.base!=null||(it.layers&&it.layers.length>0)))) }   // function declarations: mkIcon runs before this block does
+  function bnIcon(it){ return it.id==='shield'?bnRender('shield',it.base==null?0:it.base,it.layers||[]):bnRender('banner',it.aux||0,it.layers||[]) }
+  function bnLayersOk(a){ return Array.isArray(a)&&a.every(l=>l&&own(BN_PAT,l.p)&&Number.isInteger(l.c)&&l.c>=0&&l.c<=15) }
+
+  let bnFor=null, bnD=null, bnVan=true;
+  const bnMaxN=()=>bnVan?BN_MAX_VANILLA:BN_MAX_FREE;
+  const bnSay=t=>{ $('bnHint').textContent=t||'' };
+  function renderBn(){
+    const d=bnD, it=getItem(bnFor); if(!it){ closeBn(); return }
+    const max=bnMaxN(), n=d.layers.length;
+    const img=$('bnPrev'); img.src=bnRender(d.shield?'shield':'banner',d.base,d.layers); img.style.width=(d.shield?108:88)+'px';
+    $('bnCount').textContent=n+' / '+max+' layer'+(max===1?'':'s');
+    $('bnAdd').setAttribute('aria-disabled',n>=max?'true':'false');
+    $('bnClear').hidden=!n;
+    const list=$('bnLayers'); list.innerHTML='';
+    if(!n){ const e=document.createElement('div'); e.className='bn-empty'; e.textContent='No layers yet. Add one, or tap a pattern below.'; list.append(e) }
+    for(let i=n-1;i>=0;i--){
+      const l=d.layers[i], row=document.createElement('div'); row.className='bn-row'+(i===d.sel?' on':''); row.setAttribute('role','listitem');
+      const pick=document.createElement('button'); pick.type='button'; pick.className='bn-pick'; pick.setAttribute('aria-pressed',String(i===d.sel));
+      const chip=document.createElement('span'); chip.className='bn-chip'; chip.style.background=BN_COL[l.c][1];
+      const nm=document.createElement('span'); nm.className='bn-name'; nm.textContent=BN_COL[l.c][0]+' '+BN_PAT[l.p][0]; pick.append(chip,nm);
+      pick.addEventListener('click',()=>{ d.sel=i; bnSay(''); renderBn() });
+      const mini=(txt,label,dis,fn)=>{ const b=document.createElement('button'); b.type='button'; b.className='bn-mini'; b.textContent=txt; b.setAttribute('aria-label',label);
+        if(dis) b.setAttribute('aria-disabled','true'); else b.addEventListener('click',fn); return b };
+      row.append(pick,
+        mini('↑','Move layer up',i===n-1,()=>{ [d.layers[i],d.layers[i+1]]=[d.layers[i+1],d.layers[i]]; d.sel=i+1; renderBn() }),
+        mini('↓','Move layer down',i===0,()=>{ [d.layers[i],d.layers[i-1]]=[d.layers[i-1],d.layers[i]]; d.sel=i-1; renderBn() }),
+        mini('×','Delete layer',false,()=>{ d.layers.splice(i,1); d.sel=Math.min(d.sel>i?d.sel-1:d.sel,d.layers.length-1); renderBn() }));
+      list.append(row);
+    }
+    const sw=(el,on,pickFn)=>{ el.innerHTML=''; BN_COL.forEach(([name,hex],c)=>{ const b=document.createElement('button'); b.type='button'; b.style.background=hex;
+      b.setAttribute('aria-label',name); b.title=name; b.setAttribute('aria-pressed',String(on(c))); if(on(c)) b.className='on'; b.addEventListener('click',()=>pickFn(c)); el.append(b) }) };
+    sw($('bnBase'),c=>d.base===c&&d.baseSet,c=>{ d.base=c; d.baseSet=true; bnSay(''); renderBn() });
+    sw($('bnCol'),c=>d.sel>=0&&d.layers[d.sel].c===c,c=>{ if(d.sel<0){ bnSay('Add a layer first, then pick its color.'); return } d.layers[d.sel].c=c; bnSay(''); renderBn() });
+    const pats=$('bnPats'); pats.innerHTML='';
+    for(const code of BN_ORDER){
+      const b=document.createElement('button'); b.type='button'; b.className='bn-tile'+(d.sel>=0&&d.layers[d.sel].p===code?' on':''); b.title=BN_PAT[code][0]; b.setAttribute('aria-label',BN_PAT[code][0]);
+      b.setAttribute('aria-pressed',String(d.sel>=0&&d.layers[d.sel].p===code));
+      const im=new Image(); im.alt=''; im.src=bnRender('tile',0,[{p:code,c:0}],'t'); b.append(im);
+      b.addEventListener('click',()=>{
+        if(d.sel>=0){ d.layers[d.sel].p=code; bnSay(BN_PAT[code][0]) }
+        else if(d.layers.length<max){ d.layers.push({p:code,c:d.base===15?0:15}); d.sel=d.layers.length-1; d.baseSet=true; bnSay(BN_PAT[code][0]) }
+        renderBn();
+      });
+      pats.append(b);
+    }
+  }
+  function openBanner(){
+    const key=kb.sel, it=key&&getItem(key); if(!it||(it.id!=='banner'&&it.id!=='shield')) return;
+    const shield=it.id==='shield', ls=bnLayersOk(it.layers)?it.layers:[];
+    bnFor=key; bnD={shield,base:shield?(it.base!=null?it.base:0):(it.aux||0),baseSet:shield?it.base!=null:true,layers:ls.map(l=>({p:l.p,c:l.c})),sel:ls.length-1};
+    bnVan=ls.length<=BN_MAX_VANILLA; $('bnVanilla').setAttribute('aria-checked',String(bnVan));
+    $('bnTitle').textContent=shield?'Shield editor':'Banner editor'; bnSay('');
+    $('bnDlg').classList.add('on'); updateLock(); renderBn(); document.querySelector('#bnDlg .bn-body').scrollTop=0;
+  }
+  function closeBn(){ $('bnDlg').classList.remove('on'); bnFor=null; updateLock() }
+  function applyBn(){
+    const it=getItem(bnFor), d=bnD; if(!it){ closeBn(); return }
+    if(d.shield){ if(d.baseSet||d.layers.length) it.base=d.base; else delete it.base } else it.aux=d.base;
+    if(d.layers.length) it.layers=d.layers.map(l=>({p:l.p,c:l.c})); else delete it.layers;
+    const key=bnFor; closeBn(); paintSlot(key); renderItemPanel(); renderControls();
+  }
+  $('bnAdd').addEventListener('click',()=>{
+    const d=bnD; if(d.layers.length>=bnMaxN()){ bnSay(bnVan?'That is the 6 layer limit. Switch off "Max 6" to add more.':'That is the editor limit of '+BN_MAX_FREE+' layers.'); return }
+    d.layers.push({p:'bs',c:d.sel>=0?d.layers[d.sel].c:(d.base===15?0:15)}); d.sel=d.layers.length-1; d.baseSet=true; bnSay(''); renderBn();
+  });
+  $('bnVanilla').addEventListener('click',()=>{
+    if(bnVan){ bnVan=false } else if(bnD.layers.length>BN_MAX_VANILLA){ bnSay('Remove layers above '+BN_MAX_VANILLA+' first.'); return } else bnVan=true;
+    $('bnVanilla').setAttribute('aria-checked',String(bnVan)); bnSay(''); renderBn();
+  });
+  $('bnClear').addEventListener('click',()=>{ bnD.layers=[]; bnD.sel=-1; bnSay(''); renderBn() });
+  $('bnOk').addEventListener('click',applyBn);
+  $('bnCancel').addEventListener('click',closeBn);
+  $('bnClose').addEventListener('click',closeBn);
+  $('bnDlg').addEventListener('click',e=>{ if(e.target===$('bnDlg')) closeBn() });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&$('bnDlg').classList.contains('on')) closeBn() });
+
   // ----- smithing table: armor trims -----
   // Stored on the item as it.trim = {pattern, material}; written to the file as tag.Trim {Pattern, Material} (strings).
   const TRIM_PAT={sentry:'Sentry',dune:'Dune',coast:'Coast',wild:'Wild',ward:'Ward',eye:'Eye',vex:'Vex',tide:'Tide',snout:'Snout',rib:'Rib',spire:'Spire',
@@ -2273,12 +2493,17 @@
       // container contents: shulker box = tag.Items (with Slot), bundle = tag.storage_item_component_content (list order)
       const inner=isContainer(it.id)?Object.keys(it.contents||{}).map(Number).filter(i=>it.contents[i]).sort((a,b)=>a-b):[];
       const trim=trimOk(it.trim)?it.trim:null;
-      if(used||it.name||ench.length||inner.length||trim){
+      const bnL=(it.id==='banner'||it.id==='shield')&&bnLayersOk(it.layers)?it.layers:[];
+      const shBase=it.id==='shield'&&Number.isInteger(it.base)&&it.base>=0&&it.base<=15?it.base:null, bType=it.id==='banner'&&it.btype>0?it.btype|0:0;
+      if(used||it.name||ench.length||inner.length||trim||bnL.length||shBase!==null||bType){
         comp('tag');
           if(used) tInt('Damage',used);
           if(it.name){ comp('display'); tStr('Name',it.name); u8(END) }
           if(ench.length){ listOf('ench',COMP,ench.length); for(const k of ench){ tShort('id',ENCH_ID[k]); tShort('lvl',it.ench[k]); u8(END) } }
           if(trim){ comp('Trim'); tStr('Material',trim.material); tStr('Pattern',trim.pattern); u8(END) }
+          if(shBase!==null) tInt('Base',BN_NBT(shBase));
+          if(bType) tInt('Type',bType);
+          if(bnL.length||shBase!==null){ listOf('Patterns',COMP,bnL.length); for(const l of bnL){ tInt('Color',BN_NBT(l.c)); tStr('Pattern',l.p); u8(END) } }
           if(inner.length){
             if(isShulker(it.id)){ listOf('Items',COMP,inner.length); for(const i of inner) writeItem(it.contents[i],i) }
             else { listOf('storage_item_component_content',COMP,inner.length); for(const i of inner) writeItem(it.contents[i],null) }
@@ -2359,7 +2584,7 @@
     rstr(); return val(10,0);
   }
   function kitFromStructure(root){
-    const w={items:0,inside:0,unknown:new Set(),ench:0,trim:0,skipped:0,guessed:false};
+    const w={items:0,inside:0,unknown:new Set(),ench:0,trim:0,bn:0,skipped:0,guessed:false};
     const toItem=(c,nested)=>{
       if(!c||typeof c.Name!=='string'||!c.Name||!(c.Count>0)) return null;
       const id=c.Name.replace(/^minecraft:/,''), tag=c.tag||{}, mx=maxDur(id), dmg=c.Damage|0;
@@ -2376,6 +2601,15 @@
       if(tag.Trim&&typeof tag.Trim==='object'){
         const pt=String(tag.Trim.Pattern||'').replace(/^minecraft:/,''), mt=String(tag.Trim.Material||'').replace(/^minecraft:/,'');
         if(trimOk({pattern:pt,material:mt})) it.trim={pattern:pt,material:mt}; else w.trim++;
+      }
+      if(id==='banner'||id==='shield'){
+        if(Array.isArray(tag.Patterns)){
+          const ls=[]; for(const x of tag.Patterns){ const c=x&&Number.isInteger(x.Color)?15-x.Color:-1, pc=x&&typeof x.Pattern==='string'?x.Pattern:'';
+            if(c>=0&&c<=15&&own(BN_PAT,pc)) ls.push({p:pc,c}); else w.bn++ }
+          if(ls.length) it.layers=ls;
+        }
+        if(id==='shield'&&Number.isInteger(tag.Base)&&tag.Base>=0&&tag.Base<=15) it.base=15-tag.Base;
+        if(id==='banner'&&tag.Type>0) it.btype=tag.Type|0;
       }
       if(isContainer(id)){
         const co={};
@@ -2421,6 +2655,7 @@
       if(w.unknown.size) extra.push(w.unknown.size+' item id'+(w.unknown.size===1?' is':'s are')+' not in the item list (custom addon items?) and kept as they are');
       if(w.ench) extra.push(w.ench+' enchantment'+(w.ench===1?'':'s')+' could not be read and '+(w.ench===1?'was':'were')+' left out');
       if(w.trim) extra.push(w.trim+' armor trim'+(w.trim===1?'':'s')+' could not be read and '+(w.trim===1?'was':'were')+' left out');
+      if(w.bn) extra.push(w.bn+' banner layer'+(w.bn===1?'':'s')+' could not be read and '+(w.bn===1?'was':'were')+' left out');
       if(w.skipped) extra.push(w.skipped+' item'+(w.skipped===1?'':'s')+' in unsupported slots '+(w.skipped===1?'was':'were')+' left out');
       xpSay(msg+(extra.length?' Note: '+extra.join('; ')+'.':''),extra.length?'':'ok');
     }catch(err){ xpSay('Could not import '+f.name+': '+err.message,'err') }
