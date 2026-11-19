@@ -184,31 +184,6 @@
   .trimdot{position:absolute;top:3px;right:3px;width:8px;height:8px;border:1px solid #000;pointer-events:none;z-index:1}
   .ip-slot .trimdot{top:6px;right:6px;width:10px;height:10px}
   .ip-tip .t-pat{color:#a8a8a8;font-size:10px;white-space:pre}
-  /* banner / shield editor */
-  .bn-card{max-width:440px;display:flex;flex-direction:column;max-height:92vh}
-  .bn-top{flex:none;display:flex;gap:12px;align-items:flex-start;margin-bottom:6px}
-  .bn-prev{flex:none;display:grid;place-items:center;padding:8px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:3px}
-  .bn-prev img{display:block;height:auto;image-rendering:pixelated}
-  .bn-side{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
-  .bn-lh{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--mute)}
-  .bn-lh .btn{padding:6px 10px}
-  .bn-layers{height:158px;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:3px;background:rgba(0,0,0,.25)}
-  .bn-empty{padding:10px;color:var(--mute);font-size:10px}
-  .bn-row{display:flex;align-items:center;gap:4px;padding:3px 4px;border-bottom:1px solid var(--line)}
-  .bn-row.on{outline:2px solid var(--accent);outline-offset:-2px}
-  .bn-pick{appearance:none;flex:1;min-width:0;display:flex;align-items:center;gap:6px;padding:4px 2px;border:0;background:none;color:var(--text);font:inherit;font-size:10px;text-align:left;cursor:pointer}
-  .bn-chip{flex:none;width:12px;height:12px;border:1px solid #000}
-  .bn-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .bn-mini{appearance:none;flex:none;width:22px;height:22px;padding:0;border:0;background:#4b4f5a;color:#fff;font:inherit;font-size:11px;line-height:1;cursor:pointer;box-shadow:inset 1px 1px 0 rgba(255,255,255,.22),inset -1px -2px 0 rgba(0,0,0,.38)}
-  .bn-mini[aria-disabled=true]{opacity:.35;cursor:not-allowed}
-  .bn-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
-  .bn-sw{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
-  .bn-sw button{appearance:none;aspect-ratio:1;padding:0;border:2px solid #000;cursor:pointer}
-  .bn-sw button.on,.bn-tile.on{outline:2px solid var(--accent);outline-offset:1px;z-index:1}
-  .bn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:5px}
-  .bn-tile{appearance:none;position:relative;padding:4px;border:0;background:var(--t-slot) center/100% 100% no-repeat;image-rendering:pixelated;cursor:pointer}
-  .bn-tile img{display:block;width:100%;height:auto;image-rendering:pixelated}
-  .bn-sw button:focus-visible,.bn-tile:focus-visible,.bn-pick:focus-visible,.bn-mini:focus-visible{outline:2px solid #fff;outline-offset:1px}
   /* floating control strip: a small fixed toggle; opens to a slim strip of pixel-icon buttons */
   .ctl{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:25;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none}
   .ctl>*{pointer-events:auto}
@@ -368,6 +343,79 @@
   .vsw[aria-checked=true] .vsw-k{left:25px}
   .vsw:focus-visible .vsw-t{outline:2px solid var(--accent);outline-offset:2px}
   #enchHint.custom{color:#d98a00}
+</style>
+<style id="kitx-shield-editor-css">
+/* ===== KitX shield / banner editor ===== */
+.kxse-back{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);padding:0;overscroll-behavior:contain}
+.kxse{--kx-bg:var(--card,#181b22);--kx-bg2:var(--bg,#0f1115);--kx-line:var(--line,#2a2f3a);--kx-text:var(--text,#e8eaf0);--kx-mute:var(--mute,#9aa3b2);--kx-accent:var(--accent,#5b8cff);
+  --s:6;box-sizing:border-box;display:flex;flex-direction:column;width:min(600px,100vw);height:min(100dvh,880px);max-height:100dvh;background:var(--kx-bg);color:var(--kx-text);
+  border:1px solid var(--kx-line);border-radius:14px;overflow:hidden;font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.kxse *{box-sizing:border-box}
+@media (max-width:640px){.kxse-back{align-items:stretch}.kxse{width:100vw;height:100dvh;border-radius:0;border:0}}
+@media (max-height:700px){.kxse{--s:4}}
+.kxse button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.kxse button:focus-visible,.kxse [tabindex]:focus-visible{outline:2px solid var(--kx-accent);outline-offset:2px}
+.kxse-head{flex:none;display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--kx-line)}
+.kxse-head h2{margin:0;font-size:17px;font-weight:700;flex:1;min-width:0}
+.kxse-tog{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--kx-mute);cursor:pointer;user-select:none}
+.kxse-tog b{font-weight:600;color:#f0a53a}
+.kxse-sw{position:relative;width:42px;height:24px;border-radius:999px;border:1px solid var(--kx-line);background:var(--kx-bg2);padding:0;flex:none}
+.kxse-sw::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--kx-mute);transition:transform .15s,background .15s}
+.kxse-sw[aria-checked="true"]{border-color:var(--kx-accent);background:rgba(91,140,255,.18)}
+.kxse-sw[aria-checked="true"]::after{transform:translateX(18px);background:var(--kx-accent)}
+.kxse-sw:disabled{opacity:.45;cursor:not-allowed}
+.kxse-x{flex:none;width:40px;height:40px;border:0;border-radius:10px;background:transparent;font-size:20px;color:var(--kx-mute)}
+.kxse-x:hover{background:var(--kx-bg2);color:var(--kx-text)}
+
+.kxse-top{flex:none;display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--kx-line)}
+.kxse-pv{flex:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+.kxse-stage{display:grid;place-items:center;width:calc(var(--s)*1px*18);height:calc(var(--s)*1px*28);background:var(--kx-bg2);border:1px solid var(--kx-line);border-radius:10px}
+.kxse-stage canvas{image-rendering:pixelated;display:block}
+.kxse-seg{display:flex;border:1px solid var(--kx-line);border-radius:8px;overflow:hidden}
+.kxse-seg button{border:0;background:transparent;padding:5px 10px;font-size:12px;color:var(--kx-mute)}
+.kxse-seg button[aria-pressed="true"]{background:var(--kx-accent);color:#fff}
+.kxse-lay{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.kxse-lh{display:flex;align-items:center;gap:8px}
+.kxse-count{font-size:12px;color:var(--kx-mute);flex:1;white-space:nowrap}
+.kxse-count.full{color:#f0a53a}
+.kxse-btn{white-space:nowrap;border:1px solid var(--kx-line);background:var(--kx-bg2);border-radius:8px;padding:7px 11px;font-size:13px;font-weight:600}
+.kxse-btn:hover:not(:disabled){border-color:var(--kx-accent)}
+.kxse-btn:disabled{opacity:.45;cursor:not-allowed}
+.kxse-lh .kxse-btn{padding:6px 10px}
+.kxse-btn.ghost{background:transparent;color:var(--kx-mute);font-weight:500}
+.kxse-list{list-style:none;margin:0;padding:0;flex:1;min-height:0;max-height:calc(var(--s)*1px*28 - 38px);overflow:auto;border:1px solid var(--kx-line);border-radius:10px;background:var(--kx-bg2)}
+.kxse-empty{padding:14px;color:var(--kx-mute);font-size:13px}
+.kxse-layer{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 8px;border-bottom:1px solid var(--kx-line);cursor:pointer;min-height:44px}
+.kxse-layer:last-child{border-bottom:0}
+.kxse-layer.sel{background:rgba(91,140,255,.16);box-shadow:inset 3px 0 0 var(--kx-accent)}
+.kxse-layer canvas{flex:none;width:14px;height:28px;border-radius:2px;background:#2b2f3a}
+.kxse-layer .nm{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kxse-layer .nm small{display:block;color:var(--kx-mute);font-size:11px}
+.kxse-layer .dot{flex:none;width:16px;height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.35)}
+.kxse-ic{flex:none;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--kx-mute);font-size:15px;line-height:1}
+.kxse-ic:hover:not(:disabled){background:var(--kx-bg);color:var(--kx-text)}
+.kxse-ic:disabled{opacity:.25;cursor:default}
+.kxse-msg{min-height:16px;font-size:12px;color:#f0a53a}
+
+.kxse-body{flex:1;min-height:0;overflow:auto;padding:4px 14px 14px;-webkit-overflow-scrolling:touch}
+.kxse-body h3{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--kx-mute);font-weight:700}
+.kxse-body h3 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8}
+.kxse-colors{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.kxse-col{aspect-ratio:1;min-height:36px;border-radius:9px;border:2px solid rgba(0,0,0,.45);padding:0;position:relative}
+.kxse-col[aria-pressed="true"]{outline:3px solid var(--kx-accent);outline-offset:1px}
+.kxse-col[aria-pressed="true"]::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.kxse-col.lt[aria-pressed="true"]::after{color:#111;text-shadow:0 0 3px #fff}
+.kxse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:8px}
+.kxse-pat{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 2px 5px;border:1px solid var(--kx-line);border-radius:9px;background:var(--kx-bg2);min-height:108px;position:relative}
+.kxse-pat canvas{width:32px;height:64px;border-radius:2px;display:block}
+.kxse-pat span{font-size:10px;line-height:1.15;color:var(--kx-mute);text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;padding:0 2px;min-height:23px}
+.kxse-pat:hover{border-color:var(--kx-accent)}
+.kxse-pat[aria-pressed="true"]{border-color:var(--kx-accent);background:rgba(91,140,255,.16)}
+.kxse-pat[aria-pressed="true"] span{color:var(--kx-text)}
+.kxse-foot{flex:none;display:flex;gap:10px;justify-content:flex-end;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--kx-line);background:var(--kx-bg)}
+.kxse-foot .kxse-btn{min-width:96px;padding:10px 14px}
+.kxse-foot .go{background:#3f9a38;border-color:#57b94e;color:#fff}
+.kxse-foot .go:hover{background:#49a942;border-color:#7dd374}
 </style>
 </head>
 <body>
@@ -630,40 +678,437 @@
   </div>
 </div>
 
-<div class="dlg" id="bnDlg" role="dialog" aria-modal="true" aria-labelledby="bnTitle">
-  <div class="dlg-card bn-card">
-    <div class="dlg-head"><b id="bnTitle">Banner editor</b>
-      <div class="ench-tools">
-        <button class="vsw" id="bnVanilla" type="button" role="switch" aria-checked="true" aria-label="Limit to 6 layers like the loom"><span class="vsw-l">Max 6</span><span class="vsw-t"><span class="vsw-k"></span></span></button>
-        <button class="x" id="bnClose" type="button" aria-label="Close">×</button>
-      </div>
-    </div>
-    <div class="bn-top">
-      <div class="bn-prev"><img id="bnPrev" alt="Preview"></div>
-      <div class="bn-side">
-        <div class="bn-lh"><span id="bnCount"></span><button class="btn" id="bnAdd" type="button">+ Add layer</button></div>
-        <div class="bn-layers" id="bnLayers" role="list" aria-label="Layers, top layer first"></div>
-      </div>
-    </div>
-    <p class="hint" id="bnHint" role="status" style="margin:0 0 4px;min-height:13px"></p>
-    <div class="bn-body">
-      <div class="sm-sec" style="margin-top:6px">Base color</div>
-      <div class="bn-sw" id="bnBase" role="group" aria-label="Base color"></div>
-      <div class="sm-sec">Layer color</div>
-      <div class="bn-sw" id="bnCol" role="group" aria-label="Color of the selected layer"></div>
-      <div class="sm-sec">Pattern</div>
-      <div class="bn-grid" id="bnPats" role="group" aria-label="Pattern of the selected layer"></div>
-    </div>
-    <div class="dlg-actions">
-      <button class="btn ghost" id="bnClear" type="button" style="margin-right:auto">Remove layers</button>
-      <button class="btn ghost" id="bnCancel" type="button">Cancel</button>
-      <button class="btn go" id="bnOk" type="button">Apply</button>
-    </div>
-  </div>
-</div>
 
 <footer>KitX · made by ionyne · <a data-discord target="_blank" rel="noopener" style="color:inherit">Discord</a></footer>
 
+<script id="kitx-banner-patterns-js">
+/* KitX banner / shield pattern library.
+   Every pattern is drawn from scratch on a 20x40 grid (the banner front face),
+   using small geometry helpers. Coordinates are pixel indices (0..19, 0..39). */
+(function (root) {
+  'use strict';
+  var W = 20, H = 40;
+
+  /* ---------- tiny raster toolkit ---------- */
+  function Canvas() { this.a = new Float32Array(W * H); }
+  Canvas.prototype.set = function (x, y, v) { if (x >= 0 && x < W && y >= 0 && y < H) this.a[y * W + x] = v; };
+  Canvas.prototype.each = function (test, v) {
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+      var r = test(x, y);
+      if (r) this.a[y * W + x] = (v === undefined ? (r === true ? 1 : r) : v);
+    }
+    return this;
+  };
+  Canvas.prototype.rect = function (x0, y0, x1, y1, v) {          // inclusive corners
+    return this.each(function (x, y) { return x >= x0 && x <= x1 && y >= y0 && y <= y1; }, v === undefined ? 1 : v);
+  };
+  Canvas.prototype.erase = function (x0, y0, x1, y1) { return this.rect(x0, y0, x1, y1, 0); };
+  Canvas.prototype.disc = function (cx, cy, r, v) {
+    var r2 = r * r;
+    return this.each(function (x, y) { return (x - cx) * (x - cx) + (y - cy) * (y - cy) <= r2; }, v === undefined ? 1 : v);
+  };
+  Canvas.prototype.ellipse = function (cx, cy, rx, ry, v) {
+    return this.each(function (x, y) { var dx = (x - cx) / rx, dy = (y - cy) / ry; return dx * dx + dy * dy <= 1; }, v === undefined ? 1 : v);
+  };
+  Canvas.prototype.poly = function (pts, v) {
+    return this.each(function (x, y) {
+      var inside = false;
+      for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+        var xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+      }
+      return inside;
+    }, v === undefined ? 1 : v);
+  };
+  Canvas.prototype.thick = function (x0, y0, x1, y1, w, v) {       // thick line segment
+    var dx = x1 - x0, dy = y1 - y0, len2 = dx * dx + dy * dy, hw = w / 2;
+    return this.each(function (x, y) {
+      var t = Math.max(0, Math.min(1, ((x - x0) * dx + (y - y0) * dy) / len2));
+      var px = x0 + t * dx - x, py = y0 + t * dy - y;
+      return px * px + py * py <= hw * hw;
+    }, v === undefined ? 1 : v);
+  };
+  Canvas.prototype.mirrorX = function () {
+    for (var y = 0; y < H; y++) for (var x = 0; x < W / 2; x++) {
+      var m = Math.max(this.a[y * W + x], this.a[y * W + (W - 1 - x)]);
+      this.a[y * W + x] = m; this.a[y * W + (W - 1 - x)] = m;
+    }
+    return this;
+  };
+  function fn(test, v) { return new Canvas().each(test, v).a; }
+
+  /* ---------- pattern builders ---------- */
+  var bandD = function (flip) {                    // diagonal band, 1 column per 2 rows
+    return fn(function (x, y) { var c = Math.floor(y / 2); return Math.abs((flip ? 19 - x : x) - c) <= 3; });
+  };
+  var crossD = fn(function (x, y) {
+    var c = Math.floor((y < 20 ? y : 39 - y) / 2);
+    return Math.abs(x - c) <= 2 || Math.abs(19 - x - c) <= 2;
+  });
+  var zig = function (flip) {                      // three small teeth, period 7
+    var h = [9, 3.5, 2.5, 2.5, 1.5, 1.5, 0.5];
+    return fn(function (x, yy) {
+      var y = flip ? yy : 39 - yy;
+      if (y > 6) return false;
+      var d = Math.min(Math.abs(x - 2.5), Math.abs(x - 9.5), Math.abs(x - 16.5));
+      return d <= h[y];
+    });
+  };
+  var bigTri = function (flip) {                   // big triangle pointing to the middle
+    return fn(function (x, yy) {
+      var y = flip ? yy : 39 - yy;
+      if (y > 19) return false;
+      var e = Math.floor((Math.max(y, 1) - 1) / 2);
+      return x >= e && x <= 19 - e;
+    });
+  };
+  var curlyHalf = [20, 9, 7, 7, 6, 5, 4, 2, 2, 1, 1, 2, 2, 4, 5, 5, 4, 2, 2, 1];  // left thickness per row
+  var curly = fn(function (x, y) {
+    var t = curlyHalf[y < 20 ? y : 39 - y];
+    return x < t || x >= W - t;
+  });
+  var rhombus = fn(function (x, y) {
+    if (y < 8 || y > 31) return false;
+    var hw = y <= 20 ? 1 + Math.floor((y - 9) / 2) : 5 - Math.floor((y - 21) / 2);
+    return Math.abs(x - 9.5) <= hw + 0.5;
+  });
+  var bricks = fn(function (x, y) {
+    if (y % 4 === 3) return false;
+    var odd = Math.floor(y / 4) % 2;
+    return x % 6 !== (odd ? 2 : 5);
+  });
+
+  /* emblems: drawn as a few primitives each */
+  function creeper() {
+    var c = new Canvas();
+    c.rect(1, 14, 6, 19).rect(13, 14, 18, 19);       // eyes
+    c.rect(7, 20, 12, 22);                           // nose bridge
+    c.rect(4, 23, 15, 28);                           // mouth block
+    c.rect(4, 29, 6, 31).rect(13, 29, 15, 31);       // fangs
+    return c.a;
+  }
+  function skull() {
+    var c = new Canvas();
+    c.rect(6, 12, 13, 19);                           // cranium
+    c.erase(7, 16, 8, 16).erase(11, 16, 12, 16).erase(9, 17, 10, 17).erase(7, 18, 12, 18); // eyes, nose, teeth gap
+    // crossed bones: [row, x0, x1] for the left half, mirrored to the right
+    [[20, 2, 3], [21, 2, 4], [22, 2, 6], [23, 5, 8], [24, 7, 9], [25, 6, 9], [26, 2, 7], [27, 2, 5], [28, 2, 3]]
+      .forEach(function (r) { c.rect(r[1], r[0], r[2], r[0]).rect(19 - r[2], r[0], 19 - r[1], r[0]); });
+    return c.a;
+  }
+  function flower() {
+    var c = new Canvas();
+    c.rect(4, 14, 15, 15).rect(4, 24, 15, 25);                       // upper / lower bars
+    c.rect(8, 12, 11, 13).rect(9, 11, 10, 11);                       // top bud
+    c.rect(8, 26, 11, 27).rect(9, 28, 10, 28);                       // bottom bud
+    [4.5, 14.5].forEach(function (x) { c.disc(x, 12.8, 1.2).disc(x, 26.7, 1.2); });   // corner petals
+    [3.7, 15.3].forEach(function (x) { c.disc(x, 17, 2.9).disc(x, 22, 2.9); });       // side petals
+    c.rect(4, 19, 5, 20).rect(14, 19, 15, 20);                       // petal waists
+    c.rect(8, 17, 11, 22).rect(7, 18, 12, 21);                       // heart
+    return c.a;
+  }
+  function mojang() {
+    var c = new Canvas();
+    c.ellipse(9.5, 21, 8, 7.5);                       // ring
+    c.ellipse(10.5, 21.5, 5, 4.5, 0);                 // hollow
+    c.erase(10, 12, 13, 16);
+    c.poly([[13, 12], [16, 12], [17, 22], [14.5, 21]]); // tail
+    return c.a;
+  }
+  function piglin() {
+    var c = new Canvas();
+    c.rect(2, 16, 17, 24).erase(3, 17, 16, 23);
+    c.rect(6, 18, 7, 22).rect(12, 18, 13, 22);
+    return c.a;
+  }
+  function flow() {
+    var c = new Canvas();
+    c.rect(3, 13, 16, 13).rect(3, 13, 4, 22).rect(3, 22, 13, 22);   // outer turn
+    c.rect(15, 13, 16, 24).rect(8, 24, 16, 24).rect(8, 24, 9, 27);  // right wall + tail
+    c.rect(6, 15, 13, 15).rect(6, 15, 7, 20).rect(6, 20, 10, 20).rect(12, 15, 13, 22); // inner turn
+    c.rect(9, 17, 10, 19);                                           // curl
+    return c.a;
+  }
+  function guster() {
+    var c = new Canvas();
+    c.rect(7, 12, 12, 13).rect(8, 14, 11, 14).rect(7, 15, 12, 16).erase(8, 15, 8, 15).erase(11, 15, 11, 15);
+    c.rect(3, 18, 16, 19).rect(5, 21, 14, 22).rect(7, 24, 12, 25).rect(9, 27, 10, 28);
+    return c.a;
+  }
+  function globe() {
+    var c = new Canvas(), V = [[9.5, 11], [16, 14], [17, 16], [17, 24], [15.5, 26.5], [9.5, 29], [3.5, 26.5], [2, 24], [2, 16], [3, 14]];
+    for (var i = 0; i < V.length; i++) { var a = V[i], b = V[(i + 1) % V.length]; c.thick(a[0], a[1], b[0], b[1], 1.6); }
+    c.poly([[5, 16], [8, 14.5], [10.5, 16.5], [9, 20.5], [6, 22]]);  // continent A
+    c.poly([[11.5, 14], [15, 16], [15, 19], [12.5, 18]]);            // continent B
+    c.poly([[5.5, 24], [9, 22.5], [9.5, 27], [7, 26.5]]);            // continent C
+    c.poly([[13, 22], [16, 23], [14, 26]]);                          // continent D
+    return c.a;
+  }
+
+  var G = { stripes: 'Stripes', diag: 'Diagonals & halves', shapes: 'Shapes & borders', special: 'Emblems' };
+
+  /* id = Bedrock banner pattern code */
+  var LIST = [
+    { id: 'bs',  name: 'Bottom stripe',     g: 'stripes', a: fn(function (x, y) { return y >= 26; }) },
+    { id: 'ts',  name: 'Top stripe',        g: 'stripes', a: fn(function (x, y) { return y <= 13; }) },
+    { id: 'ls',  name: 'Left stripe',       g: 'stripes', a: fn(function (x) { return x <= 6; }) },
+    { id: 'rs',  name: 'Right stripe',      g: 'stripes', a: fn(function (x) { return x >= 13; }) },
+    { id: 'cs',  name: 'Center stripe',     g: 'stripes', a: fn(function (x) { return x >= 7 && x <= 12; }) },
+    { id: 'ms',  name: 'Middle stripe',     g: 'stripes', a: fn(function (x, y) { return y >= 17 && y <= 22; }) },
+    { id: 'drs', name: 'Down right stripe', g: 'stripes', a: bandD(false) },
+    { id: 'dls', name: 'Down left stripe',  g: 'stripes', a: bandD(true) },
+    { id: 'ss',  name: 'Small stripes',     g: 'stripes', a: fn(function (x) { return x % 5 !== 0 && x % 5 !== 4; }) },
+    { id: 'cr',  name: 'Diagonal cross',    g: 'stripes', a: crossD },
+    { id: 'sc',  name: 'Straight cross',    g: 'stripes', a: fn(function (x, y) { return (x >= 8 && x <= 11) || (y >= 18 && y <= 21); }) },
+
+    { id: 'ld',  name: 'Upper left diagonal',  g: 'diag', a: fn(function (x, y) { return x <= 19 - Math.floor(y / 2); }) },
+    { id: 'rd',  name: 'Upper right diagonal', g: 'diag', a: fn(function (x, y) { return x >= Math.floor(y / 2); }) },
+    { id: 'lud', name: 'Lower left diagonal',  g: 'diag', a: fn(function (x, y) { return x <= Math.floor(y / 2); }) },
+    { id: 'rud', name: 'Lower right diagonal', g: 'diag', a: fn(function (x, y) { return x >= 19 - Math.floor(y / 2); }) },
+    { id: 'vh',  name: 'Left half',    g: 'diag', a: fn(function (x) { return x <= 10; }) },
+    { id: 'vhr', name: 'Right half',   g: 'diag', a: fn(function (x) { return x >= 9; }) },
+    { id: 'hh',  name: 'Top half',     g: 'diag', a: fn(function (x, y) { return y <= 20; }) },
+    { id: 'hhb', name: 'Bottom half',  g: 'diag', a: fn(function (x, y) { return y >= 19; }) },
+    { id: 'tl',  name: 'Top left square',     g: 'diag', a: fn(function (x, y) { return x <= 9 && y <= 13; }) },
+    { id: 'tr',  name: 'Top right square',    g: 'diag', a: fn(function (x, y) { return x >= 10 && y <= 13; }) },
+    { id: 'bl',  name: 'Bottom left square',  g: 'diag', a: fn(function (x, y) { return x <= 9 && y >= 26; }) },
+    { id: 'br',  name: 'Bottom right square', g: 'diag', a: fn(function (x, y) { return x >= 10 && y >= 26; }) },
+
+    { id: 'tt',  name: 'Top triangle',      g: 'shapes', a: bigTri(true) },
+    { id: 'bt',  name: 'Bottom triangle',   g: 'shapes', a: bigTri(false) },
+    { id: 'tts', name: 'Top triangles',     g: 'shapes', a: zig(true) },
+    { id: 'bts', name: 'Bottom triangles',  g: 'shapes', a: zig(false) },
+    { id: 'mc',  name: 'Circle',            g: 'shapes', a: fn(function (x, y) { return (x - 9.5) * (x - 9.5) + (y - 19.5) * (y - 19.5) <= 31; }) },
+    { id: 'mr',  name: 'Rhombus',           g: 'shapes', a: rhombus },
+    { id: 'bo',  name: 'Border',            g: 'shapes', a: fn(function (x, y) { return x < 3 || x > 16 || y < 3 || y > 36; }) },
+    { id: 'cbo', name: 'Curly border',      g: 'shapes', a: curly },
+    { id: 'gra', name: 'Gradient',          g: 'shapes', a: fn(function (x, y) { return 1 - y / 39; }) },
+    { id: 'gru', name: 'Gradient (up)',     g: 'shapes', a: fn(function (x, y) { return y / 39; }) },
+    { id: 'bri', name: 'Bricks',            g: 'shapes', a: bricks },
+
+    { id: 'cre', name: 'Creeper',  g: 'special', special: true, a: creeper() },
+    { id: 'sku', name: 'Skull',    g: 'special', special: true, a: skull() },
+    { id: 'flo', name: 'Flower',   g: 'special', special: true, a: flower() },
+    { id: 'moj', name: 'Mojang',   g: 'special', special: true, a: mojang() },
+    { id: 'glb', name: 'Globe',    g: 'special', special: true, a: globe() },
+    { id: 'pig', name: 'Piglin',   g: 'special', special: true, a: piglin() },
+    { id: 'flw', name: 'Flow',     g: 'special', special: true, a: flow() },
+    { id: 'gus', name: 'Guster',   g: 'special', special: true, a: guster() }
+  ];
+
+  /* the 16 dye colours, in Bedrock dye order (0 = black ... 15 = white) */
+  var COLORS = [
+    ['black', 'Black', '#1d1d21'], ['red', 'Red', '#b02e26'], ['green', 'Green', '#5e7c16'], ['brown', 'Brown', '#835432'],
+    ['blue', 'Blue', '#3c44aa'], ['purple', 'Purple', '#8932b8'], ['cyan', 'Cyan', '#169c9c'], ['light_gray', 'Light gray', '#9d9d97'],
+    ['gray', 'Gray', '#474f52'], ['pink', 'Pink', '#f38baa'], ['lime', 'Lime', '#80c71f'], ['yellow', 'Yellow', '#fed83d'],
+    ['light_blue', 'Light blue', '#3ab3da'], ['magenta', 'Magenta', '#c74ebd'], ['orange', 'Orange', '#f9801d'], ['white', 'White', '#f9fffe']
+  ].map(function (c, i) { return { id: c[0], name: c[1], hex: c[2], index: i }; });
+
+  root.KitXPatterns = { W: W, H: H, LIST: LIST, GROUPS: G, COLORS: COLORS };
+  if (typeof module !== 'undefined') module.exports = root.KitXPatterns;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script id="kitx-shield-editor-js">
+/* KitX shield / banner editor  —  window.KitXShieldEditor.open({...}) */
+(function () {
+  'use strict';
+  var P = window.KitXPatterns, W = P.W, H = P.H;
+  var BY = {}, CBY = {};
+  P.LIST.forEach(function (p) { BY[p.id] = p; });
+  P.COLORS.forEach(function (c) { CBY[c.id] = c; });
+
+  function rgb(hex) { return [parseInt(hex.substr(1, 2), 16), parseInt(hex.substr(3, 2), 16), parseInt(hex.substr(5, 2), 16)]; }
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function lightColor(id) { return id === 'white' || id === 'yellow' || id === 'light_gray' || id === 'lime' || id === 'pink' || id === 'light_blue'; }
+
+  /* ---- rendering ---- */
+  function compose(baseId, layers) {                      // -> Uint8ClampedArray, 20x40 RGBA
+    var out = new Uint8ClampedArray(W * H * 4), b = rgb(CBY[baseId].hex), i, k;
+    for (i = 0; i < W * H; i++) { out[i * 4] = b[0]; out[i * 4 + 1] = b[1]; out[i * 4 + 2] = b[2]; out[i * 4 + 3] = 255; }
+    layers.forEach(function (l) {
+      var a = BY[l.pattern].a, c = rgb(CBY[l.color].hex);
+      for (i = 0; i < W * H; i++) {
+        var t = a[i]; if (t <= 0) continue;
+        for (k = 0; k < 3; k++) out[i * 4 + k] = out[i * 4 + k] * (1 - t) + c[k] * t;
+      }
+    });
+    return out;
+  }
+  var WOOD = [[138, 106, 59], [111, 82, 44], [86, 62, 32]];
+  function shieldInset(fy) { return fy < 16 ? 0 : [0, 0, 1, 1, 2, 3][fy - 16]; }
+  function inFace(fx, fy) { if (fy < 0 || fy > 21 || fx < 0 || fx > 11) return false; var s = shieldInset(fy); return fx >= s && fx < 12 - s; }
+  function drawShield(cv, px) {
+    var CW = 16, CH = 26; cv.width = CW; cv.height = CH;
+    var ctx = cv.getContext('2d'), img = ctx.createImageData(CW, CH), x, y, dx, dy;
+    for (y = 0; y < CH; y++) for (x = 0; x < CW; x++) {
+      var fx = x - 2, fy = y - 2, o = (y * CW + x) * 4, col = null;
+      if (inFace(fx, fy)) {
+        var sx = Math.floor((fx + 0.5) * W / 12), sy = Math.floor((fy + 0.5) * H / 22), s = (sy * W + sx) * 4;
+        col = [px[s], px[s + 1], px[s + 2]];
+      } else {
+        var near = 9;
+        for (dy = -2; dy <= 2; dy++) for (dx = -2; dx <= 2; dx++) if (inFace(fx + dx, fy + dy)) near = Math.min(near, dx * dx + dy * dy);
+        if (near <= 5) col = near > 2 ? WOOD[2] : WOOD[(x + y) & 1];
+      }
+      if (col) { img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = 255; }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function drawBanner(cv, px) {
+    var CW = 24, CH = 44; cv.width = CW; cv.height = CH;
+    var ctx = cv.getContext('2d'), img = ctx.createImageData(CW, CH), x, y;
+    for (y = 0; y < CH; y++) for (x = 0; x < CW; x++) {
+      var o = (y * CW + x) * 4, col = null;
+      if (y < 2) col = WOOD[(x + y) & 1];
+      else if (y >= 3 && y < 43 && x >= 2 && x < 22) { var s = ((y - 3) * W + (x - 2)) * 4; col = [px[s], px[s + 1], px[s + 2]]; }
+      if (col) { img.data[o] = col[0]; img.data[o + 1] = col[1]; img.data[o + 2] = col[2]; img.data[o + 3] = 255; }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function drawMask(cv, patternId, colorHex, bgHex) {     // pattern icon: coloured mask on a flat background
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d'), img = ctx.createImageData(W, H), a = BY[patternId].a, c = rgb(colorHex), b = rgb(bgHex);
+    for (var i = 0; i < W * H; i++) for (var k = 0; k < 3; k++) img.data[i * 4 + k] = b[k] * (1 - a[i]) + c[k] * a[i], img.data[i * 4 + 3] = 255;
+    ctx.putImageData(img, 0, 0);
+  }
+
+  /* ---- editor ---- */
+  function open(opts) {
+    opts = opts || {};
+    var S = {
+      view: opts.mode === 'banner' ? 'banner' : 'shield',
+      base: CBY[opts.base] ? opts.base : 'white',
+      layers: (opts.layers || []).filter(function (l) { return BY[l.pattern] && CBY[l.color]; }).map(function (l) { return { pattern: l.pattern, color: l.color }; }),
+      sel: -1, color: 'white', loom: !!opts.loomLimit, max: opts.maxLayers || 16, loomMax: opts.loomMax || 6
+    };
+    var prevOverflow = document.documentElement.style.overflow;
+    var back = el('div', 'kxse-back');
+    var root = el('div', 'kxse'); root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', 'Shield editor');
+    root.innerHTML =
+      '<div class="kxse-head"><h2>Shield editor</h2>' +
+      '<label class="kxse-tog"><span>Loom limit <b>' + S.loomMax + '</b></span><button type="button" class="kxse-sw" role="switch" aria-checked="false" data-a="loom"></button></label>' +
+      '<button type="button" class="kxse-x" data-a="cancel" aria-label="Close">✕</button></div>' +
+      '<div class="kxse-top"><div class="kxse-pv"><div class="kxse-stage"><canvas data-r="pv"></canvas></div>' +
+      '<div class="kxse-seg"><button type="button" data-a="view" data-v="shield">Shield</button><button type="button" data-a="view" data-v="banner">Banner</button></div></div>' +
+      '<div class="kxse-lay"><div class="kxse-lh"><span class="kxse-count" data-r="count"></span>' +
+      '<button type="button" class="kxse-btn ghost" data-a="clear">Clear</button><button type="button" class="kxse-btn" data-a="add">+ Add layer</button></div>' +
+      '<ul class="kxse-list" data-r="list"></ul><div class="kxse-msg" data-r="msg" aria-live="polite"></div></div></div>' +
+      '<div class="kxse-body" data-r="body"><h3>Base color</h3><div class="kxse-colors" data-r="base"></div>' +
+      '<h3 data-r="lch">Layer color</h3><div class="kxse-colors" data-r="lcol"></div><div data-r="pats"></div></div>' +
+      '<div class="kxse-foot"><button type="button" class="kxse-btn" data-a="cancel">Cancel</button><button type="button" class="kxse-btn go" data-a="apply">Apply</button></div>';
+    back.appendChild(root); document.body.appendChild(back); document.documentElement.style.overflow = 'hidden';
+    function $(k) { return root.querySelector('[data-r="' + k + '"]'); }
+    var R = { pv: $('pv'), count: $('count'), list: $('list'), msg: $('msg'), base: $('base'), lcol: $('lcol'), lch: $('lch'), pats: $('pats') }, msgT;
+
+    function say(t) { R.msg.textContent = t; clearTimeout(msgT); if (t) msgT = setTimeout(function () { R.msg.textContent = ''; }, 2600); }
+    function limit() { return S.loom ? S.loomMax : S.max; }
+
+    /* colour swatches (built once) */
+    function swatches(host, kind) {
+      P.COLORS.forEach(function (c) {
+        var b = el('button', 'kxse-col' + (lightColor(c.id) ? ' lt' : '')); b.type = 'button'; b.style.background = c.hex;
+        b.title = c.name; b.setAttribute('aria-label', c.name + (kind === 'base' ? ' base color' : ' layer color')); b.dataset.a = kind; b.dataset.c = c.id; host.appendChild(b);
+      });
+    }
+    swatches(R.base, 'base'); swatches(R.lcol, 'lcolor');
+
+    /* pattern grid (built once) */
+    var order = ['stripes', 'diag', 'shapes', 'special'], hints = { special: 'need a banner pattern item in survival' };
+    order.forEach(function (g) {
+      var h = el('h3', '', P.GROUPS[g] + (hints[g] ? ' <em>· ' + hints[g] + '</em>' : '')); R.pats.appendChild(h);
+      var grid = el('div', 'kxse-grid');
+      P.LIST.filter(function (p) { return p.g === g; }).forEach(function (p) {
+        var b = el('button', 'kxse-pat'); b.type = 'button'; b.dataset.a = 'pat'; b.dataset.p = p.id; b.title = p.name; b.setAttribute('aria-label', p.name);
+        var cv = el('canvas'); drawMask(cv, p.id, '#ffffff', '#2f333d'); b.appendChild(cv); b.appendChild(el('span', '', p.name)); grid.appendChild(b);
+      });
+      R.pats.appendChild(grid);
+    });
+
+    /* paint */
+    function paint() {
+      var px = compose(S.base, S.layers);
+      (S.view === 'shield' ? drawShield : drawBanner)(R.pv, px);
+      var cw = S.view === 'shield' ? 16 : 24, ch = S.view === 'shield' ? 26 : 44;
+      var k = 'calc(var(--s) * 1px * ' + (S.view === 'shield' ? 1 : 0.5) + ')';
+      R.pv.style.width = 'calc(' + k + ' * ' + cw + ')'; R.pv.style.height = 'calc(' + k + ' * ' + ch + ')';
+      root.querySelectorAll('[data-a="view"]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === S.view)); });
+      root.querySelector('h2').textContent = S.view === 'shield' ? 'Shield editor' : 'Banner editor';
+      root.setAttribute('aria-label', root.querySelector('h2').textContent);
+
+      var n = S.layers.length, lim = limit();
+      R.count.textContent = n + ' / ' + lim + ' layers'; R.count.className = 'kxse-count' + (n >= lim ? ' full' : '');
+      root.querySelector('[data-a="add"]').disabled = n >= lim;
+      root.querySelector('[data-a="clear"]').disabled = n === 0;
+      var sw = root.querySelector('[data-a="loom"]'); sw.setAttribute('aria-checked', String(S.loom)); sw.setAttribute('aria-label', 'Loom limit of ' + S.loomMax + ' layers');
+      sw.disabled = !S.loom && n > S.loomMax; sw.title = sw.disabled ? 'Remove layers down to ' + S.loomMax + ' first' : '';
+
+      R.list.innerHTML = '';
+      if (!n) R.list.appendChild(el('li', 'kxse-empty', 'No layers yet. Tap a pattern below to add one.'));
+      S.layers.forEach(function (l, i) {
+        var li = el('li', 'kxse-layer' + (i === S.sel ? ' sel' : '')); li.dataset.i = i; li.tabIndex = 0;
+        var cv = el('canvas'); drawMask(cv, l.pattern, CBY[l.color].hex, '#2f333d'); li.appendChild(cv);
+        li.appendChild(el('span', 'nm', (i + 1) + ' · ' + BY[l.pattern].name + '<small>' + CBY[l.color].name + '</small>'));
+        [['up', '↑', 'Move up', i === 0], ['down', '↓', 'Move down', i === n - 1], ['del', '✕', 'Remove layer', false]].forEach(function (d) {
+          if (i !== S.sel && d[0] !== 'del') return;       // move buttons only on the selected layer
+          var b = el('button', 'kxse-ic', d[1]); b.type = 'button'; b.dataset.a = d[0]; b.setAttribute('aria-label', d[2]); b.disabled = d[3]; li.appendChild(b);
+        });
+        R.list.appendChild(li);
+      });
+
+      var cur = S.sel >= 0 ? S.layers[S.sel].color : S.color;
+      R.lch.textContent = S.sel >= 0 ? 'Layer color — editing layer ' + (S.sel + 1) : 'Layer color — for the next layer';
+      root.querySelectorAll('[data-a="base"]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === S.base)); });
+      root.querySelectorAll('[data-a="lcolor"]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.c === cur)); });
+      var curP = S.sel >= 0 ? S.layers[S.sel].pattern : null;
+      root.querySelectorAll('[data-a="pat"]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.p === curP)); });
+    }
+
+    function addLayer(pattern, color) {
+      if (S.layers.length >= limit()) { say('Layer limit reached (' + limit() + ').'); return false; }
+      S.layers.push({ pattern: pattern, color: color }); S.sel = S.layers.length - 1; return true;
+    }
+    function close(result) {
+      document.removeEventListener('keydown', onKey, true); back.remove(); document.documentElement.style.overflow = prevOverflow;
+      if (result) { if (opts.onApply) opts.onApply(result); } else if (opts.onCancel) opts.onCancel();
+    }
+    function build() {
+      return {
+        mode: S.view, base: { id: S.base, index: CBY[S.base].index },
+        layers: S.layers.map(function (l) { return { pattern: l.pattern, color: { id: l.color, index: CBY[l.color].index } }; }),
+        nbt: { Base: CBY[S.base].index, Patterns: S.layers.map(function (l) { return { Color: CBY[l.color].index, Pattern: l.pattern }; }) }
+      };
+    }
+    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); close(null); } }
+    document.addEventListener('keydown', onKey, true);
+
+    root.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-a],.kxse-layer'); if (!t || !root.contains(t)) return;
+      var a = t.dataset.a, li = t.closest('.kxse-layer'), i = li ? +li.dataset.i : -1;
+      if (!a && li) { S.sel = S.sel === i ? -1 : i; if (S.sel >= 0) S.color = S.layers[S.sel].color; paint(); return; }
+      if (a === 'cancel') return close(null);
+      if (a === 'apply') return close(build());
+      if (a === 'loom') { if (!S.loom && S.layers.length > S.loomMax) { say('Remove layers down to ' + S.loomMax + ' first.'); return; } S.loom = !S.loom; }
+      else if (a === 'view') S.view = t.dataset.v;
+      else if (a === 'clear') { S.layers = []; S.sel = -1; }
+      else if (a === 'add') { var s = S.layers[S.sel] || S.layers[S.layers.length - 1]; addLayer(s ? s.pattern : 'bs', S.sel >= 0 ? S.layers[S.sel].color : S.color); }
+      else if (a === 'base') S.base = t.dataset.c;
+      else if (a === 'lcolor') { S.color = t.dataset.c; if (S.sel >= 0) S.layers[S.sel].color = t.dataset.c; }
+      else if (a === 'pat') { if (S.sel >= 0) S.layers[S.sel].pattern = t.dataset.p; else addLayer(t.dataset.p, S.color); }
+      else if (a === 'up' && i > 0) { var u = S.layers[i]; S.layers[i] = S.layers[i - 1]; S.layers[i - 1] = u; if (S.sel === i) S.sel = i - 1; else if (S.sel === i - 1) S.sel = i; }
+      else if (a === 'down' && i < S.layers.length - 1) { var d = S.layers[i]; S.layers[i] = S.layers[i + 1]; S.layers[i + 1] = d; if (S.sel === i) S.sel = i + 1; else if (S.sel === i + 1) S.sel = i; }
+      else if (a === 'del') { S.layers.splice(i, 1); if (S.sel === i) S.sel = -1; else if (S.sel > i) S.sel--; }
+      paint();
+    });
+    root.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('kxse-layer')) { e.preventDefault(); e.target.click(); }
+    });
+    paint(); root.setAttribute('tabindex', '-1'); root.focus();
+    return { close: function () { close(null); } };
+  }
+
+  window.KitXShieldEditor = { open: open, compose: compose, drawShield: drawShield, drawBanner: drawBanner, patterns: P };
+})();
+</script>
 <script>
 (() => {
   // ====== Site settings: edit these ======
@@ -2246,146 +2691,43 @@
   const BN_MAX_VANILLA=6, BN_MAX_FREE=16;           // loom limit / how many layers the editor allows with the limit switched off
   const BN_COL=[['White','#f9fffe'],['Orange','#f9801d'],['Magenta','#c74ebd'],['Light Blue','#3ab3da'],['Yellow','#fed83d'],['Lime','#80c71f'],['Pink','#f38baa'],['Gray','#474f52'],
     ['Light Gray','#9d9d97'],['Cyan','#169c9c'],['Purple','#8932b8'],['Blue','#3c44aa'],['Brown','#835432'],['Green','#5e7c16'],['Red','#b02e26'],['Black','#1d1d21']];
-  const bnSprite=(x0,y0,rows)=>(x,y)=>{const r=rows[y-y0];return r&&r[x-x0]==='X'?1:0};
-  const bnSpiral=(dir,rad,w)=>(x,y)=>{const dx=x+.5-10,dy=y+.5-20,r=Math.hypot(dx,dy); if(r>rad||r<1) return 0;
-    const t=Math.atan2(dy,dx), s=(((r/2.1-dir*t)%(2*Math.PI))+2*Math.PI)%(2*Math.PI); return s<w?1:0};
-  const bnEdge=(x,y)=>Math.min(x+.5,20-x-.5,y+.5,40-y-.5);
-  const bnChev=(x,y)=>{const a=16+1.8*Math.abs(x+.5-10); return y+.5>=a&&y+.5<a+8?1:0};
-  const bnSaw=(x,y)=>y+.5>=26+2*Math.abs(((x%10)+.5)-5)?1:0;
-  // code -> [name, mask(x, y) -> 0..1] on the 20 x 40 banner face. Shapes are close approximations of the game's pattern textures.
-  const BN_PAT={
-    hh:['Per Fess',(x,y)=>y<20],hhb:['Per Fess Inverted',(x,y)=>y>=20],vh:['Per Pale',(x,y)=>x<10],vhr:['Per Pale Inverted',(x,y)=>x>=10],
-    ts:['Chief',(x,y)=>y<7],bs:['Base',(x,y)=>y>=33],ls:['Pale Dexter',(x,y)=>x<7],rs:['Pale Sinister',(x,y)=>x>=13],cs:['Pale',(x,y)=>x>=7&&x<13],ms:['Fess',(x,y)=>y>=16&&y<24],
-    drs:['Bend',(x,y)=>Math.abs((x+.5)-(y+.5)/2)<3.2],dls:['Bend Sinister',(x,y)=>Math.abs((x+.5)-(20-(y+.5)/2))<3.2],
-    ss:['Paly',(x,y)=>[2,3,7,8,11,12,16,17].includes(x)],
-    cr:['Saltire',(x,y)=>Math.abs((x+.5)-(y+.5)/2)<3.2||Math.abs((x+.5)-(20-(y+.5)/2))<3.2],
-    sc:['Cross',(x,y)=>(x>=7&&x<13)||(y>=16&&y<24)],
-    ld:['Per Bend Sinister',(x,y)=>(x+.5)/20+(y+.5)/40<1],rud:['Per Bend Sinister Inverted',(x,y)=>(x+.5)/20+(y+.5)/40>=1],
-    rd:['Per Bend',(x,y)=>(y+.5)/40<(x+.5)/20],lud:['Per Bend Inverted',(x,y)=>(y+.5)/40>=(x+.5)/20],
-    tl:['Chief Dexter Canton',(x,y)=>x<8&&y<8],tr:['Chief Sinister Canton',(x,y)=>x>=12&&y<8],bl:['Base Dexter Canton',(x,y)=>x<8&&y>=32],br:['Base Sinister Canton',(x,y)=>x>=12&&y>=32],
-    tt:['Inverted Chevron',(x,y)=>bnChev(x,39-y)],bt:['Chevron',bnChev],tts:['Chief Indented',(x,y)=>bnSaw(x,39-y)],bts:['Base Indented',bnSaw],
-    mc:['Roundel',(x,y)=>Math.hypot(x+.5-10,y+.5-20)<5.5?1:0],mr:['Lozenge',(x,y)=>Math.abs(x+.5-10)/7+Math.abs(y+.5-20)/14<=1?1:0],
-    bo:['Bordure',(x,y)=>bnEdge(x,y)<3?1:0],
-    cbo:['Bordure Indented',(x,y)=>{const dx=Math.min(x+.5,20-x-.5),dy=Math.min(y+.5,40-y-.5),t=dx<dy?y+.5:x+.5;return Math.min(dx,dy)<2.5+2*Math.abs((t%8)-4)/4?1:0}],
-    bri:['Field Masoned',(x,y)=>(y%5===0)||((x+(Math.floor(y/5)%2)*5)%10===0)?1:0],
-    gra:['Gradient',(x,y)=>Math.round(Math.max(0,Math.min(1,1-(y+.5)/28))*4)/4],gru:['Base Gradient',(x,y)=>Math.round(Math.max(0,Math.min(1,1-(40-y-.5)/28))*4)/4],
-    flo:['Flower Charge',(x,y)=>{const cx=x+.5,cy=y+.5; if(Math.hypot(cx-10,cy-20)<1.7) return 0;
-      for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5; if(Math.hypot(cx-(10+4.6*Math.cos(a)),cy-(20+4.6*Math.sin(a)))<2.8) return 1} return 0}],
-    cre:['Creeper Charge',bnSprite(4,15,[".XXX....XXX.",".XXX....XXX.",".XXX....XXX.",".....XX.....","....XXXX....","...XXXXXX...","...XXXXXX...","...XX..XX...","...XX..XX..."])],
-    sku:['Skull Charge',bnSprite(4,15,["...XXXXXX...","..XXXXXXXX..",".XXXXXXXXXX.",".XX..XX..XX.",".XX..XX..XX.",".XXXXXXXXXX.","..XXX..XXX..","...XXXXXX...","...X.XX.X...","...XXXXXX..."])],
-    moj:['Thing',bnSprite(4,16,["XX........XX","XXX......XXX","XXXX....XXXX","XXXXX..XXXXX","XX.XXXXXX.XX","XX..XXXX..XX","XX...XX...XX","XX........XX"])],
-    glb:['Globe',(x,y)=>{const dx=x+.5-10,dy=y+.5-20,r=Math.hypot(dx,dy),e=Math.hypot(dx/3.5,dy/7);return (r>=5.5&&r<7.2)||(r<7.2&&Math.abs(dy)<.8)||(r<7.2&&e>.75&&e<1.25)?1:0}],
-    pig:['Snout',bnSprite(4,17,["XXXXXXXXXXXX","XXXXXXXXXXXX","XXX..XX..XXX","XXX..XX..XXX","XXXXXXXXXXXX","XXXXXXXXXXXX"])],
-    flw:['Flow',bnSpiral(-1,9.5,2.2)],gus:['Guster',bnSpiral(1,9.5,1.7)]
-  };
-  const BN_ORDER=['bs','ts','ls','rs','cs','ms','drs','dls','ss','cr','sc','ld','rud','lud','rd','vh','vhr','hh','hhb','bl','br','tl','tr','bt','tt','bts','tts','mc','mr','bo','cbo','bri','gra','gru','cre','sku','flo','moj','glb','pig','flw','gus'];
-  const bnHex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-  const bnCache={};
-  // kind: 'banner' (cloth on its bar), 'shield', or 'tile' (flat 20x40 face, used for the pattern pickers)
-  function bnRender(kind,base,layers,tile){
-    const key=kind+'|'+base+'|'+layers.map(l=>l.p+l.c).join(',')+(tile?'|'+tile:'');
-    if(bnCache[key]) return bnCache[key];
-    const baseRGB=tile?bnHex('#3a3c44'):bnHex(BN_COL[base][1]);
-    const face=(bx,by)=>{ let c=baseRGB.slice();
-      for(const l of layers){ const m=BN_PAT[l.p][1](bx,by); if(!m) continue; const rgb=tile?bnHex('#f2f3f7'):bnHex(BN_COL[l.c][1]); for(let i=0;i<3;i++) c[i]=c[i]*(1-m)+rgb[i]*m }
-      return c };
-    let W,H; if(kind==='shield'){W=36;H=56}else if(kind==='banner'){W=22;H=43}else{W=20;H=40}
-    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d'), img=ctx.createImageData(W,H);
-    const put=(x,y,c)=>{const o=(y*W+x)*4; img.data[o]=c[0];img.data[o+1]=c[1];img.data[o+2]=c[2];img.data[o+3]=255};
-    if(kind==='banner'){
-      for(let x=0;x<W;x++) for(let y=0;y<3;y++) put(x,y,y===0?[0x9a,0x72,0x42]:[0x6e,0x4d,0x27]);
-      for(let by=0;by<40;by++) for(let bx=0;bx<20;bx++) put(bx+1,by+3,face(bx,by));
-    }else if(kind==='tile'){
-      for(let by=0;by<40;by++) for(let bx=0;bx<20;bx++) put(bx,by,face(bx,by));
-    }else{ // shield: heater-ish silhouette, wooden rim, pattern on the inside (drawn at 2x so round patterns stay round)
-      const ins=(x,y)=>{ const u=(x+.5)/2,v=(y+.5)/2; if(u<1||u>17||v<1||v>27) return false; if(v>=21){const k=6-Math.sqrt(36-(v-20)*(v-20)); return u>=1+k&&u<=17-k} return true };
-      const er=f=>(x,y)=>f(x,y)&&f(x-2,y)&&f(x+2,y)&&f(x,y-2)&&f(x,y+2);
-      const inner=er(er(ins)); let x0=99,y0=99,x1=0,y1=0;
-      for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(inner(x,y)){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}
-      for(let y=0;y<H;y++) for(let x=0;x<W;x++){
-        if(inner(x,y)) put(x,y,face(Math.min(19,Math.floor((x-x0)/(x1-x0+1)*20)),Math.min(39,Math.floor((y-y0)/(y1-y0+1)*40))));
-        else if(ins(x,y)) put(x,y,(((x>>1)+(y>>1))&1)?[0x8a,0x6a,0x3a]:[0x7c,0x5e,0x33]);
-        else if(ins(x-1,y)||ins(x+1,y)||ins(x,y-1)||ins(x,y+1)) put(x,y,[0x2b,0x1d,0x0e]);
-      }
-    }
-    ctx.putImageData(img,0,0); return bnCache[key]=cv.toDataURL();
-  }
+  // code -> [name]. The pixel art of every pattern lives in KitXPatterns (the pattern script above); the ids are the game's pattern codes.
+  const BN_PAT={}; KitXPatterns.LIST.forEach(p=>{ BN_PAT[p.id]=[p.name] });
   function bnHasArt(it){ return !!it&&((it.id==='banner'&&it.layers&&it.layers.length>0)||(it.id==='shield'&&(it.base!=null||(it.layers&&it.layers.length>0)))) }   // function declarations: mkIcon runs before this block does
-  function bnIcon(it){ return it.id==='shield'?bnRender('shield',it.base==null?0:it.base,it.layers||[]):bnRender('banner',it.aux||0,it.layers||[]) }
+  const bnIconCache={};
+  function bnIcon(it){
+    const shield=it.id==='shield', base=shield?(it.base==null?0:it.base):(it.aux||0), ls=bnLayersOk(it.layers)?it.layers:[];
+    const key=(shield?'s':'b')+base+'|'+ls.map(l=>l.p+l.c).join(','); if(bnIconCache[key]) return bnIconCache[key];
+    const E=KitXShieldEditor, cv=document.createElement('canvas');
+    (shield?E.drawShield:E.drawBanner)(cv,E.compose(bnId(base),ls.map(l=>({pattern:l.p,color:bnId(l.c)}))));
+    return bnIconCache[key]=cv.toDataURL();
+  }
   function bnLayersOk(a){ return Array.isArray(a)&&a.every(l=>l&&own(BN_PAT,l.p)&&Number.isInteger(l.c)&&l.c>=0&&l.c<=15) }
 
-  let bnFor=null, bnD=null, bnVan=true;
-  const bnMaxN=()=>bnVan?BN_MAX_VANILLA:BN_MAX_FREE;
-  const bnSay=t=>{ $('bnHint').textContent=t||'' };
-  function renderBn(){
-    const d=bnD, it=getItem(bnFor); if(!it){ closeBn(); return }
-    const max=bnMaxN(), n=d.layers.length;
-    const img=$('bnPrev'); img.src=bnRender(d.shield?'shield':'banner',d.base,d.layers); img.style.width=(d.shield?108:88)+'px';
-    $('bnCount').textContent=n+' / '+max+' layer'+(max===1?'':'s');
-    $('bnAdd').setAttribute('aria-disabled',n>=max?'true':'false');
-    $('bnClear').hidden=!n;
-    const list=$('bnLayers'); list.innerHTML='';
-    if(!n){ const e=document.createElement('div'); e.className='bn-empty'; e.textContent='No layers yet. Add one, or tap a pattern below.'; list.append(e) }
-    for(let i=n-1;i>=0;i--){
-      const l=d.layers[i], row=document.createElement('div'); row.className='bn-row'+(i===d.sel?' on':''); row.setAttribute('role','listitem');
-      const pick=document.createElement('button'); pick.type='button'; pick.className='bn-pick'; pick.setAttribute('aria-pressed',String(i===d.sel));
-      const chip=document.createElement('span'); chip.className='bn-chip'; chip.style.background=BN_COL[l.c][1];
-      const nm=document.createElement('span'); nm.className='bn-name'; nm.textContent=BN_COL[l.c][0]+' '+BN_PAT[l.p][0]; pick.append(chip,nm);
-      pick.addEventListener('click',()=>{ d.sel=i; bnSay(''); renderBn() });
-      const mini=(txt,label,dis,fn)=>{ const b=document.createElement('button'); b.type='button'; b.className='bn-mini'; b.textContent=txt; b.setAttribute('aria-label',label);
-        if(dis) b.setAttribute('aria-disabled','true'); else b.addEventListener('click',fn); return b };
-      row.append(pick,
-        mini('↑','Move layer up',i===n-1,()=>{ [d.layers[i],d.layers[i+1]]=[d.layers[i+1],d.layers[i]]; d.sel=i+1; renderBn() }),
-        mini('↓','Move layer down',i===0,()=>{ [d.layers[i],d.layers[i-1]]=[d.layers[i-1],d.layers[i]]; d.sel=i-1; renderBn() }),
-        mini('×','Delete layer',false,()=>{ d.layers.splice(i,1); d.sel=Math.min(d.sel>i?d.sel-1:d.sel,d.layers.length-1); renderBn() }));
-      list.append(row);
-    }
-    const sw=(el,on,pickFn)=>{ el.innerHTML=''; BN_COL.forEach(([name,hex],c)=>{ const b=document.createElement('button'); b.type='button'; b.style.background=hex;
-      b.setAttribute('aria-label',name); b.title=name; b.setAttribute('aria-pressed',String(on(c))); if(on(c)) b.className='on'; b.addEventListener('click',()=>pickFn(c)); el.append(b) }) };
-    sw($('bnBase'),c=>d.base===c&&d.baseSet,c=>{ d.base=c; d.baseSet=true; bnSay(''); renderBn() });
-    sw($('bnCol'),c=>d.sel>=0&&d.layers[d.sel].c===c,c=>{ if(d.sel<0){ bnSay('Add a layer first, then pick its color.'); return } d.layers[d.sel].c=c; bnSay(''); renderBn() });
-    const pats=$('bnPats'); pats.innerHTML='';
-    for(const code of BN_ORDER){
-      const b=document.createElement('button'); b.type='button'; b.className='bn-tile'+(d.sel>=0&&d.layers[d.sel].p===code?' on':''); b.title=BN_PAT[code][0]; b.setAttribute('aria-label',BN_PAT[code][0]);
-      b.setAttribute('aria-pressed',String(d.sel>=0&&d.layers[d.sel].p===code));
-      const im=new Image(); im.alt=''; im.src=bnRender('tile',0,[{p:code,c:0}],'t'); b.append(im);
-      b.addEventListener('click',()=>{
-        if(d.sel>=0){ d.layers[d.sel].p=code; bnSay(BN_PAT[code][0]) }
-        else if(d.layers.length<max){ d.layers.push({p:code,c:d.base===15?0:15}); d.sel=d.layers.length-1; d.baseSet=true; bnSay(BN_PAT[code][0]) }
-        renderBn();
-      });
-      pats.append(b);
-    }
-  }
+  let bnFor=null;
+  // The editor itself (KitXShieldEditor + KitXPatterns) is the two <script> blocks above this one. It speaks dye order 0 = black ... 15 = white
+  // (the same as the file), the item data here is 0 = white ... 15 = black, so colours convert with 15 - n.
+  const bnId=c=>KitXPatterns.COLORS[15-c].id;
   function openBanner(){
     const key=kb.sel, it=key&&getItem(key); if(!it||(it.id!=='banner'&&it.id!=='shield')) return;
     const shield=it.id==='shield', ls=bnLayersOk(it.layers)?it.layers:[];
-    bnFor=key; bnD={shield,base:shield?(it.base!=null?it.base:0):(it.aux||0),baseSet:shield?it.base!=null:true,layers:ls.map(l=>({p:l.p,c:l.c})),sel:ls.length-1};
-    bnVan=ls.length<=BN_MAX_VANILLA; $('bnVanilla').setAttribute('aria-checked',String(bnVan));
-    $('bnTitle').textContent=shield?'Shield editor':'Banner editor'; bnSay('');
-    $('bnDlg').classList.add('on'); updateLock(); renderBn(); document.querySelector('#bnDlg .bn-body').scrollTop=0;
+    bnFor=key;
+    KitXShieldEditor.open({
+      mode:shield?'shield':'banner',
+      base:bnId(shield?(it.base!=null?it.base:0):(it.aux||0)),
+      layers:ls.map(l=>({pattern:l.p,color:bnId(l.c)})),
+      loomLimit:ls.length<=BN_MAX_VANILLA, loomMax:BN_MAX_VANILLA, maxLayers:BN_MAX_FREE,
+      onApply:res=>applyBn(key,res,shield), onCancel:()=>{ bnFor=null }
+    });
   }
-  function closeBn(){ $('bnDlg').classList.remove('on'); bnFor=null; updateLock() }
-  function applyBn(){
-    const it=getItem(bnFor), d=bnD; if(!it){ closeBn(); return }
-    if(d.shield){ if(d.baseSet||d.layers.length) it.base=d.base; else delete it.base } else it.aux=d.base;
-    if(d.layers.length) it.layers=d.layers.map(l=>({p:l.p,c:l.c})); else delete it.layers;
-    const key=bnFor; closeBn(); paintSlot(key); renderItemPanel(); renderControls();
+  function applyBn(key,res,shield){
+    bnFor=null; const it=getItem(key); if(!it) return;
+    const base=15-res.base.index, layers=res.layers.map(l=>({p:l.pattern,c:15-l.color.index}));
+    if(shield){ if(layers.length||base!==0||it.base!=null) it.base=base; else delete it.base } else it.aux=base;
+    if(layers.length) it.layers=layers; else delete it.layers;
+    paintSlot(key); renderItemPanel(); renderControls();
   }
-  $('bnAdd').addEventListener('click',()=>{
-    const d=bnD; if(d.layers.length>=bnMaxN()){ bnSay(bnVan?'That is the 6 layer limit. Switch off "Max 6" to add more.':'That is the editor limit of '+BN_MAX_FREE+' layers.'); return }
-    d.layers.push({p:'bs',c:d.sel>=0?d.layers[d.sel].c:(d.base===15?0:15)}); d.sel=d.layers.length-1; d.baseSet=true; bnSay(''); renderBn();
-  });
-  $('bnVanilla').addEventListener('click',()=>{
-    if(bnVan){ bnVan=false } else if(bnD.layers.length>BN_MAX_VANILLA){ bnSay('Remove layers above '+BN_MAX_VANILLA+' first.'); return } else bnVan=true;
-    $('bnVanilla').setAttribute('aria-checked',String(bnVan)); bnSay(''); renderBn();
-  });
-  $('bnClear').addEventListener('click',()=>{ bnD.layers=[]; bnD.sel=-1; bnSay(''); renderBn() });
-  $('bnOk').addEventListener('click',applyBn);
-  $('bnCancel').addEventListener('click',closeBn);
-  $('bnClose').addEventListener('click',closeBn);
-  $('bnDlg').addEventListener('click',e=>{ if(e.target===$('bnDlg')) closeBn() });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!e.defaultPrevented&&$('bnDlg').classList.contains('on')) closeBn() });
+
 
   // ----- smithing table: armor trims -----
   // Stored on the item as it.trim = {pattern, material}; written to the file as tag.Trim {Pattern, Material} (strings).
