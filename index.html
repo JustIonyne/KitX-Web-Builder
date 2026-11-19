@@ -1872,13 +1872,35 @@
     return ITEM_PATH[n]!==undefined?n:null;
   }
   const BED_COLORS=['white','orange','magenta','light_blue','yellow','lime','pink','gray','light_gray','cyan','purple','blue','brown','green','red','black'];
-  // block-style proxy items (nf:oak_door_offhand ...) -> the vanilla item they stand for: {like} or {likeVar:'bed:N'} or null
-  function vanillaGuess(id){
-    const bare=id.split(':')[1].replace(/_offhand$/,''), bm=/^(.+)_bed$/.exec(bare), bi=bm?BED_COLORS.indexOf(bm[1]):-1;
-    if(bi>=0) return {likeVar:'bed:'+bi};
-    const like=vanillaTex(bare)||vanillaTex(bare.replace(/^oak_door$/,'wooden_door').replace(/^chain$/,'iron_chain'));
-    return like?{like}:null;
+  // Bedrock ids that differ from the name an addon (or its proxy items) uses
+  const VANILLA_ALIAS={oak_door:'wooden_door',chain:'iron_chain',shulker_box:'undyed_shulker_box',stonecutter:'stonecutter_block',stone_slab:'normal_stone_slab'};
+  // display name (lower case) -> {like:id} or {likeVar:'id:aux'}, from the item list + the variants (Bedrock names the wooden_button "Oak Button", the aux 0 banner "White Banner" ...)
+  let NAME_IDX=null;
+  const nameIdx=()=>NAME_IDX||(NAME_IDX=(()=>{
+    const m={};
+    DATA.items.forEach(([id])=>{ if(VARBASE.has(id)) return; const n=prettyId(id).toLowerCase(); if(!(n in m)) m[n]={like:id} });
+    (DATA.vars||[]).forEach(([id,aux,title])=>{ const n=title.toLowerCase(); if(!(n in m)) m[n]={likeVar:id+':'+aux} });
+    return m;
+  })());
+  // block-style proxy items (nf:oak_door_offhand ...) -> the vanilla item they stand for: {like} or {likeVar:'bed:N'} / {likeVar:'banner:N'} or null
+  // strong = decided from the id (or the vanilla display-name key tile.x.name); weak = only the display name matches a vanilla item
+  function vanillaStrong(id,dk){
+    const bare=id.split(':')[1].replace(/_offhand$/,''), cm=/^(.+)_(bed|banner)$/.exec(bare), ci=cm?BED_COLORS.indexOf(cm[1]):-1;
+    if(ci>=0) return {likeVar:cm[2]+':'+ci};
+    const cand=[bare], km=/^(?:tile|item|block)\.([a-z0-9_]+)\.name$/.exec(dk||''); if(km) cand.push(km[1].replace(/_offhand$/,''));
+    for(const c of cand){ const like=vanillaTex(VANILLA_ALIAS[c]||c)||vanillaTex(c); if(like) return {like} }
+    return null;
   }
+  // names to try: the addon's own display name, then the vanilla key's words (tile.oak_button.name -> "Oak Button"), then the id's words
+  const titleOf=k=>k.split('_').map(w=>w?w[0].toUpperCase()+w.slice(1):w).join(' ');
+  function vanillaWeak(name,id,dk){
+    const km=/^(?:tile|item|block)\.([a-z0-9_]+)\.name$/.exec(dk||''), idx=nameIdx(), tries=[name];
+    if(km) tries.push(titleOf(km[1].replace(/_offhand$/,'')));
+    if(id) tries.push(titleOf(id.split(':')[1].replace(/_offhand$/,'')));
+    for(const n of tries){ const h=n&&idx[String(n).toLowerCase().trim()]; if(h) return h }
+    return null;
+  }
+  const vanillaGuess=(id,dk,name)=>vanillaStrong(id,dk)||vanillaWeak(name,id,dk);
   async function importAddon(file){
     const files=new Map(); await collectZip(await file.arrayBuffer(),files,0);
     const text=async f=>new TextDecoder().decode(await f.data());
@@ -1898,7 +1920,7 @@
       else{ const mi=c['minecraft:material_instances'], inst=mi&&(mi['*']||Object.values(mi)[0]), s=inst&&(typeof inst==='string'?inst:inst.texture); if(s) rel=texRel(ttex,s)||s; const gc=c['minecraft:geometry']; blk={mi:mi||{},geo:typeof gc==='string'?gc:gc&&gc.identifier,unit:!!c['minecraft:unit_cube']} }
       let name=lang['item.'+id+'.name']||lang['item.'+id]||lang['tile.'+id+'.name']||lang['tile.'+id]||lang['block.'+id+'.name'];
       const dn=c['minecraft:display_name']&&c['minecraft:display_name'].value; if(!name&&dn) name=lang[dn]||(/^[a-z_.:]+$/.test(dn)?null:dn);
-      found.push({id,name,rel,blk});
+      found.push({id,name,rel,blk,dk:dn});
     }
     // attachables: item id -> {geo, tex} (what the game draws for the item in the hand: block items are drawn from these)
     const ATT={};
@@ -1918,21 +1940,23 @@
       if(x.blk){ try{ icon=await block3d(x.blk,files,cache,ttex,getGi)||icon }catch(e){} }
       else if(ATT[x.id]){
         // block-style items (icon is a block / entity texture or a texture strip, not a normal item sprite): draw the attachable's 3D model
-        const rl=(x.rel||'').toLowerCase(), vg=vanillaGuess(x.id);
+        const rl=(x.rel||'').toLowerCase(), vg=vanillaGuess(x.id,x.dk,x.name);
         if(!x.rel||/^textures\/(blocks|item\/blocks|nf_left|entity)\//.test(rl)){
-          // biome-tinted leaves (Java textures are grey) and strips the model can't lay out: the vanilla icon is the better picture when there is one
-          const tinted=/^(oak|spruce|birch|jungle|acacia|dark_oak|mangrove)_leaves$/.test(x.id.split(':')[1].replace(/_offhand$/,''));
-          let i3=null; if(!(tinted&&vg)){ try{ i3=await attach3d(ATT[x.id],files,cache,getGi,!!vg) }catch(e){} }
-          if(i3) icon=i3;
-          else if(vg) icon=null;                              // flat strip / empty texture is no use: fall through to the vanilla icon
+          // the item stands for a game item / block (its texture / model are the game's own, copied or only referenced):
+          // use the real render we already have for it; only an item we can not identify gets a model rebuilt from its files
+          if(vg) icon=null;
+          else{ let i3=null; try{ i3=await attach3d(ATT[x.id],files,cache,getGi,false) }catch(e){} if(i3) icon=i3 }
         }
       }
       if(!icon){
-        // texture not inside the addon: it points at a vanilla texture (e.g. textures/items/diamond_sword), so borrow that icon
-        const tn=x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null; like=tn?vanillaTex(tn):null;
-        if(!like){   // a block-style item whose textures are vanilla ones (nf:oak_door_offhand -> the vanilla oak door icon)
-          const vg=vanillaGuess(x.id); if(vg){ like=vg.like||'bed'; likeVar=vg.likeVar||null }
-          else if(ATT[x.id]) like=vanillaTex(ATT[x.id].tex.split('/').pop().replace(/_uncast$/,''))||null;
+        // texture not inside the addon: it points at a game texture / item (e.g. textures/items/diamond_sword), so borrow the game's icon
+        const tn=x.rel?x.rel.split('/').pop().replace(/\.(png|tga|jpe?g)$/i,''):null;
+        const sg=x.blk?null:vanillaStrong(x.id,x.dk);
+        if(sg){ like=sg.like||sg.likeVar.split(':')[0]; likeVar=sg.likeVar||null }
+        else{
+          like=tn?vanillaTex(tn):null;
+          if(!like&&ATT[x.id]) like=vanillaTex(ATT[x.id].tex.split('/').pop().replace(/_uncast$/,''))||null;
+          if(!like){ const wg=vanillaWeak(x.name,x.blk?null:x.id,x.dk); if(wg){ like=wg.like||wg.likeVar.split(':')[0]; likeVar=wg.likeVar||null } }
         }
       }
       CUSTOM[x.id]={name:x.name||prettyId(x.id.split(':')[1]),icon,like,likeVar};
