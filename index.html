@@ -395,7 +395,7 @@
 .kxse-pat[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .kxse-pat[aria-pressed="true"] span{color:var(--text)}
 
-  /* addon patcher */
+  /* preview builder */
   .ap-addon{border:1px solid var(--line);border-radius:4px;background:var(--bg);padding:12px;margin-top:12px}
   .ap-ah{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   .ap-ah label{display:flex;gap:10px;align-items:center;margin:0;color:var(--text);min-width:0;overflow-wrap:anywhere}
@@ -431,7 +431,7 @@
   <div class="sep"></div>
   <a href="#kit-builder" data-route="kit-builder">1 · Kit Builder</a>
   <a href="#preset-builder" data-route="preset-builder">2 · Preset Builder</a>
-  <a href="#addon-patcher" data-route="addon-patcher">3 · Addon Patcher</a>
+  <a href="#preview-builder" data-route="preview-builder">3 · Preview Builder</a>
   <div class="item off" aria-disabled="true">4 · More tools <span class="tag">Soon</span></div>
 </nav>
 
@@ -458,7 +458,7 @@
     <div class="grid2">
       <a class="tile" href="#kit-builder"><b>Kit Builder</b><span>Lay out a kit slot by slot and export it as a .mcstructure file.</span></a>
       <a class="tile" href="#preset-builder"><b>Preset Builder</b><span>Bundle kit files into a preset addon that you add next to KitX.</span></a>
-      <a class="tile" href="#addon-patcher" style="grid-column:1/-1"><b>Addon Patcher</b><span>Make KitX's item preview show the items and blocks of other addons.</span></a>
+      <a class="tile" href="#preview-builder" style="grid-column:1/-1"><b>Preview Builder</b><span>Make KitX's item preview show the items and blocks of other addons.</span></a>
     </div>
 
     <div class="card" style="margin-top:16px">
@@ -586,9 +586,9 @@
     </div>
   </section>
 
-  <!-- ADDON PATCHER -->
-  <section class="page" id="page-addon-patcher" data-title="Addon Patcher">
-    <h2 class="title">Addon Patcher</h2>
+  <!-- PREVIEW BUILDER -->
+  <section class="page" id="page-preview-builder" data-title="Preview Builder">
+    <h2 class="title">Preview Builder</h2>
     <p class="sub">Make KitX draw the items and blocks of other addons in its item preview. Pick your KitX build and the addons you use, and download a patched KitX. Everything runs in your browser; nothing is uploaded anywhere.</p>
 
     <div class="card">
@@ -937,7 +937,7 @@
   const $ = id => document.getElementById(id);
 
   // ---------- router + drawer ----------
-  const routes = ['home','kit-builder','preset-builder','addon-patcher'];
+  const routes = ['home','kit-builder','preset-builder','preview-builder'];
   const drawer=$('drawer'), scrim=$('scrim'), burger=$('burger');
   function setMenu(open){
     drawer.classList.toggle('on',open); scrim.classList.toggle('on',open);
@@ -949,6 +949,7 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
   function route(){
     let r=(location.hash||'#home').slice(1);
+    if(r==='addon-patcher') r='preview-builder';      // old link
     if(!routes.includes(r)) r='home';
     routes.forEach(n=>$('page-'+n).classList.toggle('on',n===r));
     document.querySelectorAll('.drawer a[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===r));
@@ -968,6 +969,7 @@
   let iconBytes = null;
   // Kit names keep their capitals and spaces ("PvP HQ Kits"); only characters that can't go in a file name are dropped.
   const cleanKit = s => (s || '').replace(/\.mcstructure$/i,'').replace(/[^A-Za-z0-9_ -]+/g,' ').replace(/\s+/g,' ').trim();
+  const fileBase = (s,fb) => (s || '').replace(/[\u0000-\u001f\\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim().replace(/^\.+|\.+$/g,'').trim() || fb;   // "This Is The Preset" stays as typed
   const clean = s => (s || '').toLowerCase().replace(/\.mcstructure$/,'').replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'');
   const fmt = n => n < 1024 ? n+' B' : (n/1024).toFixed(1)+' KB';
   const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
@@ -1177,7 +1179,7 @@
       const idxFile=idxFiles.length>1?`${idxFiles[0]} to ${idxFiles[idxFiles.length-1]}`:idxFiles[0];
       for(const k of kits) out.push({name:`${R}structures/kitx_preset/${fileId(k)}.mcstructure`,data:k.bytes});
       const blob=makeZip(out);
-      const fileName=(clean(name)||'kitx_preset')+'.mcaddon';
+      const fileName=fileBase(name,'KitX Preset')+'.mcaddon';
       const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fileName;
       document.body.appendChild(a); a.click(); a.remove();
       st.className='ok'; st.textContent=`Built “${name}” with ${kits.length} kit${kits.length===1?'':'s'} (index: ${idxFile}) → ${fileName}`;
@@ -2246,7 +2248,7 @@
   }
   // pixel icons in the top bar and menu
   $('barIc').append(mkIcon({id:'grass_block'}));
-  {const DR={home:'grass_block','kit-builder':'chest','preset-builder':'crafting_table','addon-patcher':'piston'};
+  {const DR={home:'grass_block','kit-builder':'chest','preset-builder':'crafting_table','preview-builder':'piston'};
    document.querySelectorAll('#drawer a[data-route]').forEach(a=>{const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:DR[a.dataset.route]||'chest'})); a.prepend(ic)});
    const off=document.querySelector('#drawer .item.off'); if(off){const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:'command_block'})); off.prepend(ic)}}
   function closePicker(){ $('picker').classList.remove('on'); document.body.classList.remove('lock') }
@@ -2866,7 +2868,7 @@
 
   buildInv(); renderItemPanel(); renderControls();
 
-  // ---------- Addon Patcher ----------
+  // ---------- Preview Builder (was Addon Patcher) ----------
   // Adds the items / blocks of other addons to KitX's icon table so its item preview can draw them.
   // Reuses this page's addon reader (collectZip, block3d, attach3d, vanillaGuess) and zip writer (makeZip).
   (function(){
@@ -3076,7 +3078,7 @@
           e.data=new TextEncoder().encode(JSON.stringify(m,null,2));
         }
         say('Packing…');
-        const blob=makeZip(await toFiles(tree)), fileName=AP.kit.file.replace(/\.(mcaddon|zip)$/i,'')+'_'+safe(tag)+'.mcaddon';
+        const blob=makeZip(await toFiles(tree)), fileName=fileBase(tagName(AP.kit.bpName,tag),'KitX Preview')+'.mcaddon';
         const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fileName;
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
         say('Built '+fileName+' with '+pick.size+' icon'+(pick.size===1?'':'s')+'.','ok'); $('apStatus').className='ok';
