@@ -360,6 +360,175 @@
   .vsw[aria-checked=true] .vsw-k{left:25px}
   .vsw:focus-visible .vsw-t{outline:2px solid var(--accent);outline-offset:2px}
   #enchHint.custom{color:#d98a00}
+
+  /* ===== polish pass: headings, buttons, form controls ===== */
+  h2.title{font-size:16px;line-height:1.2;margin:18px 0 8px;color:var(--b7)}
+  .sub{line-height:1.65;max-width:62ch;margin:0 0 20px}
+  .card>h3,.panel>h3{display:flex;align-items:center;gap:10px;font-size:12px;line-height:1.2;text-transform:none;color:var(--b8);letter-spacing:0;margin:0 0 14px}
+  .panel>h3::before{content:"";flex:none;width:4px;height:12px;background:var(--b6)}
+  .step{flex:none;display:grid;place-items:center;width:22px;height:22px;font-style:normal;font-size:11px;color:#fff;background:var(--btn-go);border-radius:2px;box-shadow:inset 2px 2px 0 rgba(255,255,255,.25),inset -2px -2px 0 rgba(0,0,0,.3)}
+  .card{padding:18px 16px}
+  .card p.hint,.panel p.hint,.hint{line-height:1.65;max-width:62ch}
+  code{background:var(--b3);color:var(--b8);padding:1px 6px}
+
+  /* inputs */
+  input[type=text],textarea,select{border:2px solid var(--b3);background:var(--bg);padding:10px 12px;transition:none}
+  input[type=text]::placeholder,textarea::placeholder{color:#55657f}
+  input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--b6);box-shadow:0 0 0 2px rgba(74,127,220,.3)}
+  select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%2386b2f5' d='M0 0h10L5 6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:10px 6px}
+  label{margin:14px 0 6px;color:var(--mute)}
+  .ver{gap:10px}
+  .vf{flex:1;min-width:0}
+  .vf small{display:block;font-size:10px;color:var(--mute);margin-bottom:4px}
+  .vf input{text-align:center}
+
+  /* checkbox */
+  input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:18px;height:18px;margin:0;border:2px solid var(--b5);border-radius:2px;background:var(--bg);display:inline-grid;place-items:center;cursor:pointer}
+  input[type=checkbox]:checked{background:var(--btn-go) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.5l3 3 5-6' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E") center/12px 12px no-repeat;border-color:var(--btn-go)}
+  input[type=checkbox]:focus-visible{outline:2px solid var(--b7);outline-offset:2px}
+  label.chk{align-items:flex-start;line-height:1.5;margin-top:16px}
+  label.chk input{margin-top:1px}
+
+  /* file picker */
+  input[type=file]{color:var(--mute);font:inherit;max-width:100%}
+  input[type=file]::file-selector-button{appearance:none;border:0;border-radius:2px;background:var(--btn);color:#fff;font:inherit;padding:9px 14px 10px;margin-right:12px;cursor:pointer;box-shadow:inset 2px 2px 0 rgba(255,255,255,.22),inset -2px -3px 0 rgba(0,0,0,.38)}
+  input[type=file]::file-selector-button:hover{background:var(--btn-h)}
+
+  /* drop zone */
+  .drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 16px;border:2px dashed var(--b4);border-radius:3px;background:rgba(74,127,220,.05);color:var(--mute);line-height:1.5}
+  .drop svg{width:30px;height:30px;color:var(--b6);margin-bottom:2px}
+  .drop b{color:var(--b8);font-size:11px}
+  .drop:hover,.drop.over,.drop:focus-visible{border-color:var(--b6);background:var(--pickbg);outline:none}
+  .drop:hover svg,.drop.over svg{color:var(--b7)}
+
+  /* buttons */
+  button.btn,a.btn{min-height:40px;padding:10px 18px 12px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .actions{gap:10px;margin-top:10px}
+  .actions .btn{flex:1 1 0}
+  .actions .btn.go{flex:2 1 0}
+  .cp-actions{gap:10px}
+  .cp-actions .btn{flex:1 1 0;min-height:40px}
+  .btn.ghost{color:var(--b8);box-shadow:inset 0 0 0 2px var(--b4)}
+  .btn.ghost:hover{background:var(--b3);color:#fff}
+  .btn[aria-disabled=true],.btn:disabled,button.btn:disabled:hover{background:var(--b3);color:#5f7194;box-shadow:inset 0 0 0 2px var(--b3);cursor:not-allowed;opacity:1}
+  button.danger{border:2px solid var(--b4);color:#ff9a9a;padding:7px 12px;border-radius:2px;background:transparent}
+  button.danger:hover{background:rgba(255,107,107,.12);border-color:#ff6b6b}
+  #status{line-height:1.6}
+
+  /* kit rows in the preset builder */
+  .kit{background:var(--b1);border:2px solid var(--b3);border-radius:3px;padding:10px 12px}
+  .kit .name input{padding:8px 10px}
+  .ip-h{justify-content:flex-start}
+  .ip-h .ip-loc{margin-left:auto}
+  .cp-actions{margin-top:12px}
+
+  /* ===== round 3: drawer, home hero, per-tool layouts, upload buttons, motion ===== */
+  .burger,.x,.drawer a,.drawer .item{border-radius:3px}
+  .drawer{width:min(260px,80vw);padding:8px}
+  .drawer .head{padding:4px 6px 10px}
+  .drawer a,.drawer .item{padding:10px;gap:12px}
+  .drawer a:hover{background:var(--b3)}
+  .drawer a.active{background:var(--pickbg);color:var(--b8);box-shadow:inset 3px 0 0 var(--b6)}
+  .drawer .tag{border-radius:2px}
+  .drawer .sep{margin:6px 2px}
+
+  /* home hero */
+  .hero{position:relative;padding:4px 0 2px}
+  .hero::before{content:"";position:absolute;inset:-20px -16px 0;pointer-events:none;opacity:.5;
+    background-image:linear-gradient(var(--b3) 1px,transparent 1px),linear-gradient(90deg,var(--b3) 1px,transparent 1px);background-size:20px 20px;
+    -webkit-mask-image:linear-gradient(#000 25%,transparent);mask-image:linear-gradient(#000 25%,transparent)}
+  .hero>*{position:relative}
+  .hero-t{display:flex;align-items:center;gap:14px;margin:16px 0 10px}
+  .hero-t h2{margin:0;font-size:24px;line-height:1}
+  .hero-ic{flex:none;width:44px;height:44px;position:relative}
+  .hotbar{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;max-width:420px;padding:4px;margin:18px 0 6px;background:var(--b1);border:2px solid var(--b3);border-radius:3px}
+  .hb{aspect-ratio:1;position:relative;background:var(--bg);border:2px solid var(--b3);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .hb .ico{position:absolute;inset:10%;width:auto;height:auto;pointer-events:none;image-rendering:pixelated}
+  .hb:hover{border-color:var(--b5)}
+  .hb.sel{border-color:#fff;background:var(--b3)}
+  .hb-name{min-height:16px;margin:2px 0 16px;color:var(--b8)}
+  .tools{display:grid;gap:8px;margin:12px 0 14px}
+  .tool{display:flex;gap:12px;align-items:flex-start;max-width:56ch;padding:10px 12px;border-left:2px solid var(--b4);background:rgba(74,127,220,.05)}
+  .t-ic{flex:none;width:30px;height:30px;position:relative}
+  .tool b{display:block;color:var(--b8);font-size:11px;margin-bottom:2px}
+  .tool div>span{display:block;color:var(--mute);line-height:1.55}
+
+  /* upload buttons (replace the browser's file chooser) */
+  .upl{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:8px 16px;border:2px dashed var(--b4);border-radius:3px;background:rgba(74,127,220,.05);color:var(--b8);font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .upl svg{flex:none;width:18px;height:18px;color:var(--b6)}
+  .upl:hover{border-style:solid;border-color:var(--b6);background:var(--pickbg)}
+  .upl:active{transform:translateY(1px)}
+  .upl:focus-visible{outline:2px solid var(--b7);outline-offset:2px}
+  .iconrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .iconrow .upl{flex:1 1 150px}
+  .iconprev{width:44px;height:44px;image-rendering:pixelated;border:2px solid var(--b3);background:var(--bg)}
+
+  /* Preset Builder: steps on a rail, no boxes */
+  .rail{margin-top:2px}
+  .rs{display:grid;grid-template-columns:28px minmax(0,1fr);gap:0 14px;position:relative;padding-bottom:28px}
+  .rs::before{content:"";position:absolute;left:13px;top:34px;bottom:6px;width:2px;background:var(--b3)}
+  .rs:last-child{padding-bottom:4px}
+  .rs:last-child::before{display:none}
+  .rs>.step{width:28px;height:28px;font-size:12px;position:relative;z-index:1}
+  .rb{min-width:0}
+  .rb h3{display:flex;align-items:center;height:28px;margin:0 0 6px;font-size:13px;color:var(--b8)}
+  .rb>label:first-of-type{margin-top:4px}
+
+  /* Preview Builder: one settings list with rows */
+  .pv{border:2px solid var(--b3);background:var(--b2);border-radius:3px;overflow:hidden}
+  .pv-sec{padding:14px;border-bottom:2px solid var(--b3)}
+  .pv-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .pv-lab{display:flex;align-items:center;gap:12px;min-width:0}
+  .pv-n{flex:none;font-size:11px;color:var(--b6)}
+  .pv-lab b{display:block;color:var(--b8);font-size:12px}
+  .pv-lab small{display:block;color:var(--mute)}
+  .pv-row .upl{flex:0 0 auto}
+  .pv-row input[type=text]{flex:none;width:150px}
+  .pv .hint{margin:10px 0 0}
+  .pv-build{padding:14px;background:var(--b1)}
+  .pv-build .btn{width:100%}
+  .pv-build #apStatus:not(:empty),.pv-build #apResult:not(:empty){margin-top:10px}
+
+  /* tighter on phones */
+  @media (max-width:520px){
+    .wrap{padding:14px 12px 56px}
+    .sub{margin-bottom:16px}
+    .card,.panel{padding:14px 12px}
+    .home section{margin-top:16px;padding-top:14px}
+    .hero-t h2{font-size:22px}
+    .hotbar{gap:2px;padding:3px}
+    .rs{grid-template-columns:26px minmax(0,1fr);gap:0 10px;padding-bottom:22px}
+    .rs>.step{width:26px;height:26px}
+    .rs::before{left:12px;top:32px}
+    .rb h3{height:26px}
+    .pv-sec,.pv-build{padding:12px}
+    .pv-row .upl,.pv-row input[type=text]{flex:1 1 100%;width:100%}
+  }
+
+  /* small motion: colour fades, a page fade-in, a few one-off entrances */
+  @keyframes pgin{from{opacity:0}to{opacity:1}}
+  @keyframes hbin{from{opacity:0;transform:translateY(8px) scale(.9)}to{opacity:1;transform:none}}
+  @keyframes hbpop{0%{transform:scale(.8)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  @keyframes kitin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:no-preference){
+    .page.on{animation:pgin .16s ease-out}
+    button.btn,a.btn,.upl,.ext,.drawer a,.hb,.drop,.ap-tile,.row,.burger,.x,.ctl-b,input[type=text],select,input[type=checkbox]{transition:background-color .12s,border-color .12s,color .12s,box-shadow .12s}
+    .hb{transition:background-color .12s,border-color .12s,transform .12s}
+    .hb:hover{transform:translateY(-2px)}
+    .hb.sel .ico{animation:hbpop .22s ease-out}
+    .hotbar.intro .hb{animation:hbin .32s ease-out both}
+    .hotbar.intro .hb:nth-child(1){animation-delay:0ms}
+    .hotbar.intro .hb:nth-child(2){animation-delay:40ms}
+    .hotbar.intro .hb:nth-child(3){animation-delay:80ms}
+    .hotbar.intro .hb:nth-child(4){animation-delay:120ms}
+    .hotbar.intro .hb:nth-child(5){animation-delay:160ms}
+    .hotbar.intro .hb:nth-child(6){animation-delay:200ms}
+    .hotbar.intro .hb:nth-child(7){animation-delay:240ms}
+    .hotbar.intro .hb:nth-child(8){animation-delay:280ms}
+    .hotbar.intro .hb:nth-child(9){animation-delay:320ms}
+    .kit.new{animation:kitin .2s ease-out}
+    .slot{transition:filter .12s}
+  }
 </style>
 <style id="kitx-shield-editor-css">
 /* ===== KitX shield / banner editor =====
@@ -456,11 +625,15 @@
 
   <!-- HOME -->
   <section class="page home" id="page-home" data-title="KitX">
-    <h2>KitX</h2>
-    <p class="lead">KitX is a kit addon for Minecraft Bedrock. You save a kit once and then anyone who's allowed to can equip it with one command.</p>
-    <div class="cta">
-      <a class="ext cf" id="cfBtn" target="_blank" rel="noopener"><svg viewBox="27 7 116 76" aria-hidden="true" fill="currentColor"><path d="M29 9.5L105.5 9L107 17.2L141 17.6Q139 22.5 135 25Q124 31 112 34.5Q103 38 102.5 46Q102 52 108 58Q115 64 119.5 66.5L123 80.8L76 80.8Q84 74.5 90 67.7Q72 71 58 80.4L53 80.2L57 65.5Q66 58 71 52Q75 46 74 43Q72 38 65 35.5Q52 32.5 40 32.5L37.5 29L37 21Q36 17 32 15Z"/></svg><span><b>CurseForge</b><small>Download KitX</small></span></a>
-      <a class="ext dc" data-discord target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M19.3 5.3A17 17 0 0 0 15.1 4l-.5 1a15.800 15.800 0 0 0-5.200 0l-.5-1a17 17 0 0 0-4.200 1.300C2 9.300 1.300 13.200 1.600 17.100a17 17 0 0 0 5.200 2.600l1.100-1.800c-.6-.2-1.200-.5-1.700-.9l.4-.3a12 12 0 0 0 10.600 0l.4.300c-.5.400-1.100.7-1.700.9l1.100 1.800a17 17 0 0 0 5.200-2.600c.4-4.500-.7-8.400-3.100-11.800zM8.700 14.800c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2zm6.600 0c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2z"/></svg><span><b>Discord</b><small>Join the server</small></span></a>
+    <div class="hero">
+      <div class="hero-t"><span class="hero-ic" id="heroIc"></span><h2>KitX</h2></div>
+      <p class="lead">KitX is a kit addon for Minecraft Bedrock. You save a kit once and then anyone who's allowed to can equip it with one command.</p>
+      <div class="hotbar" id="hotbar" aria-hidden="true"></div>
+      <div class="hb-name" id="hbName" aria-hidden="true"></div>
+      <div class="cta">
+        <a class="ext cf" id="cfBtn" target="_blank" rel="noopener"><svg viewBox="27 7 116 76" aria-hidden="true" fill="currentColor"><path d="M29 9.5L105.5 9L107 17.2L141 17.6Q139 22.5 135 25Q124 31 112 34.5Q103 38 102.5 46Q102 52 108 58Q115 64 119.5 66.5L123 80.8L76 80.8Q84 74.5 90 67.7Q72 71 58 80.4L53 80.2L57 65.5Q66 58 71 52Q75 46 74 43Q72 38 65 35.5Q52 32.5 40 32.5L37.5 29L37 21Q36 17 32 15Z"/></svg><span><b>CurseForge</b><small>Download KitX</small></span></a>
+        <a class="ext dc" data-discord target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M19.3 5.3A17 17 0 0 0 15.1 4l-.5 1a15.800 15.800 0 0 0-5.200 0l-.5-1a17 17 0 0 0-4.200 1.300C2 9.300 1.300 13.200 1.600 17.100a17 17 0 0 0 5.200 2.600l1.100-1.800c-.6-.2-1.200-.5-1.700-.9l.4-.3a12 12 0 0 0 10.600 0l.4.300c-.5.400-1.100.7-1.700.9l1.100 1.800a17 17 0 0 0 5.200-2.600c.4-4.500-.7-8.400-3.100-11.800zM8.700 14.800c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2zm6.600 0c-1 0-1.800-.9-1.800-2s.8-2 1.800-2 1.800.9 1.800 2-.8 2-1.800 2z"/></svg><span><b>Discord</b><small>Join the server</small></span></a>
+      </div>
     </div>
 
     <section>
@@ -472,14 +645,11 @@
     <section>
       <h3>The tools on this site</h3>
       <p>I made a few small tools for KitX. You don't need any of them, they just save time when you have a lot of kits to set up. They're in the menu, top left.</p>
-      <dl>
-        <dt>Kit Builder</dt>
-        <dd>Fill a kit slot by slot and export it as a .mcstructure file.</dd>
-        <dt>Preset Builder</dt>
-        <dd>Puts a bunch of those kit files into one addon that you run next to KitX.</dd>
-        <dt>Preview Builder</dt>
-        <dd>Lets KitX's item preview show items and blocks from other addons.</dd>
-      </dl>
+      <div class="tools">
+        <div class="tool"><span class="t-ic" data-ic="chest"></span><div><b>Kit Builder</b><span>Fill a kit slot by slot and export it as a .mcstructure file.</span></div></div>
+        <div class="tool"><span class="t-ic" data-ic="crafting_table"></span><div><b>Preset Builder</b><span>Puts a bunch of those kit files into one addon that you run next to KitX.</span></div></div>
+        <div class="tool"><span class="t-ic" data-ic="crafter"></span><div><b>Preview Builder</b><span>Lets KitX's item preview show items and blocks from other addons.</span></div></div>
+      </div>
       <p>The usual order: build a kit and export it, drop the files into the Preset Builder, name your pack and download the .mcaddon. Import it into Minecraft, turn it on in your world next to KitX, then open Presets in KitX's Backup menu.</p>
     </section>
 
@@ -553,8 +723,9 @@
     <h2 class="title">Preset Builder</h2>
     <p class="sub">Add your kit structure files, name your pack, and download a preset addon to use alongside KitX. Everything runs in your browser; nothing is uploaded anywhere.</p>
 
-    <div class="card">
-      <h3>1 · Pack details</h3>
+    <div class="rail">
+    <div class="rs"><i class="step">1</i><div class="rb">
+      <h3>Pack details</h3>
       <label for="packName">Preset name</label>
       <input id="packName" type="text" placeholder="Ionyne's PvP KitX Preset" autocomplete="off">
       <label for="packAuthor">Author</label>
@@ -563,37 +734,39 @@
       <input id="packDesc" type="text" placeholder="KitX kit presets" autocomplete="off">
       <label>Version</label>
       <div class="ver">
-        <input id="v1" type="text" inputmode="numeric" value="1" aria-label="Major">
-        <input id="v2" type="text" inputmode="numeric" value="0" aria-label="Minor">
-        <input id="v3" type="text" inputmode="numeric" value="0" aria-label="Patch">
+        <div class="vf"><small>Major</small><input id="v1" type="text" inputmode="numeric" value="1" aria-label="Major"></div>
+        <div class="vf"><small>Minor</small><input id="v2" type="text" inputmode="numeric" value="0" aria-label="Minor"></div>
+        <div class="vf"><small>Patch</small><input id="v3" type="text" inputmode="numeric" value="0" aria-label="Patch"></div>
       </div>
       <label class="chk"><input id="verInName" type="checkbox" checked> Add the version to the pack name (e.g. “Ionyne's PvP KitX Preset v1.0.0”)</label>
       <label>Pack icon (optional PNG; the KitX icon is used if you skip this)</label>
       <div class="iconrow">
         <img id="iconPrev" class="iconprev" alt="" style="display:none">
-        <input id="iconFile" type="file" accept="image/png">
+        <button type="button" class="upl" id="iconPick"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3 4h18v16H3zm2 2v9l4-4 3 3 4-5 3 4V6zm4 1a1.500 1.500 0 1 0 0 3 1.500 1.500 0 0 0 0-3z"/></svg><span>Choose PNG</span></button>
+        <input id="iconFile" type="file" accept="image/png" hidden>
         <button class="danger" id="iconClear" style="display:none">Remove</button>
       </div>
       <p class="hint" id="iconHint">No icon chosen. The pack is built without one until the KitX default icon is added to this site.</p>
-    </div>
+    </div></div>
 
-    <div class="card">
-      <h3>2 · Kit structures</h3>
-      <div id="drop" class="drop">Tap to choose <code>.mcstructure</code> files, or drop them here</div>
+    <div class="rs"><i class="step">2</i><div class="rb">
+      <h3>Kit structures</h3>
+      <div id="drop" class="drop" role="button" tabindex="0"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 3h2v9h3l-4 5-4-5h3z"/><path d="M4 15h2v4h12v-4h2v6H4z"/></svg><b>Add kit files</b><span>Tap to choose <code>.mcstructure</code> files, or drop them here</span></div>
       <input id="files" type="file" accept=".mcstructure" multiple hidden>
       <div id="kits"></div>
       <div class="hint" id="kitCount"></div>
       <p class="hint">Each file becomes one kit preset. The kit name comes from the file name and you can rename it. Names keep your capitals and spaces; only letters, numbers, spaces, <code>_</code> and <code>-</code> are allowed. Kits are listed in the order shown here. Every pack gets its own index file automatically, so any number of presets can be installed side by side. Kit names still need to be unique across packs.</p>
-    </div>
+    </div></div>
 
-    <div class="card">
-      <h3>3 · Build</h3>
+    <div class="rs"><i class="step">3</i><div class="rb">
+      <h3>Build</h3>
       <div class="actions">
         <button class="btn go" id="build" disabled>Build preset</button>
         <button class="btn ghost" id="clear">Reset</button>
       </div>
       <div id="status" role="status"></div>
       <p class="hint">Output is a <code>.mcaddon</code> with a fresh pack UUID and module UUID on every build, your kit files, and an index file of its own (unique per build, so it never clashes with another preset pack) that KitX uses to list the pack under the title you chose. Import it on your device, enable it in the world next to the main KitX addon, then use the Presets screen in KitX's Backup menu.</p>
+    </div></div>
     </div>
   </section>
 
@@ -602,33 +775,43 @@
     <h2 class="title">Preview Builder</h2>
     <p class="sub">Make KitX draw the items and blocks of other addons in its item preview. Pick your KitX build and the addons you use, and download a patched KitX. Everything runs in your browser; nothing is uploaded anywhere.</p>
 
-    <div class="card">
-      <h3>1 · KitX addon</h3>
-      <button class="btn ghost" id="apKitBtn" type="button">Choose KitX (.mcaddon)</button>
-      <input id="apKitIn" type="file" hidden>
-      <div id="apKitInfo" class="hint">Use the newest KitX build.</div>
-    </div>
-
-    <div class="card">
-      <h3>2 · Addons to support</h3>
-      <button class="btn ghost" id="apAddBtn" type="button">+ Add addon (.mcaddon, .mcpack, .zip)</button>
-      <input id="apAddIn" type="file" multiple hidden>
-      <div id="apAddMsg" class="hint">Add as many as you like. Tap an item to leave it out. Items made only by script are not detected.</div>
-      <div class="ap-legend" id="apLegend" hidden>
-        <span><i class="ap-own">●</i> own icon baked in</span><span><i class="ap-alias">●</i> uses a KitX icon</span>
-        <span><i class="ap-path">●</i> game texture path</span><span><i class="ap-none">●</i> no icon found</span>
+    <div class="pv">
+      <div class="pv-sec">
+        <div class="pv-row">
+          <div class="pv-lab"><span class="pv-n">01</span><div><b>KitX addon</b><small>The build you want to patch</small></div></div>
+          <button class="upl" id="apKitBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 2l9 5v10l-9 5-9-5V7zm0 2.300L5.500 8 12 11.700 18.500 8zM5 9.700v6.100l6 3.400v-6.100zm14 0l-6 3.400v6.100l6-3.400z"/></svg><span>Choose .mcaddon</span></button>
+        </div>
+        <input id="apKitIn" type="file" hidden>
+        <div id="apKitInfo" class="hint">Use the newest KitX build.</div>
       </div>
-      <div id="apAddons"></div>
-    </div>
 
-    <div class="card">
-      <h3>3 · Build</h3>
-      <label for="apTag">Name tag</label>
-      <input id="apTag" type="text" value="Addons" maxlength="24" autocomplete="off">
-      <p class="hint">The pack name becomes <code id="apNamePrev">KitX + Addons</code>. Both packs get new UUIDs. The version number stays the same, so your kit data carries over.</p>
-      <div class="actions"><button class="btn go" id="apBuild" type="button" disabled>Build patched KitX</button></div>
-      <div id="apStatus" role="status"></div>
-      <div id="apResult"></div>
+      <div class="pv-sec">
+        <div class="pv-row">
+          <div class="pv-lab"><span class="pv-n">02</span><div><b>Addons to support</b><small>As many as you like</small></div></div>
+          <button class="upl" id="apAddBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z"/></svg><span>Add addon</span></button>
+        </div>
+        <input id="apAddIn" type="file" multiple hidden>
+        <div id="apAddMsg" class="hint">.mcaddon, .mcpack or .zip. Tap an item to leave it out. Items made only by script are not detected.</div>
+        <div class="ap-legend" id="apLegend" hidden>
+          <span><i class="ap-own">●</i> own icon baked in</span><span><i class="ap-alias">●</i> uses a KitX icon</span>
+          <span><i class="ap-path">●</i> game texture path</span><span><i class="ap-none">●</i> no icon found</span>
+        </div>
+        <div id="apAddons"></div>
+      </div>
+
+      <div class="pv-sec">
+        <div class="pv-row">
+          <div class="pv-lab"><span class="pv-n">03</span><div><b>Name tag</b><small>Added to the pack name</small></div></div>
+          <input id="apTag" type="text" value="Addons" maxlength="24" autocomplete="off" aria-label="Name tag">
+        </div>
+        <p class="hint">The pack name becomes <code id="apNamePrev">KitX + Addons</code>. Both packs get new UUIDs. The version number stays the same, so your kit data carries over.</p>
+      </div>
+
+      <div class="pv-build">
+        <button class="btn go" id="apBuild" type="button" disabled>Build patched KitX</button>
+        <div id="apStatus" role="status"></div>
+        <div id="apResult"></div>
+      </div>
     </div>
   </section>
 
@@ -1108,7 +1291,7 @@
   function renderKits(){
     const box=$('kits'); box.innerHTML='';
     kits.forEach((k,i)=>{
-      const el=document.createElement('div'); el.className='kit';
+      const el=document.createElement('div'); el.className='kit'+(k.fresh?' new':''); k.fresh=false;
       const name=document.createElement('div'); name.className='name';
       const inp=document.createElement('input'); inp.type='text'; inp.value=k.id; inp.setAttribute('aria-label','Kit name');
       const meta=document.createElement('div'); meta.className='meta'; meta.textContent=`${k.file} · ${fmt(k.size)}`;
@@ -1129,7 +1312,7 @@
       const k={file:f.name,bytes,size:bytes.length,id:'',warn:''};
       if(bytes[0]!==0x0A) k.warn='This does not look like a valid .mcstructure file.';
       k.id=uniqueId(cleanKit(f.name)||'kit',k);
-      kits.push(k);
+      k.fresh=true; kits.push(k);
     }
     renderKits();
   }
@@ -1145,8 +1328,10 @@
     if(!has&&defaultIcon) $('iconPrev').src='data:image/png;base64,'+DEFAULT_ICON_B64;
     $('iconPrev').style.display=shown?'block':'none';
     $('iconClear').style.display=has?'inline-block':'none';
+    $('iconPick').querySelector('span').textContent=has?'Change icon':'Choose PNG';
     $('iconHint').textContent=has?'Using your icon.':(defaultIcon?'No icon chosen: the KitX icon will be used.':'No icon chosen. The pack is built without one.');
   }
+  $('iconPick').addEventListener('click',()=>$('iconFile').click());
   $('iconFile').addEventListener('change',async e=>{
     const f=e.target.files[0]; if(!f){return}
     iconBytes=new Uint8Array(await f.arrayBuffer());
@@ -2269,6 +2454,21 @@
   {const DR=PAGE_ICON;
    document.querySelectorAll('#drawer a[data-route]').forEach(a=>{const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:DR[a.dataset.route]||'chest'})); a.prepend(ic)});
    const off=document.querySelector('#drawer .item.off'); if(off){const ic=document.createElement('span'); ic.className='dr-ic'; ic.append(mkIcon({id:'command_block'})); off.prepend(ic)}}
+
+  // home page: little hotbar + the icons in the tool list
+  {
+    const HB=['diamond_sword','bow','golden_apple','ender_pearl','diamond_pickaxe','totem_of_undying','water_bucket','cooked_beef','shield'];
+    const pretty=id=>id.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    const hb=$('hotbar'), nm=$('hbName');
+    const pick=i=>{ [...hb.children].forEach((c,j)=>c.classList.toggle('sel',j===i)); nm.textContent=pretty(HB[i]) };
+    HB.forEach((id,i)=>{ const d=document.createElement('div'); d.className='hb'; d.append(mkIcon({id})); d.addEventListener('click',()=>pick(i)); hb.append(d) });
+    pick(0);
+    $('heroIc').append(mkIcon({id:'anvil'}));
+    document.querySelectorAll('.t-ic[data-ic]').forEach(e=>e.append(mkIcon({id:e.dataset.ic})));
+    let introDone=false;
+    const intro=()=>{ if(introDone) return; const r=(location.hash||'#home').slice(1); if(r&&r!=='home') return; introDone=true; hb.classList.add('intro'); setTimeout(()=>hb.classList.remove('intro'),1100) };
+    window.addEventListener('hashchange',intro); intro();
+  }
   function closePicker(){ $('picker').classList.remove('on'); document.body.classList.remove('lock') }
   function chooseItem(id,aux){
     const key=kb.sel; if(!key) return;
