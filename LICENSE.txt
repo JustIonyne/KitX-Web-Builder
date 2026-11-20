@@ -1,0 +1,94 @@
+KitX Web Builder License
+
+Copyright (c) 2026 Ionyne Productions. All Rights Reserved.
+
+
+1. WHAT THIS COVERS
+
+This license covers the KitX Web Builder website: its HTML, CSS, and
+JavaScript, its build scripts and tools, and its original design, text, and
+branding. The website includes the Kit Builder, the Preset Builder, and the
+Preview Builder. The KitX addon itself is covered by the separate KitX
+License.
+
+
+2. WHAT YOU MAY DO
+
+You may:
+
+  a) Use the website for yourself and your community to make kits, presets,
+     and patched versions of KitX.
+
+  b) View the source code for educational and reference purposes.
+
+  c) Save a copy of the website to your own device for personal offline
+     use.
+
+
+3. WHAT YOU MAY NOT DO
+
+Unless you have prior written permission from Ionyne Productions, you may
+not:
+
+  a) Host, mirror, or republish the website or any part of it, including
+     deploying a copy or a fork anywhere online.
+
+  b) Modify the source code and share or distribute the result.
+
+  c) Copy or reuse the source code, design, text, or branding in other
+     projects or services.
+
+  d) Build a competing or substitute tool from this code.
+
+  e) Remove or change this license, copyright notices, or credits.
+
+  f) Present the website or any part of it as your own work.
+
+
+4. WHAT THE TOOLS PRODUCE
+
+  a) Kit files (.mcstructure) and preset addons that you make with the
+     Kit Builder or the Preset Builder, and the kits inside them, belong to
+     you. You may keep and share them. You may not include KitX itself in
+     anything you share.
+
+  b) A patched KitX made with the Preview Builder is a Modified Version
+     under the KitX License. It may only be distributed within the official
+     Ionyne Productions Discord server.
+
+
+5. OWNERSHIP
+
+All rights to the website, including its original source code and
+branding, remain with Ionyne Productions. This license does not transfer
+any ownership to you.
+
+
+6. THIRD-PARTY MATERIAL
+
+Minecraft is a trademark of Mojang AB and Microsoft. This website is not
+affiliated with, approved by, or endorsed by Mojang or Microsoft. Minecraft
+names, textures, and item and block icons shown on the website remain the
+property of their owners and are not covered by this license.
+
+Any fonts, libraries, or other third-party material used by the website
+stay under their own licenses and are not covered by this license.
+
+
+7. TERMINATION
+
+If you break these terms, your permission to use the website under this
+license ends automatically.
+
+
+8. NO WARRANTY
+
+The website is provided "as is", without warranty of any kind. To the
+fullest extent allowed by law, Ionyne Productions is not liable for any
+damage or data loss that results from using the website or its output.
+
+
+9. PERMISSIONS AND CONTACT
+
+To ask for permission for anything not allowed above, contact Ionyne
+Productions through the official Discord server.
