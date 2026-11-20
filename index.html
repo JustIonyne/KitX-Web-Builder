@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#181b21" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <title>KitX</title>
 <meta name="description" content="KitX for Minecraft Bedrock: build kits and presets in your browser.">
 <style>
@@ -23,7 +26,7 @@
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--text);font:10px/1.5 'KitX Pixel',system-ui,sans-serif;font-synthesis:none}
-  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+  .wrap{--pad:16px;max-width:720px;margin:0 auto;padding:20px var(--pad) 60px}
 
   /* top bar */
   .bar{position:sticky;top:0;z-index:20;background:var(--bar);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:6px 10px;height:52px}
@@ -434,7 +437,7 @@
 
   /* home hero */
   .hero{position:relative;padding:4px 0 2px}
-  .hero::before{content:"";position:absolute;inset:-20px -16px 0;pointer-events:none;opacity:.5;
+  .hero::before{content:"";position:absolute;top:-20px;bottom:0;left:calc(var(--pad)*-1);right:calc(var(--pad)*-1);pointer-events:none;opacity:.5;
     background-image:linear-gradient(var(--b3) 1px,transparent 1px),linear-gradient(90deg,var(--b3) 1px,transparent 1px);background-size:20px 20px;
     -webkit-mask-image:linear-gradient(#000 25%,transparent);mask-image:linear-gradient(#000 25%,transparent)}
   .hero>*{position:relative}
@@ -491,7 +494,7 @@
 
   /* tighter on phones */
   @media (max-width:520px){
-    .wrap{padding:14px 12px 56px}
+    .wrap{--pad:12px;padding:14px var(--pad) 56px}
     .sub{margin-bottom:16px}
     .card,.panel{padding:14px 12px}
     .home section{margin-top:16px;padding-top:14px}
@@ -529,13 +532,112 @@
     .kit.new{animation:kitin .2s ease-out}
     .slot{transition:filter .12s}
   }
+
+  /* ===== devices: desktop, tablet, landscape phones, iOS, touch ===== */
+  :root{color-scheme:dark light}
+  *{scrollbar-width:thin;scrollbar-color:var(--b4) transparent}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:var(--b4);border-radius:2px}
+  ::-webkit-scrollbar-track{background:transparent}
+  html{overflow-x:hidden}
+  input[type=text],textarea,select,.upl,button.btn{-webkit-appearance:none;appearance:none}
+  input[type=text],textarea{border-radius:3px}
+  button.btn:focus-visible,a.btn:focus-visible,.ext:focus-visible,.drawer a:focus-visible,.burger:focus-visible,.x:focus-visible,.slot:focus-visible,.ctl-b:focus-visible,.hb:focus-visible{outline:2px solid var(--b7);outline-offset:2px}
+  .x{width:40px;height:40px}
+
+  /* iPhone zooms the page when a text field is smaller than 16px; keep fields at 16px there */
+  @supports (-webkit-touch-callout:none){
+    input[type=text],input[type=search],textarea,select{font-size:16px}
+  }
+
+  /* touch screens: no sticky hover look after a tap */
+  @media (hover:none){
+    .hb:hover{transform:none;border-color:var(--b3)}
+    .hb.sel:hover{border-color:#fff}
+    .upl:hover{border-style:dashed;border-color:var(--b4);background:rgba(74,127,220,.05)}
+    .drop:hover{border-color:var(--b4);background:rgba(74,127,220,.05)}
+    .drop.over{border-color:var(--b6);background:var(--pickbg)}
+    .btn.ghost:hover{background:transparent;color:var(--b8)}
+    .drawer a:hover{background:transparent}
+    .drawer a.active:hover{background:var(--pickbg)}
+  }
+  @media (pointer:coarse){
+    button.btn,a.btn,.upl{min-height:44px}
+  }
+
+  /* short screens (phones on their side) */
+  @media (max-height:480px){
+    .bar{height:44px}
+    .wrap{padding-top:10px}
+    .hero-t{margin-top:6px}
+    .hero-ic{width:34px;height:34px}
+    .hero-t h2{font-size:20px}
+    .hotbar{margin-top:12px}
+    .sheet-head{padding-top:4px;padding-bottom:4px}
+  }
+
+  /* big picker sheet: keep the list a readable width on large screens */
+  @media (min-width:700px){
+    .sheet{align-items:center}
+    .sheet>*{width:100%;max-width:760px}
+    .dlg-card{max-width:440px}
+  }
+
+  /* tablets / small laptops: roomier page */
+  @media (min-width:700px){
+    .wrap{--pad:24px;padding-top:26px}
+    .hotbar{max-width:460px}
+    .tools{max-width:620px}
+  }
+
+  /* desktop: the menu is always open on the left */
+  @media (min-width:960px){
+    body{padding-left:260px}
+    .drawer{transform:none;width:260px;transition:none;padding:12px 10px}
+    .drawer .head{padding:6px 8px 14px}
+    .scrim{display:none}
+    .burger,#closeMenu{display:none}
+    .bar{padding-left:20px}
+    .wrap{max-width:780px}
+    .home p,.sub{max-width:68ch}
+  }
+
+  /* large desktop: Kit Builder gets two columns */
+  @media (min-width:1180px){
+    .wrap{max-width:1040px}
+    #page-home,#page-preset-builder,#page-preview-builder{max-width:780px;margin:0 auto}
+    .kb{display:grid;grid-template-columns:minmax(0,480px) minmax(0,1fr);gap:16px;align-items:start;max-width:none;margin:0}
+    .kb>.panel[aria-label="Inventory Panel"]{grid-column:1;grid-row:1 / span 3}
+    .kb>.panel[aria-label="Item Panel"]{grid-column:2;grid-row:1}
+    .kb>#ctnPanel{grid-column:2;grid-row:2}
+    .kb>.xp{grid-column:2;grid-row:3}
+  }
+  @media (min-width:1600px){
+    .wrap{max-width:1180px}
+    .kb{grid-template-columns:minmax(0,540px) minmax(0,1fr)}
+  }
+  /* picker tabs: usable with a mouse too (wheel, drag, edge arrows) */
+  .pk-tabwrap{position:relative;flex:none}
+  .pk-tabs{cursor:grab;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .pk-tabs::-webkit-scrollbar{display:none}
+  .pk-tabs.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+  .pk-tabs.dragging .pk-tab{pointer-events:none}
+  .pk-arrow{appearance:none;-webkit-appearance:none;position:absolute;top:0;bottom:1px;z-index:2;width:36px;padding:0;border:0;display:grid;place-items:center;color:var(--b8);cursor:pointer}
+  .pk-arrow[hidden]{display:none}
+  .pk-arrow.l{left:0;background:linear-gradient(90deg,var(--bar) 50%,transparent)}
+  .pk-arrow.r{right:0;background:linear-gradient(270deg,var(--bar) 50%,transparent)}
+  .pk-arrow svg{width:10px;height:16px}
+  .pk-arrow.l svg{margin-right:8px}
+  .pk-arrow.r svg{margin-left:8px}
+  .pk-arrow:hover{color:#fff}
+  @media (any-hover:none){.pk-arrow{display:none!important}}
 </style>
 <style id="kitx-shield-editor-css">
 /* ===== KitX shield / banner editor =====
    Built from the page's own dialog pieces so it looks like Enchant / Rename: .dlg overlay, .dlg-card, .dlg-head, .x, the pixel .btn buttons,
    the Vanilla switch (.vsw), .hint and the bordered rows (like .er). Only the layout of the editor itself is defined here. */
 .kxse-back{overscroll-behavior:contain}
-.kxse{--s:6;display:flex;flex-direction:column;max-width:480px;height:min(92dvh,860px);max-height:92dvh;overflow:hidden}
+.kxse{--s:6;display:flex;flex-direction:column;max-width:480px;height:min(92vh,860px);height:min(92dvh,860px);max-height:92vh;max-height:92dvh;overflow:hidden}
 .kxse *{box-sizing:border-box}
 @media (max-width:520px){.kxse{--s:4}}
 @media (max-height:700px){.kxse{--s:4}}
@@ -821,7 +923,11 @@
     <button class="x" id="pickClose" aria-label="Close">×</button>
     <input id="pickQ" type="text" placeholder="Search items (e.g. diamond sword)" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
   </div>
-  <div class="pk-tabs" id="pkTabs" role="tablist" aria-label="Creative inventory"></div>
+  <div class="pk-tabwrap" id="pkTabWrap">
+    <button type="button" class="pk-arrow l" id="pkArrL" aria-label="Scroll tabs left" tabindex="-1" hidden><svg viewBox="0 0 10 16" aria-hidden="true" fill="currentColor"><path d="M8 0l2 2-6 6 6 6-2 2L0 8z"/></svg></button>
+    <div class="pk-tabs" id="pkTabs" role="tablist" aria-label="Creative inventory"></div>
+    <button type="button" class="pk-arrow r" id="pkArrR" aria-label="Scroll tabs right" tabindex="-1" hidden><svg viewBox="0 0 10 16" aria-hidden="true" fill="currentColor"><path d="M2 0L0 2l6 6-6 6 2 2 8-8z"/></svg></button>
+  </div>
   <div class="sheet-body">
     <div class="sheet-title" id="pickTitle">Add item</div>
     <div class="sheet-count" id="pickCount"></div>
@@ -2388,11 +2494,42 @@
     const s=document.createElement('button'); s.type='button'; s.className='pk-tab'; s.setAttribute('role','tab'); s.textContent='🔍 Search';
     s.addEventListener('click',()=>showTab(SEARCH_TAB)); bar.append(s);
   }
+  // mouse support for the tab strip: wheel, click-and-drag and edge arrows (touch already scrolls by itself)
+  {
+    const el=$('pkTabs'), L=$('pkArrL'), R=$('pkArrR');
+    const upd=()=>{ const max=el.scrollWidth-el.clientWidth; L.hidden=!(max>1&&el.scrollLeft>1); R.hidden=!(max>1&&el.scrollLeft<max-1) };
+    el.addEventListener('scroll',upd,{passive:true});
+    if(window.ResizeObserver) new ResizeObserver(upd).observe(el); else window.addEventListener('resize',upd);
+    new MutationObserver(upd).observe(el,{childList:true});
+    el.addEventListener('wheel',e=>{
+      const max=el.scrollWidth-el.clientWidth; if(max<=1) return;
+      let d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY; if(!d) return;
+      if(e.deltaMode===1) d*=16;
+      if((d<0&&el.scrollLeft<=0)||(d>0&&el.scrollLeft>=max-1)) return;
+      e.preventDefault(); el.scrollLeft+=d;
+    },{passive:false});
+    let down=null, moved=false;
+    el.addEventListener('pointerdown',e=>{ if(e.pointerType==='touch'||e.button!==0) return; down={x:e.clientX,left:el.scrollLeft,id:e.pointerId}; moved=false });
+    el.addEventListener('pointermove',e=>{
+      if(!down) return; const dx=e.clientX-down.x;
+      if(!moved&&Math.abs(dx)>5){ moved=true; el.classList.add('dragging'); try{el.setPointerCapture(down.id)}catch(_){} }
+      if(moved) el.scrollLeft=down.left-dx;
+    });
+    const end=()=>{ if(!down) return; down=null; el.classList.remove('dragging') };
+    el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+    el.addEventListener('click',e=>{ if(moved){ e.stopPropagation(); e.preventDefault(); moved=false } },true);
+    const step=dir=>el.scrollBy({left:dir*Math.max(160,el.clientWidth*.6),behavior:'smooth'});
+    L.addEventListener('click',()=>step(-1)); R.addEventListener('click',()=>step(1));
+    // keep the selected tab in view (also after keyboard use)
+    window.pkRevealTab=i=>{ const b=el.children[i]; if(!b) return; const l=b.offsetLeft-12, r=b.offsetLeft+b.offsetWidth+12;
+      if(l<el.scrollLeft) el.scrollLeft=l; else if(r>el.scrollLeft+el.clientWidth) el.scrollLeft=r-el.clientWidth; upd() };
+  }
   function showTab(i){
     pkTab=i; pkOpen=null; pkSel=null; renderPkDetail();
     [...$('pkTabs').children].forEach((b,k)=>{b.classList.toggle('on',k===i); b.setAttribute('aria-selected',k===i)});
     if(i===SEARCH_TAB) doSearch(); else if(i===ADDON_TAB) renderAddons(); else renderTab();
     $('pickList').scrollTop=0;
+    if(window.pkRevealTab) pkRevealTab(i);
   }
   const PAGE=60; let results=[], shown=0, pickTimer=0;
   function runSearch(q){
